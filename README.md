@@ -1,3 +1,20 @@
+# Chrysanthemum 2
+
+## Todo
+
+- [ ] make it deploy
+- [ ] basic ui
+- [ ] set up db
+- [ ] attach db to ui
+- [ ] add auth
+- [ ] error management
+- [ ] tech login
+- [ ] customers
+- [ ] transactions
+- [ ] booking
+- [ ] accounting
+
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
