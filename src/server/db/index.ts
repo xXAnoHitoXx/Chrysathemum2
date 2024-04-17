@@ -1,18 +1,16 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-
-import { env } from "~/env";
+import { drizzle } from 'drizzle-orm/vercel-postgres';
+import { sql } from "@vercel/postgres";
 import * as schema from "./schema";
 
-/**
- * Cache the database connection in development. This avoids creating a new connection on every HMR
- * update.
- */
-const globalForDb = globalThis as unknown as {
-  conn: postgres.Sql | undefined;
-};
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+import { env } from '~/env';
 
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
+// Use this object to send drizzle queries to your DB
+export const d_db = drizzle(sql, { schema });
 
-export const db = drizzle(conn, { schema });
+const fisebase_config = {
+    databaseURL: env.FIREBASE_URL,
+}
+const app = initializeApp(fisebase_config);
+export const f_db = getDatabase(app);
