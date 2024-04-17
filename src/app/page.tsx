@@ -1,18 +1,23 @@
-import { d_db } from "~/server/db";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"; 
 import TopNav from "./_components/TopNav"
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-    const posts = await d_db.query.posts.findMany();
-
+export default function HomePage() {
     return (
         <main>
             <TopNav/>
-            <div className="flex flex-wrap gap-4">
-                {posts.map((post) => (
-                <div key={post.id}>{post.name}</div>
-                ))}
+            <div className="flex w-full h-dvh justify-center">
+                <div className="grid grid-cols-1 m-auto justify-items-center">
+                    <SignedOut>
+                        <SignInButton mode="modal"> 
+                            <button className="w-32 h-20 border-4 border-sky-500 rounded-full">Sign In</button>
+                        </SignInButton> 
+                    </SignedOut>
+                    <SignedIn>
+                        <UserButton/> 
+                    </SignedIn>
+                </div>
             </div>
         </main>
     );
