@@ -2,11 +2,11 @@
 
 ## Todo
 
-- [ ] make it deploy
+- [x] make it deploy
 - [ ] basic ui
-- [ ] set up db
+- [x] set up db
 - [ ] attach db to ui
-- [ ] add auth
+- [x] add auth
 - [ ] error management
 - [ ] tech login
 - [ ] customers
