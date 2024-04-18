@@ -11,7 +11,9 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 m-auto justify-items-center">
                     <SignedOut>
                         <SignInButton mode="modal"> 
-                            <button className="w-32 h-20 border-4 border-sky-500 rounded-full">Sign In</button>
+                            <button className="w-32 h-20 border-4 border-sky-500 rounded-full">
+                                Sign In
+                            </button>
                         </SignInButton> 
                     </SignedOut>
                     <SignedIn>
