@@ -5,7 +5,7 @@
 - [x] make it deploy
 - [ ] basic ui
 - [x] set up db
-- [ ] attach db to ui
+- [x] attach db to ui
 - [x] add auth
 - [ ] error management
 - [ ] tech login
