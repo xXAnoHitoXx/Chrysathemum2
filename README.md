@@ -2,17 +2,24 @@
 
 ## Todo
 
-- [x] make it deploy
-- [ ] basic ui
-- [x] set up db
-- [x] attach db to ui
-- [x] add auth
-- [ ] error management
-- [ ] tech login
-- [ ] customers
-- [ ] transactions
-- [ ] booking
-- [ ] accounting
+- [x] ~~make it deploy~~
+- [x] ~~set up db~~
+- [x] ~~attach db to ui~~
+- [x] ~~add auth~~
+- [x] ~~error management~~
+- [x] ~~data layout~~
+- salon:
+    - [ ] migration framework
+    - [ ] appointment viewer
+    - [ ] booking
+    - [ ] view daily breakdown
+    - [ ] sumary
+    - [ ] month tally
+- technician:
+    - [ ] daily break down
+    - [ ] sumary
+- [ ] curtomer booking
+
 
 
 # Create T3 App
