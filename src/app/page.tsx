@@ -12,7 +12,9 @@ export default async function HomePage() {
             redirect("/tech");
         } 
 
-        return SalonSelect(user.publicMetadata.Role === "admin");
+        const is_manager = user.publicMetadata.Role === "admin" || user.publicMetadata.Role === "operator";
+
+        return SalonSelect(is_manager);
     }
 
     return (
