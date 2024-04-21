@@ -38,7 +38,7 @@ export default function RootLayout({
 
 function TopNav() {
     return (
-        <nav id="top-nav" className="flex w-full items-center justify-between border-b border-sky-500 p-4 text-xl font-semibold">
+        <nav id="top-nav" className="flex w-full items-center justify-between border-b-4 border-sky-500 p-4 text-xl font-semibold">
 
             <div>Chrysanthemum Spa</div>
 
