@@ -18,8 +18,8 @@ import {
  */
 export const createTable = pgTableCreator((name) => `chrysanthemum-2_${name}`);
 
-export const customer = createTable(
-  "customer",
+export const customers = createTable(
+  "customers",
   {
     id: serial("id").primaryKey(),
     name: text("name").notNull(),
@@ -33,8 +33,8 @@ export const customer = createTable(
   }
 );
 
-export const technician = createTable(
-  "tenician",
+export const technicians = createTable(
+  "technicians",
   {
     id: serial("id").primaryKey(),
     name: text("name").notNull(),
@@ -43,12 +43,12 @@ export const technician = createTable(
   }
 );
 
-export const transaction = createTable(
-  "transaction",
+export const transactions = createTable(
+  "transactions",
   {
     id: serial("id").primaryKey(),
-    customer_id: integer("customer_id").references(() => customer.id).notNull(),
-    tech_id: integer("tech_id").references(() => technician.id).notNull(),
+    customer_id: integer("customer_id").references(() => customers.id).notNull(),
+    tech_id: integer("tech_id").references(() => technicians.id).notNull(),
     description: text("description").notNull().default(""),
     amount: integer("amount").notNull().default(0),
     tip: integer("tip").notNull().default(0),
@@ -65,26 +65,40 @@ export const transaction = createTable(
   }
 );
 
-export const users = createTable(
-  "users",
+/**
+ *  convert clerk user id string to the users table's id integer
+ */
+export const web_users = createTable(
+  "web_users",
   {
     id: text("id").primaryKey(),
-    customer_id: integer("customer_id").references(() => customer.id).notNull(),
+    customer_id: integer("customer_id").references(() => customers.id).notNull().unique(),
   }
 );
 
-export const fb_tech = createTable(
-  "fb_tenician",
+/**
+ *  convert clerk user id string to the technicians table's id integer
+ */
+export const web_technicians = createTable(
+  "web_technicians",
   {
-    id: integer("id").primaryKey(),
-    tech_id: integer("tech_id").references(() => technician.id).notNull(),
+    id: text("id").primaryKey(),
+    tech_id: integer("tech_id").references(() => technicians.id).notNull().unique(),
   }
 );
 
-export const fb_customer = createTable(
-  "fb_customer",
+export const fb_techs = createTable(
+  "fb_tenicians",
   {
     id: integer("id").primaryKey(),
-    customer_id: integer("customer_id").references(() => customer.id).notNull(),
+    tech_id: integer("tech_id").references(() => technicians.id).notNull(),
+  }
+);
+
+export const fb_customers = createTable(
+  "fb_customers",
+  {
+    id: integer("id").primaryKey(),
+    customer_id: integer("customer_id").references(() => customers.id).notNull(),
   }
 );
