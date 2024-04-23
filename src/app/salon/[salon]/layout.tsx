@@ -1,21 +1,17 @@
-import { currentUser } from "@clerk/nextjs/server";
-import SalonLeftNav from "./_component/SalonLeftNav";
-import { redirect } from "next/navigation";
-
 export default async function RootLayout({
     children,
+    params,
 }: {
-    children: React.ReactNode;
+    children: React.ReactNode,
+    params: { salon: string }
 }) {
-    const user = await currentUser();
-
-    if(!user) {
-        redirect("/");
-    }
 
     return (
-        <div className="flex w-full flex-grow justify-start min-h-lvh">
-            <SalonLeftNav is_admin={user.publicMetadata.Role === "admin"}/>
+        <div className="flex flex-wrap p-2 gap-2">
+            <a href={"/salon/nav/".concat(params.salon)}>
+                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Actions</button>
+            </a>
+            <div id="Appointment View" className="flex flex-nowrap w-full h-fit"></div>
             {children}
         </div>
     );

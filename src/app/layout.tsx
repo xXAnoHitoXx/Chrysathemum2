@@ -28,7 +28,7 @@ export default function RootLayout({
         }}>
     <html lang="en">
         <body className={`font-sans ${inter.variable}`}>
-            <TopNav/>
+           <TopNav/>
             {children}
         </body>
     </html>
