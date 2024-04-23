@@ -90,7 +90,7 @@ export const web_technicians = createTable(
 export const fb_techs = createTable(
   "fb_tenicians",
   {
-    id: integer("id").primaryKey(),
+    id: text("id").primaryKey(),
     tech_id: integer("tech_id").references(() => technicians.id).notNull(),
   }
 );
@@ -98,7 +98,7 @@ export const fb_techs = createTable(
 export const fb_customers = createTable(
   "fb_customers",
   {
-    id: integer("id").primaryKey(),
+    id: text("id").primaryKey(),
     customer_id: integer("customer_id").references(() => customers.id).notNull(),
   }
 );

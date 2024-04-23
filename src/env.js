@@ -8,7 +8,14 @@ export const env = createEnv({
    */
   server: {
     POSTGRES_URL: z.string().url(),
+    API_KEY: z.string(),
+    AUTH_DOMAIN: z.string(),
     FIREBASE_URL: z.string().url(),
+    PROJECT_ID: z.string(),
+    STORAGE_BUCKET: z.string(),
+    MESSAGING_SENDER_ID: z.string(),
+    APP_ID: z.string(),
+    MEASURMENT_ID: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -29,7 +36,14 @@ export const env = createEnv({
    */
   runtimeEnv: {
     POSTGRES_URL: process.env.POSTGRES_URL,
+    API_KEY: process.env.API_KEY,
+    AUTH_DOMAIN: process.env.AUTH_DOMAIN,
     FIREBASE_URL: process.env.FIREBASE_URL,
+    PROJECT_ID: process.env.PROJECT_ID,
+    STORAGE_BUCKET: process.env.STORAGE_BUCKET,
+    MESSAGING_SENDER_ID: process.env.MESSAGING_SENDER_ID,
+    APP_ID: process.env.APP_ID,
+    MEASURMENT_ID: process.env.MEASURMENT_ID,
     NODE_ENV: process.env.NODE_ENV,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
