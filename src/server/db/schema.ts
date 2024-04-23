@@ -33,26 +33,49 @@ export const customers = createTable(
   }
 );
 
+export const locations = createTable(
+  "locations",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    address: text("address").notNull(),
+  }
+);
+
 export const technicians = createTable(
   "technicians",
   {
     id: serial("id").primaryKey(),
     name: text("name").notNull(),
     colour: text("colour").notNull(),
-    active_location: text("active_location").notNull().default(""),
   }
+);
+
+export const attendance = createTable(
+    "attendance",
+    {
+        id: serial("id").primaryKey(),
+        date: text("date").notNull(),
+        tech_id: integer("tech_id").references(() => technicians.id).notNull(),
+        location_id: text("location_id").references(() => locations.id).notNull(),
+    },
+    (table) => {
+        return {
+          date_loc_tech_index: index("date_loc_tech_index").on(table.date, table.location_id, table.tech_id),
+          date_tech_index: index("date_tech_index").on(table.date, table.tech_id),
+        };
+    }
 );
 
 export const transactions = createTable(
   "transactions",
   {
     id: serial("id").primaryKey(),
+    attendance: integer("attendance").references(() => attendance.id).notNull(),
     customer_id: integer("customer_id").references(() => customers.id).notNull(),
-    tech_id: integer("tech_id").references(() => technicians.id).notNull(),
     description: text("description").notNull().default(""),
     amount: integer("amount").notNull().default(0),
     tip: integer("tip").notNull().default(0),
-    date: integer("date").notNull().default(0),
     time: integer("time").notNull().default(0),
     duration: integer("duration").notNull().default(0),
     closed: boolean("closed").notNull().default(false),
@@ -60,7 +83,7 @@ export const transactions = createTable(
   (table) => {
       return {
           customer_index: index("customer_index").on(table.customer_id),
-          date_index: index("date_index").on(table.date),
+          attendance_index: index("attendance").on(table.attendance),
       };
   }
 );
