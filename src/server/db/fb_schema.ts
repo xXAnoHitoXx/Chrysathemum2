@@ -34,10 +34,10 @@ export type Transactions = {
     technician_id: string, 
     location_id: string,
     date: string, 
-    time: number, 
-    duration: number,
-    amount: number,
-    tip: number,
+    time: bigint, 
+    duration: bigint,
+    amount: bigint,
+    tip: bigint,
     description: string,
 };
 const transactions_root="transactions/";
@@ -46,13 +46,13 @@ export const fb_transactions_date_index=root.concat(transactions_root, "date/");
 export const fb_transactions_customer_index=root.concat(transactions_root, "customers/");
 
 export type Acounting = {
-    amount: number,
-    tip: number,
+    amount: bigint,
+    tip: bigint,
 };
 
 export type Closing = {
-    cash: number,
-    machine: number,
-    gift: number,
-    discount: number,
+    cash: bigint,
+    machine: bigint,
+    gift: bigint,
+    discount: bigint,
 };

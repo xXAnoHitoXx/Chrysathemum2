@@ -2,7 +2,7 @@ import { f_db } from "../db";
 import { ref, set, get } from "firebase/database";
 import type { DataSnapshot } from "firebase/database";
 import { fb_customers_legacy_id_index } from "../db/fb_schema";
-import { update_customer, create_customer } from "../customer_queries";
+import { update_customer, create_customer } from "../queries/customers";
 
 export async function migrate_customers() {
     const snapshot = await get(ref(f_db, "customer/id"));

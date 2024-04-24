@@ -1,8 +1,8 @@
-import { f_db } from "./db";
+import { f_db } from "../db";
 import { ref, push, set, get, update } from "firebase/database";
 import type { DataSnapshot, DatabaseReference } from "firebase/database";
-import { fb_customers, fb_customers_phone_index } from "./db/fb_schema";
-import type { Customer } from "./db/fb_schema";
+import { fb_customers, fb_customers_phone_index } from "../db/fb_schema";
+import type { Customer } from "../db/fb_schema";
 
 export async function create_customer(name: string, phone_number: string) : Promise<Customer>{
     const id : DatabaseReference = await push(ref(f_db, fb_customers));
