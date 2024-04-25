@@ -1,5 +1,5 @@
-import { push, ref, set, update } from "firebase/database";
-import type { DatabaseReference } from "firebase/database";
+import { push, ref, set, get, update } from "firebase/database";
+import type { DatabaseReference, DataSnapshot } from "firebase/database";
 import { f_db } from "../db";
 import { fb_technicians } from "../db/fb_schema";
 import type { Technician } from "../db/fb_schema";
@@ -18,6 +18,22 @@ export async function create_technician(name: string, color: string){
     };
 
     await set(id, tech);
+}
+
+export async function get_all_technicians(): Promise<Technician[]> {
+    const data: DataSnapshot = await get(ref(f_db, fb_technicians));
+
+    if(!data.exists()) {
+        return [];
+    }
+
+    const techs: Technician[] = [];
+
+    data.forEach((child) => {
+        techs.push(child.val() as Technician)
+    });
+
+    return techs;
 }
 
 export async function update_technician(tech: Technician){

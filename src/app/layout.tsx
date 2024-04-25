@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"; 
 import { ClerkProvider } from '@clerk/nextjs'
+import { Providers } from "./providers"
 
 import { Inter } from "next/font/google";
 import { dark } from "@clerk/themes";
@@ -27,9 +28,11 @@ export default function RootLayout({
         baseTheme: dark
         }}>
     <html lang="en">
-        <body className={`font-sans ${inter.variable}`}>
-           <TopNav/>
+        <body className={`font-sans ${inter.variable}`.concat("w-full h-lvh")}>
+            <Providers>
+            <TopNav/>
             {children}
+            </Providers>
         </body>
     </html>
     </ClerkProvider>
