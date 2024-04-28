@@ -43,7 +43,9 @@ function TopNav() {
     return (
         <nav id="top-nav" className="flex w-full items-center justify-between border-b-4 border-sky-500 p-4 text-xl font-semibold">
 
-            <div>Chrysanthemum Spa</div>
+            <a href="/">
+                <div>Chrysanthemum Spa</div>
+            </a>
 
             <div>
                 <SignedOut>
