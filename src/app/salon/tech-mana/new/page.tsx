@@ -1,23 +1,16 @@
-import { Button } from "@nextui-org/react";
-import { TechnicianButton } from "../_component/TechDisplayBar";
+import { get_all_technicians } from "~/server/queries/technicians";
+import NewTechForm from "./_components/NewTechForm";
+import TechDisplayBar from "~/app/salon/tech-mana/new/_components/TechDisplayBar";
 import type { Technician } from "~/server/db/fb_schema";
+import type { ButtonData } from "~/app/salon/tech-mana/new/_components/TechDisplayBar";
 
-export default function NewTech() {
-    const default_tech: Technician = {
-        id: "default",
-        name: "Tinn",
-        color: "bg-slate-950 text-sky-300 border-sky-500",
-    }; 
+export default async function NewTech() {
+    const buttons_data: ButtonData[] = ( await get_all_technicians() ).map((technicians: Technician)=> ( [ technicians, null ] ));
+
     return(
-        <div className="flex w-1/2 h-grow justify-center">
-            <div className="grid grid-cols-5 grid-rows-5 items-center p-4">
-                <div className="col-start-3 row-start-3">
-                    <TechnicianButton  technician={default_tech} link={null} />
-                </div>
-                <div className="col-start-1 row-start-5 place-items-center">
-                    <Button type="submit" color="primary" isDisabled={true}>Create</Button>
-                </div>
-            </div>
+        <div className="flex flex-wrap w-full h-fit p-2 gap-2">
+            <NewTechForm />
+            <TechDisplayBar technicians={buttons_data} />
         </div>
     );
 }

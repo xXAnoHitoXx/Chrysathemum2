@@ -4,7 +4,7 @@ export type ButtonData = [Technician, string | null];
 
 export default function TechDisplayBar({ technicians }: { technicians: ButtonData[] }) {
     return (
-        <div className="flex flex-nowrap">
+        <div className="flex flex-nowrap overflow-x-auto">
             { technicians.map((tech: ButtonData) => ( <TechnicianButton key={tech[0].id} technician={tech[0]} link={tech[1]}/>) ) }
         </div>
     );
