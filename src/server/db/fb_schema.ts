@@ -1,4 +1,16 @@
-const root="c2/";
+let root: Mode = "c2/";
+
+export const fb_root = () => { return root };
+
+type Mode = "c2/" | "test/";
+
+export function enableTestMode() {
+    root = "test/";
+}
+
+export function desableTestMode() {
+    root = "c2/";
+}
 
 export type Customer = { 
     id: string, 
@@ -6,9 +18,9 @@ export type Customer = {
     phone_number: string 
 };
 const customers_root="customers/";
-export const fb_customers=root.concat(customers_root, "id/");
-export const fb_customers_phone_index=root.concat(customers_root, "phone_number/");
-export const fb_customers_legacy_id_index=root.concat(customers_root, "legacy_id/");
+export const fb_customers = () => { return root.concat(customers_root, "id/"); };
+export const fb_customers_phone_index = () => { return root.concat(customers_root, "phone_number/"); };
+export const fb_customers_legacy_id_index = () => { return root.concat(customers_root, "legacy_id/"); };
 
 export type Technician = { 
     id: string, 
@@ -16,17 +28,17 @@ export type Technician = {
     color: string 
 };
 const technicians_root="technicians/";
-export const fb_technicians=root.concat(technicians_root, "id/");
-export const fb_technicians_activity=root.concat(technicians_root, "activity/");
-export const fb_technicians_login=root.concat(technicians_root, "login/")
-export const fb_technicians_legacy_id_index=root.concat(technicians_root, "legacy_id");
+export const fb_technicians = () => { return root.concat(technicians_root, "id/"); };
+export const fb_technicians_activity = () => { return root.concat(technicians_root, "activity/"); };
+export const fb_technicians_login = () => { return root.concat(technicians_root, "login/") };
+export const fb_technicians_legacy_id_index = () => { return root.concat(technicians_root, "legacy_id"); };
 
 export type Location = { 
     id: string, 
     address: string 
 };
 const locations_root="locations/"
-export const fb_locations=root.concat(locations_root, "id/");
+export const fb_locations = () => { return root.concat(locations_root, "id/"); };
 
 export type Transactions = { 
     id: string, 
@@ -41,9 +53,9 @@ export type Transactions = {
     description: string,
 };
 const transactions_root="transactions/";
-export const fb_transactions=root.concat(transactions_root, "id/");
-export const fb_transactions_date_index=root.concat(transactions_root, "date/");
-export const fb_transactions_customer_index=root.concat(transactions_root, "customers/");
+export const fb_transactions = () => { return root.concat(transactions_root, "id/"); };
+export const fb_transactions_date_index = () => { return root.concat(transactions_root, "date/"); };
+export const fb_transactions_customer_index = () => { return root.concat(transactions_root, "customers/"); };
 
 export type Acounting = {
     amount: bigint,

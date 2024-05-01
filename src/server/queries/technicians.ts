@@ -5,7 +5,7 @@ import { fb_technicians } from "../db/fb_schema";
 import type { Technician } from "../db/fb_schema";
 
 export async function create_technician(name: string, color: string){
-    const id: DatabaseReference = push(ref(f_db, fb_technicians));
+    const id: DatabaseReference = push(ref(f_db, fb_technicians()));
 
     if(id.key == null) {
         throw new Error("failed to create an id for technician");
@@ -21,7 +21,7 @@ export async function create_technician(name: string, color: string){
 }
 
 export async function get_all_technicians(): Promise<Technician[]> {
-    const data: DataSnapshot = await get(ref(f_db, fb_technicians));
+    const data: DataSnapshot = await get(ref(f_db, fb_technicians()));
 
     if(!data.exists()) {
         return [];
@@ -37,5 +37,5 @@ export async function get_all_technicians(): Promise<Technician[]> {
 }
 
 export async function update_technician(tech: Technician){
-    await update(ref(f_db, fb_technicians.concat(tech.id)), { name: tech.name, color: tech.color });
+    await update(ref(f_db, fb_technicians().concat(tech.id)), { name: tech.name, color: tech.color });
 }
