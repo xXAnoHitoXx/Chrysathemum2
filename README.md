@@ -10,15 +10,22 @@
 - [x] ~~data layout~~
 - back end:
     - [ ] cruds
-        - [ ] customer
+        - [x] ~~customer~~
             - [x] ~~customer data type~~
             - [x] ~~customer entries~~
             - [x] ~~customer phone index~~
-            - [ ] customer migration index
+            - [x] ~~customer migration index~~
         - [ ] technician
             - [ ] technician entries
             - [ ] technician login index
             - [ ] technician migration index
+        - [ ] location
+            - [ ] location entries
+            - [ ] location's technician
+        - [ ] transaction
+            - [ ] transaction entries
+            - [ ] transaction migration index
+        - [ ] accouting
             
 - salon:
     - [ ] migration framework

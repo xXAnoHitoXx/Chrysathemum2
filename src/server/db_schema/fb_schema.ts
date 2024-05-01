@@ -1,6 +1,15 @@
+import { ref, remove } from "firebase/database";
+import { f_db } from ".";
+
 export function fb_root(redirect: string): string {
-    const env: string = (process.env.VERCEL_ENV === "production")? "production" : process.env.NODE_ENV;
-    return process.env.PROJECT_NAME!.concat("/", env , "/", redirect);
+    const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
+    const mode: string = (process.env.NODE_ENV === "test")? "test" : "operarion";
+    return process.env.PROJECT_NAME!.concat("/", env , "/", mode, "/", redirect);
+}
+
+export async function clear_test_data(test_name: string) {
+    const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
+    await remove(ref(f_db, process.env.PROJECT_NAME!.concat("/", env , "/test/", test_name)));
 }
 
 export type Customer = { 
