@@ -16,6 +16,7 @@ export const env = createEnv({
     MESSAGING_SENDER_ID: z.string(),
     APP_ID: z.string(),
     MEASURMENT_ID: z.string(),
+    PROJECT_NAME: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -44,6 +45,7 @@ export const env = createEnv({
     MESSAGING_SENDER_ID: process.env.MESSAGING_SENDER_ID,
     APP_ID: process.env.APP_ID,
     MEASURMENT_ID: process.env.MEASURMENT_ID,
+    PROJECT_NAME: process.env.PROJECT_NAME,
     NODE_ENV: process.env.NODE_ENV,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },

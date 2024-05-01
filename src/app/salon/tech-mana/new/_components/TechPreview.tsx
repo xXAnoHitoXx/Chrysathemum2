@@ -6,6 +6,7 @@ export default function TechPreview({ name , color }: { name: string, color: str
         id: "preview",
         name: name,
         color: color,
+        active: true,
     }; 
     return(
         <div className="flex w-1/2 max-w-96 h-grow justify-center">
