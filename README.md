@@ -8,6 +8,18 @@
 - [x] ~~add auth~~
 - [x] ~~error management~~
 - [x] ~~data layout~~
+- back end:
+    - [ ] cruds
+        - [ ] customer
+            - [x] ~~customer data type~~
+            - [x] ~~customer entries~~
+            - [x] ~~customer phone index~~
+            - [ ] customer migration index
+        - [ ] technician
+            - [ ] technician entries
+            - [ ] technician login index
+            - [ ] technician migration index
+            
 - salon:
     - [ ] migration framework
     - [ ] appointment viewer
