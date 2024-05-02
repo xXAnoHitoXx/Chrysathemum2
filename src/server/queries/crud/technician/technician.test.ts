@@ -1,5 +1,6 @@
 import { clear_test_data, type Technician } from "~/server/db_schema/fb_schema";
 import { create_technician_entry, delete_technician_entry, retrieve_technician_entry, update_technician_entry } from "./technician_entry";
+import { create_technician_login_index, delete_technician_login_index, retrieve_technician_id_from_user_id } from "./technician_login_index";
 
 const test_suit = "tech_cruds";
 
@@ -40,4 +41,27 @@ test("test technician entries CRUD queries", async () => {
     const no_technician_entry: Technician | null = await retrieve_technician_entry(test_technician_entry.id, test_name);
     expect(no_technician_entry).toBeNull();
 });
+
+
+test("test technician_login_index CRUDs querries", async () => {
+    const test_name = test_suit.concat("/test_technician_login_index_cruds/");
+
+    const login = {
+        user_id: "banana",
+        tech_id: "bruh-nuh-nuh"
+    };
+
+    let conversion: string | null = await retrieve_technician_id_from_user_id(login.user_id, test_name);
+    expect(conversion).toBeNull();
+
+    await create_technician_login_index({user_id: login.user_id, technician_id: login.tech_id}, test_name);
+
+    conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
+    expect(conversion).toBe(login.tech_id);
+
+    await delete_technician_login_index(login.user_id, test_name);
+
+    conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
+    expect(conversion).toBeNull();
+})
 

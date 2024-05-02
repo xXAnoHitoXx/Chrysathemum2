@@ -17,7 +17,7 @@
             - [x] ~~customer migration index~~
         - [ ] technician
             - [x] ~~technician entries~~
-            - [ ] technician login index
+            - [x] ~~technician login index~~
             - [ ] technician migration index
         - [ ] location
             - [ ] location entries
