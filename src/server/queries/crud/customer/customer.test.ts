@@ -3,7 +3,7 @@ import { create_customer_entry, delete_customer_entry, retrieve_customer_entry, 
 import { create_customer_phone_index, delete_customer_phone_index, retrieve_customer_phone_index } from "./customer_phone_index";
 import { create_customer_migration_index, delete_customer_migration_index, retrieve_customer_id_from_legacy_id } from "./customer_migration_index";
 
-const test_suit = "cruds";
+const test_suit = "cust_cruds";
 
 afterAll(async () => {
     await clear_test_data(test_suit);
@@ -38,7 +38,7 @@ test("test customer_entries CRUDs querries", async () => {
         expect(updated_customer_entry.phone_number).toBe(update_target.phone_number);
     }
 
-    await delete_customer_entry(updated_customer_entry!, test_name);
+    await delete_customer_entry(test_customer_entry.id, test_name);
 
     const empty_customer_entry: Customer | null = await retrieve_customer_entry(test_customer_entry.id, test_name);
     expect(empty_customer_entry).toBeNull();

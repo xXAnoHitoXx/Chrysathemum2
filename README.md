@@ -16,7 +16,7 @@
             - [x] ~~customer phone index~~
             - [x] ~~customer migration index~~
         - [ ] technician
-            - [ ] technician entries
+            - [x] ~~technician entries~~
             - [ ] technician login index
             - [ ] technician migration index
         - [ ] location

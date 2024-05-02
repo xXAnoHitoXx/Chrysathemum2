@@ -1,7 +1,7 @@
 import { get_all_technicians } from "~/server/queries/technicians";
 import NewTechForm from "./_components/NewTechForm";
 import TechDisplayBar from "~/app/salon/tech-mana/new/_components/TechDisplayBar";
-import type { Technician } from "~/server/db/fb_schema";
+import type { Technician } from "~/server/db_schema/fb_schema";
 import type { ButtonData } from "~/app/salon/tech-mana/new/_components/TechDisplayBar";
 
 export default async function NewTech() {
