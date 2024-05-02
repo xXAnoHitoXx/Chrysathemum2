@@ -1,3 +1,4 @@
+import 'server-only';
 import { ref, remove } from "firebase/database";
 import { f_db } from ".";
 

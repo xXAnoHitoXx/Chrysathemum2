@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { type DataSnapshot, get, ref, set, remove } from "firebase/database"
 import { f_db } from "~/server/db_schema";
 import { fb_technicians_login } from "~/server/db_schema/fb_schema";

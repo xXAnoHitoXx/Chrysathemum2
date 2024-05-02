@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { type DatabaseReference, push, ref, set, get, type DataSnapshot, update, remove } from "firebase/database";
 import { f_db } from "~/server/db_schema";
 import { fb_technician_entries, type Technician } from "~/server/db_schema/fb_schema";

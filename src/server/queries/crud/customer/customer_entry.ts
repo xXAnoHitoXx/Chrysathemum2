@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { f_db } from "~/server/db_schema";
 import { ref, push, set, get, update, remove } from "firebase/database";
 import type { DataSnapshot, DatabaseReference } from "firebase/database";

@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { type DataSnapshot, ref, set, get, remove } from "firebase/database";
 import { f_db } from "~/server/db_schema";
 import { fb_customers_phone_index, type Customer } from "~/server/db_schema/fb_schema";

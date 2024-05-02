@@ -1,6 +1,7 @@
 import { clear_test_data, type Technician } from "~/server/db_schema/fb_schema";
 import { create_technician_entry, delete_technician_entry, retrieve_technician_entry, update_technician_entry } from "./technician_entry";
 import { create_technician_login_index, delete_technician_login_index, retrieve_technician_id_from_user_id } from "./technician_login_index";
+import { create_technician_migration_index, delete_technician_migration_index, retrieve_technician_id_from_legacy_id } from "./technician_migration_index";
 
 const test_suit = "tech_cruds";
 
@@ -62,6 +63,28 @@ test("test technician_login_index CRUDs querries", async () => {
     await delete_technician_login_index(login.user_id, test_name);
 
     conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
+    expect(conversion).toBeNull();
+})
+
+test("test technician_migration_index CRUDs querries", async () => {
+    const test_name = test_suit.concat("/test_technician_migration_index_cruds/");
+
+    const migration = {
+        legacy_id: "banana",
+        tech_id: "bruh-nuh-nuh"
+    };
+
+    let conversion: string | null = await retrieve_technician_id_from_legacy_id(migration.legacy_id, test_name);
+    expect(conversion).toBeNull();
+
+    await create_technician_migration_index({legacy_id: migration.legacy_id, technician_id: migration.tech_id}, test_name);
+
+    conversion = await retrieve_technician_id_from_legacy_id(migration.legacy_id, test_name);
+    expect(conversion).toBe(migration.tech_id);
+
+    await delete_technician_migration_index(migration.legacy_id, test_name);
+
+    conversion = await retrieve_technician_id_from_legacy_id(migration.legacy_id, test_name);
     expect(conversion).toBeNull();
 })
 

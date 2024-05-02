@@ -15,10 +15,10 @@
             - [x] ~~customer entries~~
             - [x] ~~customer phone index~~
             - [x] ~~customer migration index~~
-        - [ ] technician
+        - [x] ~~technician~~
             - [x] ~~technician entries~~
             - [x] ~~technician login index~~
-            - [ ] technician migration index
+            - [x] ~~technician migration index~~
         - [ ] location
             - [ ] location entries
             - [ ] location's technician
