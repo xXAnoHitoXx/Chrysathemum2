@@ -1,9 +1,9 @@
-import { TechnicianButton } from "~/app/salon/tech-mana/new/_components/TechDisplayBar";
-import type { Technician } from "~/server/db/fb_schema";
+import { TechnicianButton } from "./TechDisplayBar"; 
+import type { Technician } from "~/server/db_schema/fb_schema"; 
 
 export default function TechPreview({ name , color }: { name: string, color: string }) {
     const default_tech: Technician = {
-        id: "preview",
+       id: "preview",
         name: name,
         color: color,
         active: true,

@@ -27,10 +27,10 @@ export default function RootLayout({
     <ClerkProvider appearance={{
         baseTheme: dark
         }}>
-    <html lang="en">
-        <body className={`font-sans ${inter.variable}`.concat("w-full h-lvh")}>
-            <Providers>
+    <html lang="en" className="dark">
+        <body className={`font-sans ${inter.variable}`}>
             <TopNav/>
+            <Providers>
             {children}
             </Providers>
         </body>

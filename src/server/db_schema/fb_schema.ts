@@ -1,6 +1,16 @@
+import 'server-only';
+import { ref, remove } from "firebase/database";
+import { f_db } from ".";
+
 export function fb_root(redirect: string): string {
-    const env: string = (process.env.VERCEL_ENV === "production")? "production" : process.env.NODE_ENV;
-    return process.env.PROJECT_NAME!.concat("/", env , "/", redirect);
+    const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
+    const mode: string = (process.env.NODE_ENV === "test")? "test" : "operarion";
+    return process.env.PROJECT_NAME!.concat("/", env , "/", mode, "/", redirect);
+}
+
+export async function clear_test_data(test_name: string) {
+    const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
+    await remove(ref(f_db, process.env.PROJECT_NAME!.concat("/", env , "/test/", test_name)));
 }
 
 export type Customer = { 
@@ -21,6 +31,23 @@ export function fb_customers_legacy_id_index(redirect:string): string {
     return fb_root(redirect).concat(customers_root, "legacy_id/"); 
 }
 
+export type Technician = { 
+    id: string, 
+    name: string, 
+    color: string,
+    active: boolean,
+};
+
+const technicians_root="technicians/";
+export function fb_technician_entries(redirect: string): string { 
+    return fb_root(redirect).concat(technicians_root, "id/");
+}
+export function fb_technicians_login(redirect: string): string { 
+    return fb_root(redirect).concat(technicians_root, "login/");
+}
+export function fb_technicians_legacy_id_index(redirect: string): string { 
+    return fb_root(redirect).concat(technicians_root, "legacy_id/");
+};
 /*
 import { ref, remove } from "firebase/database";
 import { f_db } from ".";
@@ -42,17 +69,6 @@ export async function clear_test_data() {
     await remove(ref(f_db, "test/"));
 }
 
-export type Technician = { 
-    id: string, 
-    name: string, 
-    color: string,
-    active: boolean,
-};
-const technicians_root="technicians/";
-export const fb_technician_entries = () => { return root.concat(technicians_root, "id/"); };
-export const fb_technicians_activity = () => { return root.concat(technicians_root, "activity/"); };
-export const fb_technicians_login = () => { return root.concat(technicians_root, "login/") };
-export const fb_technicians_legacy_id_index = () => { return root.concat(technicians_root, "legacy_id"); };
 
 export type Location = { 
     id: string, 

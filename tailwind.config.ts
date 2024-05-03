@@ -17,13 +17,13 @@ export default {
 
     safelist: [
         {
-            pattern: /text-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indlgo|violet|purple|fuchsia|pink|rose)-(300|400|500|600|700|800|900|950)/
+            pattern: /text-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(300|400|500|600|700|800|900|950)/
         },
         {
-            pattern: /bg-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indlgo|violet|purple|fuchsia|pink|rose)-(300|400|500|600|700|800|900|950)/
+            pattern: /bg-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(300|400|500|600|700|800|900|950)/
         },
         {
-            pattern: /border-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indlgo|violet|purple|fuchsia|pink|rose)-(300|400|500|600|700|800|900|950)/
+            pattern: /border-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(300|400|500|600|700|800|900|950)/
         },
     ],
 
