@@ -7,7 +7,7 @@ export default async function CreatTech({ params }: { params: { tag: string, sal
 
     await create_new_technician({ name: name_fmt, color: color_fmt });
 
-    const new_tag = (params.tag === "r")? "t" : "r";
-    const path = "/salon/tech-mana/new/".concat(new_tag, "/", params.salon); 
+    const new_tag = Number(params.tag) + 1;
+    const path = "/salon/tech-mana/new/".concat(new_tag.toString(), "/", params.salon); 
     redirect(path);
 }
