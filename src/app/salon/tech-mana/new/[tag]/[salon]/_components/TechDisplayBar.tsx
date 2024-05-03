@@ -1,10 +1,10 @@
-import type { Technician } from "~/server/db/fb_schema";
+import type { Technician } from "~/server/db_schema/fb_schema"; 
 
 export type ButtonData = [Technician, string | null];
 
 export default function TechDisplayBar({ technicians }: { technicians: ButtonData[] }) {
     return (
-        <div className="flex flex-nowrap overflow-x-auto">
+        <div className="flex flex-nowrap w-full overflow-x-auto">
             { technicians.map((tech: ButtonData) => ( <TechnicianButton key={tech[0].id} technician={tech[0]} link={tech[1]}/>) ) }
         </div>
     );

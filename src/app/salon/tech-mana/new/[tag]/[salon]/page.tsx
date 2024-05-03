@@ -4,10 +4,9 @@ import { Button, Input, Select, SelectItem } from '@nextui-org/react'
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react'
-import TechPreview from './TechPreview';
+import TechPreview from './_components/TechPreview'; 
 
-export default function NewTechForm() {
-
+export default function NewTechForm({ params }: {params : { tag: string, salon: string }}) {
     const [name, set_name] = useState("Tinn");
     const [text_color, set_text_color] = useState("sky");
     const [text_intensity, set_text_intensity] = useState("300");
@@ -31,7 +30,7 @@ export default function NewTechForm() {
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         set_is_loading(true);
-
+        router.replace("/salon/tech-mana/create/".concat(params.tag, "/", params.salon, "/", name, "/", color_data));
         set_is_loading(false);
     };
     
@@ -109,7 +108,7 @@ export default function NewTechForm() {
                         </Select>
                     </div>
                     <Button type="submit" color="primary" isDisabled={is_loading}>
-                        {is_loading ? "Loading..." : "Preview"}
+                        {is_loading ? "Loading..." : "Create"}
                     </Button>
                 </form>
             </div>
