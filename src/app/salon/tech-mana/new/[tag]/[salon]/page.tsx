@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react'
 import TechPreview from './_components/TechPreview'; 
+import sanitizer from '~/server/validation/text_sanitization'
 
 export default function NewTechForm({ params }: {params : { tag: string, salon: string }}) {
     const [name, set_name] = useState("Tinn");
@@ -34,6 +35,10 @@ export default function NewTechForm({ params }: {params : { tag: string, salon: 
         set_is_loading(false);
     };
     
+    const name_change = (new_name: string) => {
+        set_name(sanitizer(new_name));
+    }
+
     const handle_text_color_change = (e: ChangeEvent<HTMLSelectElement>) => {
         const text_color = (e.target.value === "")? "sky" : e.target.value;
         set_text_color(text_color);
@@ -82,7 +87,7 @@ export default function NewTechForm({ params }: {params : { tag: string, salon: 
         <div className="flex flex-nowrap justify-center w-full h-fit p-2 border-b border-b-sky-400">
             <div className="flex w-1/2 max-w-96 p-3 gap-1 border-r border-sky-500">
                 <form onSubmit={onSubmit} className="flex flex-wrap gap-1">
-                    <Input onValueChange={set_name} isRequired label="Name" placeholder="Tinn"/>
+                    <Input onValueChange={name_change} isRequired label="Name" placeholder="Tinn"/>
                     <div className="flex w-full gap-1">
                         <Select defaultSelectedKeys={["Sky"]} onChange={handle_text_color_change} isRequired label="Text Color">
                             { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
