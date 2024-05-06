@@ -1,5 +1,5 @@
 import { clear_test_data, type Customer } from "~/server/db_schema/fb_schema";
-import { create_new_customer, update_customer_info } from "./customer_queries";
+import { create_new_customer, is_no_book, update_customer_info } from "./customer_queries";
 import { retrieve_customer_entry } from "../crud/customer/customer_entry";
 import { retrieve_customer_phone_index } from "../crud/customer/customer_phone_index";
 
@@ -153,4 +153,24 @@ test("update customer info", async () => {
     expect(updated_customer.name).toBe(update_target.name);
     expect(updated_customer.phone_number).toBe(update_target.phone_number);
     expect(updated_customer.notes).toBe(update_target.notes);
+})
+
+test("check for no book flag", () => {
+    const customer: Customer = {
+        id: "JWong",
+        name: "Justin Wong",
+        phone_number: "Evo Moment 37",
+        notes: "Get Daigo Parried"
+    }
+
+    expect(is_no_book(customer)).toBe(false);
+
+    customer.notes = "yolo oh no book";
+    expect(is_no_book(customer)).toBe(true);
+
+    customer.notes = "yolo oh nO boOKtranak";
+    expect(is_no_book(customer)).toBe(true);
+
+    customer.notes = "yolo oh noboOKtranak";
+    expect(is_no_book(customer)).toBe(true);
 })
