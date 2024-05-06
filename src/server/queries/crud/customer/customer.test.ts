@@ -26,6 +26,7 @@ test("test customer_entries CRUDs querries", async () => {
         id: test_customer_entry.id,
         name: "AnoHito",
         phone_number: "your mother is a colosal murloc",
+        notes: "is cool"
     };
 
     await update_customer_entry(update_target, test_name);
@@ -36,6 +37,7 @@ test("test customer_entries CRUDs querries", async () => {
         expect(updated_customer_entry.id).toBe(update_target.id);
         expect(updated_customer_entry.name).toBe(update_target.name);
         expect(updated_customer_entry.phone_number).toBe(update_target.phone_number);
+        expect(updated_customer_entry.notes).toBe(update_target.notes);
     }
 
     await delete_customer_entry(test_customer_entry.id, test_name);
@@ -51,12 +53,14 @@ test("test customer_phone_index CRUDs querries", async () => {
         id: "Banana",
         name: "Pizza",
         phone_number: "Your Mother",
+        notes: "",
     }
 
     const customer_2: Customer = {
         id: "Anana",
         name: "Pineapple",
         phone_number: "Your Mother",
+        notes: "",
     }
 
     let index = await retrieve_customer_phone_index(customer_1.phone_number, test_name);

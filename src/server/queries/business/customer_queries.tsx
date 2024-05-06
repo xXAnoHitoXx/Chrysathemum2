@@ -9,11 +9,11 @@ export async function create_new_customer({ name, phone_number }: { name: string
     return customer;
 }
 
-export async function update_customer_info(customer: Customer, { name = customer.name, phone_number = customer.phone_number}, redirect = ""): Promise<Customer> {
+export async function update_customer_info(customer: Customer, { name = customer.name, phone_number = customer.phone_number, notes = customer.notes}, redirect = ""): Promise<Customer> {
     
     await delete_customer_phone_index(customer, redirect);
 
-    const update_target: Customer = { id: customer.id, name: name, phone_number: phone_number }; 
+    const update_target: Customer = { id: customer.id, name: name, phone_number: phone_number, notes: notes}; 
     await update_customer_entry(update_target, redirect);
 
     await create_customer_phone_index(update_target, redirect);

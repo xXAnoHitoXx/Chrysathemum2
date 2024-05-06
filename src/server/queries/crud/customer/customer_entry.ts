@@ -17,6 +17,7 @@ export async function create_customer_entry({name, phone_number}: {name: string,
         id: id.key,
         name: name,
         phone_number: phone_number,
+        notes: "",
     };
  
     await set(id, customer_entry);
@@ -34,7 +35,7 @@ export async function retrieve_customer_entry(id: string, redirect: string) : Pr
 }
 
 export async function update_customer_entry(customer: Customer, redirect: string) {
-    await update(ref(f_db, fb_customer_entries(redirect).concat(customer.id)), { name: customer.name, phone_number: customer.phone_number });
+    await update(ref(f_db, fb_customer_entries(redirect).concat(customer.id)), { name: customer.name, phone_number: customer.phone_number, notes: customer.notes });
 }
 
 export async function delete_customer_entry(id: string, redirect: string) {

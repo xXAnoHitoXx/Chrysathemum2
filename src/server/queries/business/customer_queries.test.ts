@@ -33,9 +33,9 @@ test("customer creation", async () => {
     expect(phone_index).toContain(customer.id);
 })
 
-test("update customer info", async () => {
-    const test_name = test_suit.concat("/customer_creation/");
-
+test("update customer name", async () => {
+    const test_name = test_suit.concat("/customer_name_update/");
+    
     const customer_info = {
         name: "Justin",
         phone_number: "Thyme"
@@ -60,48 +60,97 @@ test("update customer info", async () => {
     expect(name_changed.id).toBe(starting_customer.id);
     expect(name_changed.name).toBe(name_change_info.name);
     expect(name_changed.phone_number).toBe(starting_customer.phone_number);
+})
 
-    const phone_change_info = {
-        phone_number: "Evo Moment 37"
+test("update customer phone_number", async () => {
+    const test_phone_number = test_suit.concat("/customer_phone_number_update/");
+    
+    const customer_info = {
+        name: "Justin Wong",
+        phone_number: "Thyme"
+    };
+
+    const starting_customer: Customer = await create_new_customer(customer_info, test_phone_number);
+
+    const phone_number_change_info = {
+        phone_number: "Evo Monent 37"
     }
 
-    const phone_changed: Customer = await update_customer_info(name_changed, phone_change_info, test_name);
-    const phone_changed_entry: Customer | null = await retrieve_customer_entry(name_changed.id, test_name);
+    const phone_number_changed: Customer = await update_customer_info(starting_customer, phone_number_change_info, test_phone_number);
+    const phone_number_changed_entry: Customer | null = await retrieve_customer_entry(phone_number_changed.id, test_phone_number);
 
-    expect(phone_changed_entry).not.toBeNull();
-    if(phone_changed_entry != null) {
-        expect(phone_changed_entry.id).toBe(starting_customer.id);
-        expect(phone_changed_entry.phone_number).toBe(phone_change_info.phone_number);
-        expect(phone_changed_entry.name).toBe(name_changed.name);
+    expect(phone_number_changed_entry).not.toBeNull();
+    if(phone_number_changed_entry != null) {
+        expect(phone_number_changed_entry.id).toBe(starting_customer.id);
+        expect(phone_number_changed_entry.phone_number).toBe(phone_number_change_info.phone_number);
+        expect(phone_number_changed_entry.name).toBe(starting_customer.name);
     }
 
-    expect(phone_changed.id).toBe(starting_customer.id);
-    expect(phone_changed.phone_number).toBe(phone_change_info.phone_number);
-    expect(phone_changed.name).toBe(name_changed.name);
+    expect(phone_number_changed.id).toBe(starting_customer.id);
+    expect(phone_number_changed.phone_number).toBe(phone_number_change_info.phone_number);
+    expect(phone_number_changed.name).toBe(starting_customer.name);
+})
 
-    let phone_index: string[] = await retrieve_customer_phone_index(phone_change_info.phone_number, test_name);
-    expect(phone_index).toContain(starting_customer.id);
+test("update customer notes", async () => {
+    const test_notes = test_suit.concat("/customer_notes_update/");
+    
+    const customer_info = {
+        name: "Justin",
+        phone_number: "Thyme"
+    };
 
-    let old_phone_index: string[] = await retrieve_customer_phone_index(customer_info.phone_number, test_name);
-    expect(old_phone_index).not.toContain(starting_customer.id);
+    const starting_customer: Customer = await create_new_customer(customer_info, test_notes);
 
-    const change_both_at_the_same_time: Customer = await update_customer_info(phone_changed, customer_info, test_name);
-    const change_both_at_the_same_time_entry: Customer | null = await retrieve_customer_entry(phone_changed.id, test_name);
-
-    expect(change_both_at_the_same_time_entry).not.toBeNull();
-    if(change_both_at_the_same_time_entry != null) {
-        expect(change_both_at_the_same_time_entry.id).toBe(starting_customer.id);
-        expect(change_both_at_the_same_time_entry.phone_number).toBe(starting_customer.phone_number);
-        expect(change_both_at_the_same_time_entry.name).toBe(starting_customer.name);
+    const notes_change_info = {
+        notes: "Justin Wong"
     }
 
-    expect(change_both_at_the_same_time.id).toBe(starting_customer.id);
-    expect(change_both_at_the_same_time.phone_number).toBe(starting_customer.phone_number);
-    expect(change_both_at_the_same_time.name).toBe(starting_customer.name);
+    const notes_changed: Customer = await update_customer_info(starting_customer, notes_change_info, test_notes);
+    const notes_changed_entry: Customer | null = await retrieve_customer_entry(notes_changed.id, test_notes);
 
-    old_phone_index = await retrieve_customer_phone_index(phone_change_info.phone_number, test_name);
-    phone_index = await retrieve_customer_phone_index(starting_customer.phone_number, test_name);
+    expect(notes_changed_entry).not.toBeNull();
+    if(notes_changed_entry != null) {
+        expect(notes_changed_entry.id).toBe(starting_customer.id);
+        expect(notes_changed_entry.notes).toBe(notes_change_info.notes);
+        expect(notes_changed_entry.phone_number).toBe(starting_customer.phone_number);
+        expect(notes_changed_entry.name).toBe(starting_customer.name);
+    }
 
-    expect(phone_index).toContain(starting_customer.id);
-    expect(old_phone_index).not.toContain(starting_customer.id);
+    expect(notes_changed.id).toBe(starting_customer.id);
+    expect(notes_changed.notes).toBe(notes_change_info.notes);
+    expect(notes_changed.phone_number).toBe(starting_customer.phone_number);
+    expect(notes_changed.name).toBe(starting_customer.name);
+})
+
+test("update customer info", async () => {
+    const test_name = test_suit.concat("/customer_info_update/");
+
+    const customer_info = {
+        name: "Justin",
+        phone_number: "Thyme"
+    };
+
+    const customer: Customer = await create_new_customer(customer_info, test_name);
+
+    const update_target = {
+        name: "Justin Wong",
+        phone_number: "Evo Moment 37",
+        notes: "Get Daigo Parried"
+    }
+
+    const updated_customer: Customer = await update_customer_info(customer, update_target, test_name);
+    const updated_entry: Customer | null = await retrieve_customer_entry(customer.id, test_name);
+
+    expect(updated_entry).not.toBeNull();
+    if(updated_entry != null) {
+        expect(updated_entry.id).toBe(customer.id);
+        expect(updated_entry.name).toBe(update_target.name);
+        expect(updated_entry.phone_number).toBe(update_target.phone_number);
+        expect(updated_entry.notes).toBe(update_target.notes);
+    }
+
+    expect(updated_customer.id).toBe(customer.id);
+    expect(updated_customer.name).toBe(update_target.name);
+    expect(updated_customer.phone_number).toBe(update_target.phone_number);
+    expect(updated_customer.notes).toBe(update_target.notes);
 })
