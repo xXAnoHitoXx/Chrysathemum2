@@ -28,7 +28,9 @@ function AdminTasks(is_admin: boolean, salon: string) {
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Daily Tally</button>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Weekly Tips</button>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Monthly View</button>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Migration Station</button>
+                <a href="/salon/migration">
+                    <button className="border-2 border-sky-400 rounded-full w-32 h-20">Migration Station</button>
+                </a>
             </div>
         );
     }
