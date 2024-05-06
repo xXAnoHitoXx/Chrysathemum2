@@ -34,6 +34,7 @@ test("simple migration", async () => {
     expect(migrated_customer.id).not.toBe(simple_customer.id);
     expect(migrated_customer.name).toBe(simple_customer.name);
     expect(migrated_customer.phone_number).toBe(simple_customer.phone_number);
+    expect(migrated_customer.notes).toBe("");
 
     const phone_index: string[] = await retrieve_customer_phone_index(simple_customer.phone_number, test_name);
     expect(phone_index).toContain(migrated_customer.id);

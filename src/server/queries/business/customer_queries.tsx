@@ -22,6 +22,6 @@ export async function update_customer_info(customer: Customer, { name = customer
 }
 
 export function is_no_book(customer: Customer): boolean {
-    const note = customer.notes.toLowerCase();
+    const note = customer.notes.concat(" banana ", customer.name).toLowerCase();
     return note.includes("no book") || note.includes("nobook");
 }

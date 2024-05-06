@@ -173,4 +173,8 @@ test("check for no book flag", () => {
 
     customer.notes = "yolo oh noboOKtranak";
     expect(is_no_book(customer)).toBe(true);
+
+    customer.notes = "";
+    customer.name = "Justin nobook Wong";
+    expect(is_no_book(customer)).toBe(true);
 })
