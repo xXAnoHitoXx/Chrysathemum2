@@ -16,7 +16,8 @@ export async function clear_test_data(test_name: string) {
 export type Customer = { 
     id: string, 
     name: string, 
-    phone_number: string 
+    phone_number: string,
+    notes: string,
 }
 
 const customers_root="customers/";

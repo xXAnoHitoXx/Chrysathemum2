@@ -1,5 +1,5 @@
 import { type Technician, clear_test_data } from "~/server/db_schema/fb_schema";
-import { create_new_technician, get_all_technicians, mark_technician_active, mark_technician_inactive } from "./technician_queries";
+import { create_new_technician, get_active_technicians, get_all_technicians, mark_technician_active, mark_technician_inactive } from "./technician_queries";
 import { delete_technician_entry, retrieve_technician_entry } from "../crud/technician/technician_entry";
 
 const test_suit = "technician_business_logic";
@@ -119,6 +119,38 @@ test("test load all technician querry", async () => {
     await delete_technician_entry(t1.id, test_name);
     
     tech_list = await get_all_technicians(test_name);
+    expect(tech_list).toHaveLength(1);
+    expect(tech_list[0]!.name).toBe(technician_2.name);
+    expect(tech_list[0]!.color).toBe(technician_2.color);
+})
+
+test("test load all active technician querry", async () => {
+    const test_name = test_suit.concat("/test_load_all_active_technician_query/");
+
+    const technician_1 = {
+        name: "banana",
+        color: "bruh-nuh-nuh"
+    }
+
+    const technician_2 = {
+        name: "owanges",
+        color: "owonges"
+    }
+
+    const t1: Technician = await create_new_technician(technician_1, test_name);
+    await create_new_technician(technician_2, test_name);
+
+    let tech_list: Technician[] = await get_active_technicians(test_name);
+
+    expect(tech_list).toHaveLength(2);
+    expect(tech_list[0]!.name).toBe(technician_1.name);
+    expect(tech_list[0]!.color).toBe(technician_1.color);
+    expect(tech_list[1]!.name).toBe(technician_2.name);
+    expect(tech_list[1]!.color).toBe(technician_2.color);
+    
+    await mark_technician_inactive(t1, test_name);
+    
+    tech_list = await get_active_technicians(test_name);
     expect(tech_list).toHaveLength(1);
     expect(tech_list[0]!.name).toBe(technician_2.name);
     expect(tech_list[0]!.color).toBe(technician_2.color);

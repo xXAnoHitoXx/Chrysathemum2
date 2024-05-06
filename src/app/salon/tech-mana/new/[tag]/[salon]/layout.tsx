@@ -1,4 +1,4 @@
-import { get_all_technicians } from "~/server/queries/business/technician_queries";
+import { get_active_technicians } from "~/server/queries/business/technician_queries";
 import TechDisplayBar, { type ButtonData } from "./_components/TechDisplayBar";
 
 export default async function RootLayout({
@@ -6,7 +6,7 @@ export default async function RootLayout({
 }: {
     children: React.ReactNode,
 }) {
-    const technicians: ButtonData[] = (await get_all_technicians()).filter((tech) => { return tech.active }).map((tech) => ([ tech, null ]));
+    const technicians: ButtonData[] = (await get_active_technicians()).map((tech) => ([tech, null]));
 
     return (
         <div className="flex flex-wrap w-full h-fit p-2 gap-2">
