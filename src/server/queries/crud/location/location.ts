@@ -18,3 +18,5 @@ export async function retrieve_location({ id }: { id: string }, redirect: string
 
     return data.val() as Location;
 }
+
+
