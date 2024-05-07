@@ -50,6 +50,4 @@ export async function import_customer_from_old_db(redirect = "") {
     });
 
     await Promise.all( customers.map( customer => migrate_customer_data(customer, redirect) ) );
-
-    console.log("done");
 }

@@ -33,7 +33,5 @@ export async function remove_technician_from_location({ location_id, technician_
 export async function retrieve_technicians_at(location_id: string, redirect = ""): Promise<Technician[]> {
     const active_tech: Technician[] = await get_active_technicians(redirect);
     const roster: string[] = await retrieve_roster_ids(location_id, redirect);
-    console.log(roster)
-    console.log(active_tech)
     return active_tech.filter((tech) => (roster.includes(tech.id)));
 }
