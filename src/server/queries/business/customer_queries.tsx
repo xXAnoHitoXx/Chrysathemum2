@@ -10,7 +10,6 @@ export async function create_new_customer({ name, phone_number }: { name: string
 }
 
 export async function update_customer_info(customer: Customer, { name = customer.name, phone_number = customer.phone_number, notes = customer.notes}, redirect = ""): Promise<Customer> {
-    
     await delete_customer_phone_index(customer, redirect);
 
     const update_target: Customer = { id: customer.id, name: name, phone_number: phone_number, notes: notes}; 
