@@ -1,8 +1,13 @@
 import 'server-only';
 import { ref, remove } from "firebase/database";
 import { f_db } from ".";
+import { production_override } from './switch';
 
 export function fb_root(redirect: string): string {
+    if (redirect === production_override) {
+        return process.env.PROJECT_NAME!.concat("/production/operarion/");
+    }
+
     const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
     const mode: string = (process.env.NODE_ENV === "test")? "test" : "operarion";
     return process.env.PROJECT_NAME!.concat("/", env , "/", mode, "/", redirect);
