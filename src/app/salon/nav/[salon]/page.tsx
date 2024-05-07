@@ -28,12 +28,22 @@ function AdminTasks(is_admin: boolean, salon: string) {
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Daily Tally</button>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Weekly Tips</button>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Monthly View</button>
-                <a href="/salon/migration">
-                    <button className="border-2 border-sky-400 rounded-full w-32 h-20">Migration Station</button>
-                </a>
+                <MigrationStation/>
             </div>
         );
     }
 
     return;
+}
+
+function MigrationStation() {
+    if(process.env.VERCEL_ENV === "production") {
+        return;
+    }
+
+    return (
+            <a href="/salon/migration">
+                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Migration Station</button>
+            </a>
+    );
 }
