@@ -11,6 +11,9 @@ dependencies:
   '@clerk/themes':
     specifier: ^1.7.14
     version: 1.7.14(react@18.2.0)
+  '@formkit/drag-and-drop':
+    specifier: ^0.0.38
+    version: 0.0.38
   '@nextui-org/button':
     specifier: ^2.0.31
     version: 2.0.31(@nextui-org/system@2.1.2)(@nextui-org/theme@2.2.3)(framer-motion@11.1.9)(react-dom@18.2.0)(react@18.2.0)(tailwind-variants@0.2.1)
@@ -1516,6 +1519,10 @@ packages:
     resolution: {integrity: sha512-zTwEpWOzZ2CiKcB93BLngUX59hQkuZjT2+SAQEscSm52peDW/getsawMcWF1rGRpMCX6D7nSJA3CzJ8gn13N/g==}
     dependencies:
       tslib: 2.6.2
+    dev: false
+
+  /@formkit/drag-and-drop@0.0.38:
+    resolution: {integrity: sha512-3uJFcqz1xL7x/5pClDnyqEDfyFRDFH+75MFpJYXnVF17oekxLrwbUaOBN7ttKGn1jW2MdojRw4WMnSN1iLryvw==}
     dev: false
 
   /@grpc/grpc-js@1.9.14:

@@ -4,9 +4,9 @@ export default async function Nav({ params }: { params: { salon: string } }) {
             <a href={ "/salon/tech-mana/new/0/".concat(params.salon)}>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">New Technician</button>
             </a>
-            <button className="border-2 border-sky-400 rounded-full w-32 h-20">Gift Card Manager</button>
-            <button className="border-2 border-sky-400 rounded-full w-32 h-20">Sale</button>
-            <button className="border-2 border-sky-400 rounded-full w-32 h-20">Customer Finder</button>
+            <a href={ "/salon/tech-mana/assignment/".concat(params.salon)}>
+                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Assignment</button>
+            </a>
         </div>
     );
 }

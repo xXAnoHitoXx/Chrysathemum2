@@ -18,8 +18,6 @@ export default function NewTechForm({ params }: {params : { tag: string, salon: 
     const [color_data, set_color_data] = useState("border-sky-500 bg-slate-950 text-sky-300");
     const [is_loading, set_is_loading] = useState(false);
 
-    const router = useRouter();
-
     function update_style(text_color:string, text_intensity:string, bg_color:string, bg_intensity:string, border_color:string, border_intensity:string) {
         set_color_data( "border-".concat(
             border_color.toLowerCase(), "-", border_intensity, " ",
@@ -28,10 +26,12 @@ export default function NewTechForm({ params }: {params : { tag: string, salon: 
         ));
     }
 
+    const router = useRouter();
+
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         set_is_loading(true);
-        router.replace("/salon/tech-mana/create/".concat(params.tag, "/", params.salon, "/", name, "/", color_data));
+        router.replace("/salon/tech-mana/q/create/".concat(params.tag, "/", params.salon, "/", name, "/", color_data));
         set_is_loading(false);
     };
     

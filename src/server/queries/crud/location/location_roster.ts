@@ -6,7 +6,7 @@ export async function assign_technician_to_roster({ location_id, technician }: {
     await set(ref(f_db, fb_location_roster(redirect).concat(location_id, "/", technician.id)), technician.color);
 }
 
-export async function retrieve_roster_ids(location_id: string, redirect: string): Promise<string[]>{
+export async function retrieve_roster_ids(location_id: string, redirect = ""): Promise<string[]>{
     const data: DataSnapshot = await get(ref(f_db, fb_location_roster(redirect).concat(location_id)));
     const ids: string[] = [];
 
