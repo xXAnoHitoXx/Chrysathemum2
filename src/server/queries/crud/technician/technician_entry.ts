@@ -2,7 +2,8 @@ import 'server-only';
 
 import { type DatabaseReference, push, ref, set, get, type DataSnapshot, update, remove } from "firebase/database";
 import { f_db } from "~/server/db_schema";
-import { fb_technician_entries, type Technician } from "~/server/db_schema/fb_schema";
+import { fb_technician_entries } from "~/server/db_schema/fb_schema";
+import type { Technician } from '~/server/db_schema/type_def';
 
 export async function create_technician_entry({ name, color, active }: { name: string, color: string, active: boolean }, redirect: string): Promise<Technician> {
     const id_ref: DatabaseReference = push(ref(f_db, fb_technician_entries(redirect)));

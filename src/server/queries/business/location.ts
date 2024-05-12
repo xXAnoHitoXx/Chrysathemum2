@@ -1,6 +1,7 @@
 import { type DataSnapshot, get, ref, remove } from "firebase/database";
 import { f_db } from "~/server/db_schema";
-import { type Technician, fb_location_entries, type Location, fb_location_roster } from "~/server/db_schema/fb_schema";
+import { fb_location_entries, fb_location_roster } from "~/server/db_schema/fb_schema";
+import type { Technician, Location } from "~/server/db_schema/type_def";
 import { assign_technician_to_roster, retrieve_roster_ids } from "../crud/location/location_roster";
 import { get_active_technicians, mark_technician_active } from "./technician_queries";
 

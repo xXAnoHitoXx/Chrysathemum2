@@ -1,4 +1,4 @@
-import { type Customer } from "~/server/db_schema/fb_schema";
+import { type Customer } from "~/server/db_schema/type_def";
 import { create_customer_entry, update_customer_entry } from "../crud/customer/customer_entry";
 import { create_customer_phone_index, delete_customer_phone_index } from "../crud/customer/customer_phone_index";
 

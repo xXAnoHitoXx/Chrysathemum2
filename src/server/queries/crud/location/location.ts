@@ -1,6 +1,7 @@
 import { type DataSnapshot, get, ref, set } from "firebase/database";
 import { f_db } from "~/server/db_schema";
-import { fb_location_entries, type Location } from "~/server/db_schema/fb_schema";
+import { fb_location_entries } from "~/server/db_schema/fb_schema";
+import { type Location } from "~/server/db_schema/type_def";
 
 export async function create_new_location({ id, address }: { id: string, address: string }, redirect: string ): Promise<Location> {
     const location: Location = { id: id, address: address };

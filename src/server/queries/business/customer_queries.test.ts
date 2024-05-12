@@ -1,4 +1,5 @@
-import { clear_test_data, type Customer } from "~/server/db_schema/fb_schema";
+import { clear_test_data } from "~/server/db_schema/fb_schema";
+import type { Customer } from "~/server/db_schema/type_def";
 import { create_new_customer, is_no_book, update_customer_info } from "./customer_queries";
 import { retrieve_customer_entry } from "../crud/customer/customer_entry";
 import { retrieve_customer_phone_index } from "../crud/customer/customer_phone_index";

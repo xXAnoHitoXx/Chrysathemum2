@@ -3,10 +3,16 @@
 import { Button, Input, Select, SelectItem } from '@nextui-org/react'
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react'
-import TechPreview from './_components/TechPreview'; 
+import TechPreview from './TechPreview';
 import sanitizer from '~/server/validation/text_sanitization'
+import type { Technician } from '~/server/db_schema/type_def';
+import TechDisplayBar from './TechDisplayBar';
+import { TypeConversionError } from '~/server/validation/validation_error';
+import { into_technician } from '~/server/validation/technician_validation';
 
-export default function NewTechForm({ params }: {params : { tag: string, salon: string }}) {
+export default function NewTechForm({ starting_active_technicians }: { starting_active_technicians: Technician[] }) {
+    const [active_techs, set_active_techs] = useState(starting_active_technicians);
+
     const [name, set_name] = useState("Tinn");
     const [text_color, set_text_color] = useState("sky");
     const [text_intensity, set_text_intensity] = useState("300");
@@ -33,6 +39,17 @@ export default function NewTechForm({ params }: {params : { tag: string, salon: 
             body: JSON.stringify({ name: name, color: color_data }),
         }));
         
+        const new_tech: Technician | TypeConversionError = await into_technician(response);
+
+        if (new_tech instanceof TypeConversionError) {
+            // handle error lol
+        } else {
+            set_active_techs([
+                new_tech,
+                ...active_techs
+            ]);
+        }
+
         set_is_loading(false);
     };
     
@@ -85,40 +102,43 @@ export default function NewTechForm({ params }: {params : { tag: string, salon: 
     const intensities: string[] = ["300", "400", "500", "600", "700", "800", "900", "950"];
 
     return (
-        <div className="flex flex-nowrap justify-center w-full h-fit p-2 border-b border-b-sky-400">
-            <div className="flex w-1/2 max-w-96 p-3 gap-1 border-r border-sky-500">
-                <form onSubmit={onSubmit} className="flex flex-wrap gap-1">
-                    <Input onValueChange={name_change} isRequired label="Name" placeholder="Tinn"/>
-                    <div className="flex w-full gap-1">
-                        <Select defaultSelectedKeys={["Sky"]} onChange={handle_text_color_change} isRequired label="Text Color">
-                            { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
-                        </Select>
-                        <Select defaultSelectedKeys={["300"]} onChange={handle_text_insensity_change} isRequired label="Text Color Intensity">
-                            { intensities.map((intensity: string) => ( <SelectItem key={intensity} value={intensity}>{intensity}</SelectItem> ) ) }
-                        </Select>
-                    </div>
-                    <div className="flex w-full gap-1">
-                        <Select defaultSelectedKeys={["Slate"]} onChange={handle_bg_color_change} isRequired label="Color">
-                            { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
-                        </Select>
-                        <Select defaultSelectedKeys={["950"]} onChange={handle_bg_intensity_change} isRequired label="Color Intensity">
-                            { intensities.map((intensity: string) => ( <SelectItem key={intensity} value={intensity}>{intensity}</SelectItem> ) ) }
-                        </Select>
-                    </div>
-                    <div className="flex w-full gap-1">
-                        <Select defaultSelectedKeys={["Sky"]} onChange={handle_border_color_change} isRequired label="Border">
-                            { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
-                        </Select>
-                        <Select defaultSelectedKeys={["500"]} onChange={handle_border_intensity_change} isRequired label="Border Intensity">
-                            { intensities.map((intensity: string) => ( <SelectItem key={intensity} value={intensity}>{intensity}</SelectItem> ) ) }
-                        </Select>
-                    </div>
-                    <Button type="submit" color="primary" isDisabled={is_loading}>
-                        {is_loading ? "Loading..." : "Create"}
-                    </Button>
-                </form>
+        <div className="flex flex-wrap w-full h-fit p-2 gap-2">
+            <div className="flex flex-nowrap justify-center w-full h-fit p-2 border-b border-b-sky-400">
+                <div className="flex w-1/2 max-w-96 p-3 gap-1 border-r border-sky-500">
+                    <form onSubmit={onSubmit} className="flex flex-wrap gap-1">
+                        <Input onValueChange={name_change} isRequired label="Name" placeholder="Tinn"/>
+                        <div className="flex w-full gap-1">
+                            <Select defaultSelectedKeys={["Sky"]} onChange={handle_text_color_change} isRequired label="Text Color">
+                                { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
+                            </Select>
+                            <Select defaultSelectedKeys={["300"]} onChange={handle_text_insensity_change} isRequired label="Text Color Intensity">
+                                { intensities.map((intensity: string) => ( <SelectItem key={intensity} value={intensity}>{intensity}</SelectItem> ) ) }
+                            </Select>
+                        </div>
+                        <div className="flex w-full gap-1">
+                            <Select defaultSelectedKeys={["Slate"]} onChange={handle_bg_color_change} isRequired label="Color">
+                                { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
+                            </Select>
+                            <Select defaultSelectedKeys={["950"]} onChange={handle_bg_intensity_change} isRequired label="Color Intensity">
+                                { intensities.map((intensity: string) => ( <SelectItem key={intensity} value={intensity}>{intensity}</SelectItem> ) ) }
+                            </Select>
+                        </div>
+                        <div className="flex w-full gap-1">
+                            <Select defaultSelectedKeys={["Sky"]} onChange={handle_border_color_change} isRequired label="Border">
+                                { colors.map((color: string) => ( <SelectItem key={color} value={color}>{color}</SelectItem> ) ) }
+                            </Select>
+                            <Select defaultSelectedKeys={["500"]} onChange={handle_border_intensity_change} isRequired label="Border Intensity">
+                                { intensities.map((intensity: string) => ( <SelectItem key={intensity} value={intensity}>{intensity}</SelectItem> ) ) }
+                            </Select>
+                        </div>
+                        <Button type="submit" color="primary" isDisabled={is_loading}>
+                            {is_loading ? "Loading..." : "Create"}
+                        </Button>
+                    </form>
+                </div>
+                <TechPreview name={name} color={color_data} />
             </div>
-            <TechPreview name={name} color={color_data} />
+            <TechDisplayBar technicians={active_techs.map((tech) => ([ tech, null ]))}/>
         </div>
     );
 }

@@ -1,4 +1,5 @@
-import { clear_test_data, type Customer } from "~/server/db_schema/fb_schema";
+import { clear_test_data } from "~/server/db_schema/fb_schema";
+import type { Customer } from "~/server/db_schema/type_def";
 import { type Old_Customer_Data, migrate_customer_data } from "./customer";
 import { retrieve_customer_entry } from "../crud/customer/customer_entry";
 import { retrieve_customer_phone_index } from "../crud/customer/customer_phone_index";

@@ -1,4 +1,5 @@
-import { type Location, clear_test_data } from "~/server/db_schema/fb_schema";
+import { clear_test_data } from "~/server/db_schema/fb_schema";
+import type { Location } from "~/server/db_schema/type_def";
 import { create_new_location, retrieve_location } from "./location";
 import { assign_technician_to_roster, remove_technician_from_roster, retrieve_roster_ids } from "./location_roster";
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@nextui-org/button";
-import { type Technician } from "~/server/db_schema/fb_schema";
+import { type Technician } from "~/server/db_schema/type_def";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";

@@ -1,4 +1,4 @@
-import { type Customer } from "~/server/db_schema/fb_schema"
+import { type Customer } from "~/server/db_schema/type_def";
 import { create_new_customer, update_customer_info } from "../business/customer_queries"
 import { create_customer_migration_index, delete_customer_migration_index, retrieve_customer_id_from_legacy_id } from "../crud/customer/customer_migration_index";
 import { type DataSnapshot, get, ref } from "firebase/database";

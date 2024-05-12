@@ -1,4 +1,4 @@
-import { type Technician } from "~/server/db_schema/fb_schema";
+import { type Technician } from "~/server/db_schema/type_def";
 import ClientSide from "./_component/ClientSide";
 import { get_all_technicians } from "~/server/queries/business/technician_queries";
 import { retrieve_roster_ids } from "~/server/queries/crud/location/location_roster";

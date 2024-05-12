@@ -1,5 +1,5 @@
 import { TechnicianButton } from "./TechDisplayBar"; 
-import type { Technician } from "~/server/db_schema/fb_schema"; 
+import type { Technician } from "~/server/db_schema/type_def"; 
 
 export default function TechPreview({ name , color }: { name: string, color: string }) {
     const default_tech: Technician = {

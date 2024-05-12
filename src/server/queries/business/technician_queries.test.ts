@@ -1,6 +1,7 @@
-import { type Technician, clear_test_data } from "~/server/db_schema/fb_schema";
+import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { create_new_technician, get_active_technicians, get_all_technicians, mark_technician_active, mark_technician_inactive } from "./technician_queries";
 import { delete_technician_entry, retrieve_technician_entry } from "../crud/technician/technician_entry";
+import type { Technician } from "~/server/db_schema/type_def";
 
 const test_suit = "technician_business_logic";
 
