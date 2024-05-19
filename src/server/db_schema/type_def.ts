@@ -18,6 +18,7 @@ export type Technician = {
 export type TechnicianCreationInfo = {
     name: string,
     color: string,
+    active_salon: string,
 }
 
 export type Location = { 

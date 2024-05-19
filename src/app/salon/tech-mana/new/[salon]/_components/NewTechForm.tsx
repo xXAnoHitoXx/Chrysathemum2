@@ -10,7 +10,7 @@ import TechDisplayBar from './TechDisplayBar';
 import { TypeConversionError } from '~/server/validation/validation_error';
 import { into_technician } from '~/server/validation/technician_validation';
 
-export default function NewTechForm({ starting_active_technicians }: { starting_active_technicians: Technician[] }) {
+export function NewTechForm({ starting_active_technicians, salon }: { starting_active_technicians: Technician[], salon: string}) {
     const [active_techs, set_active_techs] = useState(starting_active_technicians);
 
     const [name, set_name] = useState("Tinn");
@@ -30,13 +30,13 @@ export default function NewTechForm({ starting_active_technicians }: { starting_
             "bg-", bg_color.toLowerCase(), "-", bg_intensity
         ));
     }
-
+ 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         set_is_loading(true);
-        const response: Response = await fetch(new Request("salon/tech-mana/new/api", {
+        const response: Response = await fetch(new Request("/salon/tech-mana/new/api", {
             method: "POST",
-            body: JSON.stringify({ name: name, color: color_data }),
+            body: JSON.stringify({ name: name, color: color_data, active_salon: salon }),
         }));
         
         const new_tech: Technician | TypeConversionError = await into_technician(response);

@@ -9,6 +9,7 @@ class TechConversion {
     name: string | undefined;
     color: string | undefined;
     active: boolean | undefined;
+    active_salon: string | undefined;
     
     into_technician_creation_info(): TechnicianCreationInfo | TypeConversionError {
         if (this.name == undefined){
@@ -19,9 +20,14 @@ class TechConversion {
             return new TypeConversionError("technician must have color");
         }
 
+        if (this.active_salon == undefined) {
+            return new TypeConversionError("new technician must have assignment");
+        }
+
         return {
             name: this.name,
             color: this.color,
+            active_salon: this.active_salon,
         }
     }
 
