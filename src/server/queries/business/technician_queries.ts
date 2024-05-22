@@ -1,8 +1,9 @@
 import 'server-only';
 import { create_technician_entry, update_technician_entry } from './../crud/technician/technician_entry';
-import { fb_technician_entries, type Technician } from '~/server/db_schema/fb_schema';
+import { fb_technician_entries } from '~/server/db_schema/fb_schema';
 import { type DataSnapshot, get, ref, query, orderByChild, equalTo } from 'firebase/database';
 import { f_db } from '~/server/db_schema';
+import type { Technician } from '~/server/db_schema/type_def';
 
 export async function create_new_technician(
     { name, color }: { name: string, color: string }, 

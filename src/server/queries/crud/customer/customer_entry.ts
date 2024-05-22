@@ -4,7 +4,7 @@ import { f_db } from "~/server/db_schema";
 import { ref, push, set, get, update, remove } from "firebase/database";
 import type { DataSnapshot, DatabaseReference } from "firebase/database";
 import { fb_customer_entries } from "~/server/db_schema/fb_schema";
-import type { Customer } from "~/server/db_schema/fb_schema";
+import type { Customer } from '~/server/db_schema/type_def';
 
 export async function create_customer_entry({name, phone_number}: {name: string, phone_number: string}, redirect: string) : Promise<Customer>{
     const id : DatabaseReference = await push(ref(f_db, fb_customer_entries(redirect)));

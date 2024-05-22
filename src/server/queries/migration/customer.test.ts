@@ -1,4 +1,5 @@
-import { clear_test_data, type Customer } from "~/server/db_schema/fb_schema";
+import { clear_test_data } from "~/server/db_schema/fb_schema";
+import type { Customer } from "~/server/db_schema/type_def";
 import { type Old_Customer_Data, migrate_customer_data } from "./customer";
 import { retrieve_customer_entry } from "../crud/customer/customer_entry";
 import { retrieve_customer_phone_index } from "../crud/customer/customer_phone_index";
@@ -74,16 +75,16 @@ test("re-migration migration", async () => {
         expect(created_customer_entry.notes).toBe(remigrated_customer.notes);
     }
 
-    expect(migrated_customer.id).not.toBe(simple_customer.id);
-    expect(migrated_customer.name).toBe(updated.name);
-    expect(migrated_customer.phone_number).toBe(updated.phoneNumber);
-    expect(migrated_customer.notes).toBe("");
+    expect(remigrated_customer.id).not.toBe(simple_customer.id);
+    expect(remigrated_customer.name).toBe(updated.name);
+    expect(remigrated_customer.phone_number).toBe(updated.phoneNumber);
+    expect(remigrated_customer.notes).toBe("");
 
     const phone_index: string[] = await retrieve_customer_phone_index(simple_customer.phoneNumber, test_name);
     expect(phone_index).not.toContain(migrated_customer.id);
 
     const actual_phone_index: string[] = await retrieve_customer_phone_index(updated.phoneNumber, test_name);
-    expect(actual_phone_index).not.toContain(migrated_customer.id);
+    expect(actual_phone_index).toContain(migrated_customer.id);
 
     const id_index: string | null = await retrieve_customer_id_from_legacy_id(simple_customer.id, test_name);
     expect(id_index).not.toBeNull();

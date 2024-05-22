@@ -1,5 +1,5 @@
+/*
 import 'server-only';
-
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 import {
@@ -12,12 +12,6 @@ import {
 } from "drizzle-orm/pg-core";
 
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
 export const createTable = pgTableCreator((name) => `chrysanthemum-2_${name}`);
 
 export const customers = createTable(
@@ -90,9 +84,6 @@ export const transactions = createTable(
   }
 );
 
-/**
- *  convert clerk user id string to the users table's id integer
- */
 export const web_users = createTable(
   "web_users",
   {
@@ -101,9 +92,6 @@ export const web_users = createTable(
   }
 );
 
-/**
- *  convert clerk user id string to the technicians table's id integer
- */
 export const web_technicians = createTable(
   "web_technicians",
   {
@@ -127,3 +115,4 @@ export const fb_customers = createTable(
     customer_id: integer("customer_id").references(() => customers.id).notNull(),
   }
 );
+*/

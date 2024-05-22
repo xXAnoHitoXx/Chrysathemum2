@@ -1,4 +1,4 @@
-import type { Technician } from "~/server/db_schema/fb_schema"; 
+import type { Technician } from "~/server/db_schema/type_def"; 
 
 export type ButtonData = [Technician, string | null];
 

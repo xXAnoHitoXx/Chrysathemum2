@@ -4,7 +4,6 @@
 
 - [x] ~~make it deploy~~
 - [x] ~~set up db~~
-- [x] ~~attach db to ui~~
 - [x] ~~add auth~~
 - [x] ~~error management~~
 - [x] ~~data layout~~
@@ -19,16 +18,24 @@
             - [x] ~~technician entries~~
             - [x] ~~technician login index~~
             - [x] ~~technician migration index~~
-        - [ ] location
-            - [ ] location entries
-            - [ ] location's technician
+        - [x] ~~location~~
+            - [x] ~~location entries~~
+            - [x] ~~location's technician~~
         - [ ] transaction
             - [ ] transaction entries
             - [ ] transaction migration index
         - [ ] accouting
             
 - salon:
+    - [ ] technician manager
+        - [ ] create technician
+        - [ ] assign technician to salon location
+        - [ ] set technician inactive
     - [ ] migration framework
+        - restriction: vercel limited timeout on development
+        - [x] ~~runable from dev environment~~
+        - [x] ~~migrating customers~~
+        - [ ] migrating transactions
     - [ ] appointment viewer
     - [ ] booking
     - [ ] view daily breakdown

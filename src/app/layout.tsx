@@ -29,8 +29,8 @@ export default function RootLayout({
         }}>
     <html lang="en" className="dark">
         <body className={`font-sans ${inter.variable}`}>
-            <TopNav/>
             <Providers>
+            <TopNav/>
             {children}
             </Providers>
         </body>
