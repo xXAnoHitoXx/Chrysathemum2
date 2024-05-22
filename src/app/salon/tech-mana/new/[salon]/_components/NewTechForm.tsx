@@ -8,7 +8,7 @@ import sanitizer from '~/server/validation/text_sanitization'
 import type { Technician } from '~/server/db_schema/type_def';
 import TechDisplayBar from './TechDisplayBar';
 import { TypeConversionError } from '~/server/validation/validation_error';
-import { into_technician } from '~/server/validation/technician_validation';
+import { res_into_technician } from '~/server/validation/technician_validation';
 
 export function NewTechForm({ starting_active_technicians, salon }: { starting_active_technicians: Technician[], salon: string}) {
     const [active_techs, set_active_techs] = useState(starting_active_technicians);
@@ -34,12 +34,12 @@ export function NewTechForm({ starting_active_technicians, salon }: { starting_a
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         set_is_loading(true);
-        const response: Response = await fetch(new Request("/salon/tech-mana/new/api", {
+        const response: Response = await fetch(new Request("/api/technician/create", {
             method: "POST",
             body: JSON.stringify({ name: name, color: color_data, active_salon: salon }),
         }));
         
-        const new_tech: Technician | TypeConversionError = await into_technician(response);
+        const new_tech: Technician | TypeConversionError = await res_into_technician(response);
 
         if (new_tech instanceof TypeConversionError) {
             // handle error lol

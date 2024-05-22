@@ -56,14 +56,20 @@ class TechConversion {
             active: this.active,
         }
     }
+    
 }
 
-export async function into_technician(response: Response): Promise<Technician | TypeConversionError> {
+export async function res_into_technician(response: Response): Promise<Technician | TypeConversionError> {
     const conv: TechConversion = plainToClass(TechConversion, await response.json());
     return conv.into_technician();
 }
 
-export async function into_technician_creation_info(request: Request): Promise<TechnicianCreationInfo | TypeConversionError> {
+export async function req_into_technician(request: Request): Promise<Technician | TypeConversionError> {
+    const conv: TechConversion = plainToClass(TechConversion, await request.json());
+    return conv.into_technician();
+}
+
+export async function req_into_technician_creation_info(request: Request): Promise<TechnicianCreationInfo | TypeConversionError> {
     const conv: TechConversion = plainToClass(TechConversion, await request.json());
     return conv.into_technician_creation_info();
 }
