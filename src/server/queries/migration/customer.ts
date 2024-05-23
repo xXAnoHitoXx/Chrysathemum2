@@ -35,7 +35,7 @@ export async function migrate_customer_data(old_customer_data: Old_Customer_Data
     return await update_customer_info(customer, { name: old_customer_data.name, phone_number: old_customer_data.phoneNumber }, redirect);
 }
 
-export async function import_customer_from_old_db(redirect = "") {
+export async function import_customer_from_old_db(): Promise<Old_Customer_Data[]> {
     const data_snapshot: DataSnapshot = await get(ref(f_db, "/customer/id"));
 
     const customers: Old_Customer_Data[] = [];
@@ -49,5 +49,5 @@ export async function import_customer_from_old_db(redirect = "") {
         customers.push(customer);
     });
 
-    await Promise.all( customers.map( customer => migrate_customer_data(customer, redirect) ) );
+    return customers;
 }

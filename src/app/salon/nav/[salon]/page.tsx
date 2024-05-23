@@ -37,10 +37,6 @@ function AdminTasks(is_admin: boolean, salon: string) {
 }
 
 function MigrationStation() {
-    if(process.env.VERCEL_ENV === "production") {
-        return;
-    }
-
     return (
             <a href="/salon/migration">
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Migration Station</button>
