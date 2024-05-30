@@ -1,4 +1,3 @@
-
 import type { Technician } from "~/server/db_schema/type_def"
 import { assign_technician_to_location, remove_technician_from_location } from "~/server/queries/business/location";
 import { req_into_technician } from "~/server/validation/technician_validation"
