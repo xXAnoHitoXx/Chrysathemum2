@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react";
-import { type Old_Customer_Data } from "~/server/queries/migration/customer";
+import type { Old_Customer_Data } from "~/server/queries/migration/customer";
 import { res_into_Old_Customer_Data } from "~/server/validation/migration/customer/customer_validation";
 import { TypeConversionError } from "~/server/validation/validation_error";
-import { type AnoIter, ano_iter } from "~/util/anoiter/anoiter";
+import { ano_iter } from "~/util/anoiter/anoiter";
+import type { AnoIter } from "~/util/anoiter/anoiter";
 
 export default function MigrationStation() {
     const [is_loading, set_is_loading] = useState(false);
@@ -23,7 +24,7 @@ export default function MigrationStation() {
             ) .imap((data) => ( (data instanceof TypeConversionError)? null : data ))
             .icompact<Old_Customer_Data>();
 
-        for (const customers of old_customers.ichunk(100).collect()){
+        for (const customers of old_customers.ichunk(20).collect()){
             console.log(customers);
             await Promise.all(customers.map((customer) => (
                 fetch(
