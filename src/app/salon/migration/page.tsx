@@ -24,7 +24,7 @@ export default function MigrationStation() {
             ) .imap((data) => ( (data instanceof TypeConversionError)? null : data ))
             .icompact<Old_Customer_Data>();
 
-        for (const customers of old_customers.ichunk(100).collect()){
+        for (const customers of old_customers.ichunk(20).collect()){
             console.log(customers);
             await Promise.all(customers.map((customer) => (
                 fetch(
