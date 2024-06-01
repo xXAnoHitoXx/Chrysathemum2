@@ -26,3 +26,12 @@ export type Location = {
     address: string 
 };
 
+export type Appointment = {
+    id: string,
+    customer_id: string,
+    technician_id: string | null,
+    date: string,
+    time: string,
+    duration: string,
+    details: string,
+}

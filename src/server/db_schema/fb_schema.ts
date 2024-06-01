@@ -39,15 +39,20 @@ export function fb_technicians_login(redirect: string): string {
 }
 export function fb_technicians_legacy_id_index(redirect: string): string { 
     return fb_root(redirect).concat(technicians_root, "legacy_id/");
-};
+}
 
-const locations_root="locations/"
+const locations_root="locations/";
 export function fb_location_entries(redirect: string) { 
     return fb_root(redirect).concat(locations_root, "id/");
-};
+}
 export function fb_location_roster(redirect: string) { 
     return fb_root(redirect).concat(locations_root, "roster/");
-};
+}
+
+const appoinment_root="appoinments/"
+export function fb_appoinment_index(date: string, salon: string, redirect: string){
+    return fb_root(redirect).concat(date, "/", appoinment_root, salon, "/")
+}
 
 /*
 export type Transactions = { 
