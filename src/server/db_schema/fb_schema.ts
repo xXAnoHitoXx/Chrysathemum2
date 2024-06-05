@@ -1,32 +1,40 @@
 import 'server-only';
-import { ref, remove } from "firebase/database";
+import { DatabaseReference, ref } from "firebase/database";
 import { f_db } from ".";
-import { production_override } from './switch';
 
-export function fb_root(redirect = ""): string {
-    if (redirect === production_override) {
-        return process.env.PROJECT_NAME!.concat("/production/operarion/");
-    }
-
-    const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
-    const mode: string = (process.env.NODE_ENV === "test")? "test" : "operarion";
-    return process.env.PROJECT_NAME!.concat("/", env , "/", mode, "/", redirect);
-}
-
-export async function clear_test_data(test_name: string) {
-    const env: string = (process.env.VERCEL_ENV === "production")? "production" : "development";
-    await remove(ref(f_db, process.env.PROJECT_NAME!.concat("/", env , "/test/", test_name)));
-}
+const prod="production";
+const dev="development";
+const test="test";
+const operarion="operarion";
 
 const customers_root="customers/";
-export function fb_customer_entries(fb_root: string):string { 
-    return fb_root.concat(customers_root, "id/"); 
-}
-export function fb_customers_phone_index(fb_root: string):string { 
-    return fb_root.concat(customers_root, "phone_number/"); 
-}
-export function fb_customers_legacy_id_index(fb_root: string):string { 
-    return fb_root.concat(customers_root, "legacy_id/"); 
+
+export class FireDB {
+    private root_path: string;
+
+    constructor(redirect = "") {
+        const env: string = (process.env.VERCEL_ENV === prod)? prod : dev;
+        const mode: string = this.is_in_test_mode()? test : operarion;
+        this.root_path = process.env.PROJECT_NAME!.concat("/", env , "/", mode, "/", redirect);
+    }
+
+    is_in_test_mode(): boolean {
+        return process.env.NODE_ENV === test;
+    }
+
+    root(): DatabaseReference {
+        return ref(f_db, this.root_path);
+    }
+
+    customer_entries(): DatabaseReference {
+        return ref(f_db, this.root_path.concat(customers_root, "id/"));
+    }
+    customers_phone_index(): DatabaseReference {
+        return ref(f_db, this.root_path.concat(customers_root, "phone_number/"));
+    }
+    customers_legacy_id_index(): DatabaseReference {
+        return ref(f_db, this.root_path.concat(customers_root, "legacy_id/"));
+    }
 }
 
 const technicians_root="technicians/";
