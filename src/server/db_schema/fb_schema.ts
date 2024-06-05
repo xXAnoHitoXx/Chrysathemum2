@@ -3,7 +3,7 @@ import { ref, remove } from "firebase/database";
 import { f_db } from ".";
 import { production_override } from './switch';
 
-export function fb_root(redirect: string): string {
+export function fb_root(redirect = ""): string {
     if (redirect === production_override) {
         return process.env.PROJECT_NAME!.concat("/production/operarion/");
     }
@@ -19,53 +19,47 @@ export async function clear_test_data(test_name: string) {
 }
 
 const customers_root="customers/";
-
-export function fb_customer_entries(redirect:string): string { 
-    return fb_root(redirect).concat(customers_root, "id/"); 
+export function fb_customer_entries(fb_root: string):string { 
+    return fb_root.concat(customers_root, "id/"); 
 }
-export function fb_customers_phone_index(redirect:string): string { 
-    return fb_root(redirect).concat(customers_root, "phone_number/"); 
+export function fb_customers_phone_index(fb_root: string):string { 
+    return fb_root.concat(customers_root, "phone_number/"); 
 }
-export function fb_customers_legacy_id_index(redirect:string): string { 
-    return fb_root(redirect).concat(customers_root, "legacy_id/"); 
+export function fb_customers_legacy_id_index(fb_root: string):string { 
+    return fb_root.concat(customers_root, "legacy_id/"); 
 }
 
 const technicians_root="technicians/";
-export function fb_technician_entries(redirect: string): string { 
-    return fb_root(redirect).concat(technicians_root, "id/");
+export function fb_technician_entries(fb_root: string):string { 
+    return fb_root.concat(technicians_root, "id/");
 }
-export function fb_technicians_login(redirect: string): string { 
-    return fb_root(redirect).concat(technicians_root, "login/");
+export function fb_technicians_login(fb_root: string):string { 
+    return fb_root.concat(technicians_root, "login/");
 }
-export function fb_technicians_legacy_id_index(redirect: string): string { 
-    return fb_root(redirect).concat(technicians_root, "legacy_id/");
+export function fb_technicians_legacy_id_index(fb_root: string):string { 
+    return fb_root.concat(technicians_root, "legacy_id/");
 }
 
 const locations_root="locations/";
-export function fb_location_entries(redirect: string) { 
-    return fb_root(redirect).concat(locations_root, "id/");
+export function fb_location_entries(fb_root: string) { 
+    return fb_root.concat(locations_root, "id/");
 }
-export function fb_location_roster(redirect: string) { 
-    return fb_root(redirect).concat(locations_root, "roster/");
-}
-
-const appoinment_root="appoinments/"
-export function fb_appoinment_index(date: string, salon: string, redirect: string){
-    return fb_root(redirect).concat(date, "/", appoinment_root, salon, "/")
+export function fb_location_roster(fb_root: string) { 
+    return fb_root.concat(locations_root, "roster/");
 }
 
 /*
 export type Transactions = { 
-    id: string, 
-    customer_id: string, 
-    technician_id: string, 
-    location_id: string,
-    date: string, 
+    id:string, 
+    customer_id:string, 
+    technician_id:string, 
+    location_id:string,
+    date:string, 
     time: bigint, 
     duration: bigint,
     amount: bigint,
     tip: bigint,
-    description: string,
+    description:string,
 };
 const transactions_root="transactions/";
 export const fb_transaction_entries = () => { return root.concat(transactions_root, "id/"); };
