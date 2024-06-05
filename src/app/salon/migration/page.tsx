@@ -35,8 +35,6 @@ export default function MigrationStation() {
                 )
             )));
         }
-
-        console.log("Finished Migrating Customers");
     }
 
     return(
