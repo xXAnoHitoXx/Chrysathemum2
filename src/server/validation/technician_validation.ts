@@ -56,7 +56,6 @@ class TechConversion {
             active: this.active,
         }
     }
-    
 }
 
 export async function res_into_technician(response: Response): Promise<Technician | TypeConversionError> {

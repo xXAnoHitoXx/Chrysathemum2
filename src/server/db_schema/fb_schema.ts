@@ -1,6 +1,8 @@
 import 'server-only';
-import { DatabaseReference, ref } from "firebase/database";
+import { DatabaseReference, ref, remove } from "firebase/database";
 import { f_db } from ".";
+import { QueryError } from '../queries/queries_monad';
+import { ano_iter } from '~/util/anoiter/anoiter';
 
 const prod="production";
 const dev="development";
@@ -8,6 +10,19 @@ const test="test";
 const operarion="operarion";
 
 const customers_root="customers/";
+
+export async function clear_test_data(test_name: string): Promise<QueryError | null> {
+    const fire_db: FireDB = new FireDB(test_name);
+
+    if (!fire_db.is_in_test_mode()) {
+        const message = "Node ENV is not in test mode";
+        console.log(message);
+        return new QueryError(message);
+    }
+
+    await remove(fire_db.root());
+    return null;
+}
 
 export class FireDB {
     private root_path: string;
@@ -26,12 +41,23 @@ export class FireDB {
         return ref(f_db, this.root_path);
     }
 
-    customer_entries(): DatabaseReference {
-        return ref(f_db, this.root_path.concat(customers_root, "id/"));
+    customer_entries(sub_path: string[] = []): DatabaseReference {
+        let path = ano_iter(sub_path).reduce(
+            (u: string, t: string) => (u.concat(t, "/")), 
+            "id/"
+        );
+        return ref(f_db, this.root_path.concat(customers_root, path));
     }
-    customers_phone_index(): DatabaseReference {
-        return ref(f_db, this.root_path.concat(customers_root, "phone_number/"));
+
+    customers_phone_index(sub_path : string[]): DatabaseReference {
+        let path = ano_iter(sub_path).reduce(
+            (u: string, t: string) => (u.concat(t, "/")), 
+             "phone_number/"
+        );
+
+        return ref(f_db, this.root_path.concat(customers_root, path));
     }
+
     customers_legacy_id_index(): DatabaseReference {
         return ref(f_db, this.root_path.concat(customers_root, "legacy_id/"));
     }

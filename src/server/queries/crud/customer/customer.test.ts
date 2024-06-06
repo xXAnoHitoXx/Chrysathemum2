@@ -3,24 +3,37 @@ import type { Customer } from "~/server/db_schema/type_def";
 import { create_customer_entry, delete_customer_entry, retrieve_customer_entry, update_customer_entry } from "./customer_entry"
 import { create_customer_phone_index, delete_customer_phone_index, retrieve_customer_phone_index } from "./customer_phone_index";
 import { create_customer_migration_index, delete_customer_migration_index, retrieve_customer_id_from_legacy_id } from "./customer_migration_index";
+import { QueryError, is_successful_query, pack_test } from "../../queries_monad";
 
 const test_suit = "cust_cruds";
 
 afterAll(async () => {
-    await clear_test_data(test_suit);
+    const res = await clear_test_data(test_suit);
+    expect(is_successful_query(res)).toBe(true);
 })
 
 test("test customer_entries CRUDs querries", async () => {
     const test_name = test_suit.concat("/test_customer_entries_cruds/");
-    const test_customer_entry: Customer = await create_customer_entry({name: "Tinn", phone_number: "your mother is a murloc"}, test_name);
+    const test_customer_entry: Customer | QueryError = await
+        pack_test({name: "Tinn", phone_number: "your mother is a murloc"}, test_name)
+        .bind(create_customer_entry)
+        .unpack();
 
-    const created_customer_entry: Customer | null = await retrieve_customer_entry(test_customer_entry.id, test_name);
+    if (!is_successful_query(test_customer_entry)) {
+        fail();
+    }
+
+    const created_customer_entry: Customer | QueryError = await 
+        pack_test({ id: test_customer_entry.id }, test_name)
+        .bind(retrieve_customer_entry)
+        .unpack();
     
-    expect(created_customer_entry).not.toBeNull();
-    if (created_customer_entry != null) {
+    if (is_successful_query(created_customer_entry)) {
         expect(created_customer_entry.id).toBe(test_customer_entry.id);
         expect(created_customer_entry.name).toBe(test_customer_entry.name);
         expect(created_customer_entry.phone_number).toBe(test_customer_entry.phone_number);
+    } else {
+        fail();
     }
 
     const update_target: Customer = {
@@ -30,21 +43,34 @@ test("test customer_entries CRUDs querries", async () => {
         notes: "is cool"
     };
 
-    await update_customer_entry(update_target, test_name);
-    const updated_customer_entry: Customer | null = await retrieve_customer_entry(test_customer_entry.id, test_name);
+    await pack_test(update_target, test_name)
+        .bind(update_customer_entry)
+        .unpack()
 
-    expect(updated_customer_entry).not.toBeNull();
-    if (updated_customer_entry != null) {
+    const updated_customer_entry: Customer | QueryError = await 
+        pack_test({ id: test_customer_entry.id }, test_name)
+        .bind(retrieve_customer_entry)
+        .unpack()
+
+    if (is_successful_query(updated_customer_entry)) {
         expect(updated_customer_entry.id).toBe(update_target.id);
         expect(updated_customer_entry.name).toBe(update_target.name);
         expect(updated_customer_entry.phone_number).toBe(update_target.phone_number);
         expect(updated_customer_entry.notes).toBe(update_target.notes);
+    } else {
+        fail();
     }
 
-    await delete_customer_entry(test_customer_entry.id, test_name);
+    await pack_test({ id: test_customer_entry.id }, test_name)
+        .bind(delete_customer_entry)
+        .unpack();
 
-    const empty_customer_entry: Customer | null = await retrieve_customer_entry(test_customer_entry.id, test_name);
-    expect(empty_customer_entry).toBeNull();
+    const empty_customer_entry: Customer | QueryError = await
+        pack_test({ id: test_customer_entry.id }, test_name)
+        .bind(retrieve_customer_entry)
+        .unpack()
+
+    expect(is_successful_query(empty_customer_entry)).toBe(false);
 })
 
 test("test customer_phone_index CRUDs querries", async () => {

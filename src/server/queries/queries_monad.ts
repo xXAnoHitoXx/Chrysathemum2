@@ -19,6 +19,10 @@ export interface iServerQueryData<T> {
     clear_test_data(): Promise<QueryError | null>;
 }
 
+export function is_successful_query<T>(result: T | QueryError): result is T {
+    return !(result instanceof QueryError);
+}
+
 export function pack<T>(data: T): iServerQueryData<T> {
     return new SimpleQueryData(data, new FireDB(), false);
 }
