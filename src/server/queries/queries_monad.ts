@@ -1,17 +1,8 @@
-import * as Sentry from "@sentry/nextjs"
 import { FireDB } from "../db_schema/fb_schema";
 import { remove } from "firebase/database";
+import { ServerError, is_server_error, server_error } from "../server_error";
 
-export class QueryError {
-    message = "";
-
-    constructor(error: string){
-        this.message = error;
-        if(!(new FireDB()).is_in_test_mode()){
-            Sentry.captureMessage(this.message);
-        }
-    }
-}
+export type QueryError = ServerError;
 
 export type Query<T, U> = (t: T, fire_db: FireDB) => Promise<U | QueryError>;
 
@@ -22,7 +13,7 @@ export interface iServerQueryData<T> {
 }
 
 export function is_successful_query<T>(result: T | QueryError): result is T {
-    return !(result instanceof QueryError);
+    return !(is_server_error(result));
 }
 
 export function pack<T>(data: T): iServerQueryData<T> {
@@ -36,17 +27,17 @@ export function pack_test<T>(data: T, test_name: string): iServerQueryData<T> {
 export function packed_query<T, U, V>(query: Query<T, U>, packer: (t: T, u: U) => V | QueryError): Query<T, V> {
     return async (t: T, fire_db: FireDB) => {
         const u = await query(t, fire_db);
-        if (u instanceof QueryError) {
+        if (is_server_error(u)) {
             return u;
         }
         return packer(t, u);
     }
 }
 
-export function retain_input<T>(query: Query<T, null>): Query<T, T> {
+export function retain_input<T>(query: Query<T, void>): Query<T, T> {
     return async (t: T, fire_db: FireDB) => {
-        const err: QueryError | null = await query(t, fire_db);
-        if (err instanceof QueryError){
+        const err: QueryError | void = await query(t, fire_db);
+        if (is_server_error(err)){
             return err;
         }
         return t;
@@ -76,13 +67,13 @@ class SimpleQueryData<T> implements iServerQueryData<T> {
         if (!this.is_test) {
             const message = "Server Query is not in test mode";
             console.log(message);
-            return new QueryError(message);
+            return server_error(message);
         }
         
         if (!this.fire_db.is_in_test_mode()) {
             const message = "Node ENV is not in test mode";
             console.log(message);
-            return new QueryError(message);
+            return server_error(message);
         }
 
         await remove(this.fire_db.root());
@@ -106,7 +97,7 @@ class ServerQueryData<T, U> implements iServerQueryData<U> {
     async unpack(): Promise<U | QueryError> {
         const data: T | QueryError = await this.data.unpack();
 
-        if (data instanceof QueryError) {
+        if (is_server_error(data)) {
             return data;
         }
 

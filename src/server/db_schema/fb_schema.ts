@@ -10,6 +10,7 @@ const test="test";
 const operarion="operarion";
 
 const customers_root="customers/";
+const technicians_root="technicians/";
 
 export async function clear_test_data(test_name: string): Promise<QueryError | null> {
     const fire_db: FireDB = new FireDB(test_name);
@@ -49,7 +50,7 @@ export class FireDB {
         return ref(f_db, this.root_path.concat(customers_root, path));
     }
 
-    customers_phone_index(sub_path : string[]): DatabaseReference {
+    customers_phone_index(sub_path : string[] = []): DatabaseReference {
         let path = ano_iter(sub_path).reduce(
             (u: string, t: string) => (u.concat(t, "/")), 
              "phone_number/"
@@ -58,7 +59,7 @@ export class FireDB {
         return ref(f_db, this.root_path.concat(customers_root, path));
     }
 
-    customers_legacy_id_index(sub_path : string[]): DatabaseReference {
+    customers_legacy_id_index(sub_path : string[] = []): DatabaseReference {
         let path = ano_iter(sub_path).reduce(
             (u: string, t: string) => (u.concat(t, "/")), 
              "legacy_id/"
@@ -66,9 +67,16 @@ export class FireDB {
 
         return ref(f_db, this.root_path.concat(customers_root, path));
     }
+    
+    technician_entries(sub_path : string[] = []): DatabaseReference {
+        let path = ano_iter(sub_path).reduce(
+            (u: string, t: string) => (u.concat(t, "/")), 
+            "id/"
+        );
+        return ref(f_db, this.root_path.concat(technicians_root, path))
+    }
 }
 
-const technicians_root="technicians/";
 export function fb_technician_entries(fb_root: string):string { 
     return fb_root.concat(technicians_root, "id/");
 }

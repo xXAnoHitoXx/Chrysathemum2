@@ -1,74 +1,60 @@
 import "reflect-metadata"
-import "es6-shim"
-import { plainToClass } from "class-transformer"
-import type { Technician, TechnicianCreationInfo } from "../db_schema/type_def"
-import { TypeConversionError } from "./validation_error"
+import { Technician, TechnicianCreationInfo } from "../db_schema/type_def"
+import { TypeConversionError } from "./validation_error";
+import { server_error } from "../server_error";
 
-class TechConversion {
-    id: string | undefined;
-    name: string | undefined;
-    color: string | undefined;
-    active: boolean | undefined;
-    active_salon: string | undefined;
+export function to_technician_creation_info(t: unknown): TechnicianCreationInfo | TypeConversionError {
+    if (typeof t !== "object" || t == null) {
+        return server_error("unknow is not Technician");
+    }
     
-    into_technician_creation_info(): TechnicianCreationInfo | TypeConversionError {
-        if (this.name == undefined){
-            return new TypeConversionError("technician must have name");
-        }
+    if (!("name" in t && "color" in t && "active_salon" in t)) {
+        return server_error("unknow is not TechnicianCreationInfo");
+    }
+    
+    const { name, color, active_salon } = t;
 
-        if (this.color == undefined) {
-            return new TypeConversionError("technician must have color");
-        }
-
-        if (this.active_salon == undefined) {
-            return new TypeConversionError("new technician must have assignment");
-        }
-
-        return {
-            name: this.name,
-            color: this.color,
-            active_salon: this.active_salon,
-        }
+    if (typeof name !== "string" || name == null) {
+        return server_error("unknow is not Technician");
     }
 
-    into_technician(): Technician | TypeConversionError {
-        
-        if (this.id == undefined){
-            return new TypeConversionError("undefined technician id");
-        } 
-
-        if (this.name == undefined){
-            return new TypeConversionError("undefined technician name");
-        }
-
-        if (this.color == undefined) {
-            return new TypeConversionError("undefined technician color");
-        }
-
-        if (this.active == undefined) {
-            return new TypeConversionError("undefined technician active");
-        }
-
-        return {
-            id: this.id,
-            name: this.name,
-            color: this.color,
-            active: this.active,
-        }
+    if (typeof color !== "string" || color == null) {
+        return server_error("unknow is not Technician");
     }
+
+    if (typeof active_salon !== "string" || active_salon == null) {
+        return server_error("unknow is not Technician");
+    }
+
+    return { name: name, color: color, active_salon: active_salon }
 }
 
-export async function res_into_technician(response: Response): Promise<Technician | TypeConversionError> {
-    const conv: TechConversion = plainToClass(TechConversion, await response.json());
-    return conv.into_technician();
-}
+export function to_technician(t: unknown): Technician | TypeConversionError {
+    if (typeof t !== "object" || t == null) {
+        return server_error("unknow is not Technician");
+    }
+    
+    if (!("id" in t && "name" in t && "color" in t && "active" in t)) {
+        return server_error("unknow is not Technician");
+    }
+    
+    const { id, name, color, active } = t;
 
-export async function req_into_technician(request: Request): Promise<Technician | TypeConversionError> {
-    const conv: TechConversion = plainToClass(TechConversion, await request.json());
-    return conv.into_technician();
-}
+    if (typeof id !== "string" || id == null) {
+        return server_error("unknow is not Technician");
+    }
 
-export async function req_into_technician_creation_info(request: Request): Promise<TechnicianCreationInfo | TypeConversionError> {
-    const conv: TechConversion = plainToClass(TechConversion, await request.json());
-    return conv.into_technician_creation_info();
+    if (typeof name !== "string" || name == null) {
+        return server_error("unknow is not Technician");
+    }
+
+    if (typeof color !== "string" || color == null) {
+        return server_error("unknow is not Technician");
+    }
+
+    if (typeof active !== "boolean" || active == null) {
+        return server_error("unknow is not Technician");
+    }
+
+    return { id: id, name: name, color: color, active: active }
 }

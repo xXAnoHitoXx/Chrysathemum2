@@ -5,13 +5,15 @@ import type { DataSnapshot, DatabaseReference } from "firebase/database";
 import type { Customer } from '~/server/db_schema/type_def';
 import { Query, QueryError } from '../../queries_monad';
 import { FireDB } from '~/server/db_schema/fb_schema';
+import { server_error } from '~/server/server_error';
+import { to_customer } from '~/server/validation/customer_validation';
 
 export const create_customer_entry: Query<{name: string, phone_number: string}, Customer> = 
     async (params: { name: string, phone_number: string }, f_db: FireDB): Promise<Customer | QueryError> => {
-        const id: DatabaseReference = await push(f_db.customer_entries([]));
+        const id: DatabaseReference = await push(f_db.customer_entries());
         
         if(id.key == null) {
-            return new QueryError("failed to create customer entry: null id");
+            return server_error("failed to create customer entry: null id");
         }
         
         const customer_entry: Customer = {
@@ -30,25 +32,22 @@ export const retrieve_customer_entry: Query<{ id: string }, Customer> =
         const data: DataSnapshot = await get(f_db.customer_entries([params.id]));
 
         if (!data.exists()) {
-            return new QueryError("customer entry {".concat(params.id, "} not found"));
+            return server_error("customer entry {".concat(params.id, "} not found"));
         }
 
-        return data.val() as Customer;
+        return to_customer(data.val());
     }
 
-export const update_customer_entry: Query<Customer, null> =
-    async (customer: Customer, f_db: FireDB): Promise<null> => {
+export const update_customer_entry: Query<Customer, void> =
+    async (customer: Customer, f_db: FireDB): Promise<void> => {
         await update(f_db.customer_entries([customer.id]), { 
             name: customer.name, 
             phone_number: customer.phone_number, 
             notes: customer.notes 
         });
-
-        return null;
     }
 
-export const delete_customer_entry: Query<{ id: string }, null> =
-    async (params: { id : string }, f_db: FireDB): Promise<null> => {
+export const delete_customer_entry: Query<{ id: string }, void> =
+    async (params: { id : string }, f_db: FireDB): Promise<void> => {
         await remove(f_db.customer_entries([params.id]));
-        return null;
     }

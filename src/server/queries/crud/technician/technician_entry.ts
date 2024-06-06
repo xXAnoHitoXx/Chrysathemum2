@@ -1,45 +1,52 @@
 import 'server-only';
 
-import { type DatabaseReference, push, ref, set, get, type DataSnapshot, update, remove } from "firebase/database";
-import { f_db } from "~/server/db_schema";
-import { fb_technician_entries } from "~/server/db_schema/fb_schema";
+import { type DatabaseReference, push, set, get, type DataSnapshot, update, remove } from "firebase/database";
+import { FireDB } from "~/server/db_schema/fb_schema";
 import type { Technician } from '~/server/db_schema/type_def';
+import { QueryError, Query } from '../../queries_monad';
+import { server_error } from '~/server/server_error';
+import { to_technician } from '~/server/validation/technician_validation';
 
-export async function create_technician_entry({ name, color, active }: { name: string, color: string, active: boolean }, redirect: string): Promise<Technician> {
-    const id_ref: DatabaseReference = push(ref(f_db, fb_technician_entries(redirect)));
+export const create_technician_entry: Query<{ name: string, color: string, active: boolean }, Technician> =
+    async (params: { name: string, color: string, active: boolean }, f_db: FireDB) : Promise<Technician | QueryError> => {
+        const id_ref: DatabaseReference = await push(f_db.technician_entries([]));
 
-    if(id_ref.key == null) {
-        throw new Error("failed to create technician_entry null id");
+        if(id_ref.key == null) {
+            return server_error("failed to create technician_entry null id");
+        }
+
+        const technician_entry: Technician = {
+            id: id_ref.key,
+            name: params.name,
+            color: params.color,
+            active: params.active,
+        }
+
+        await set(id_ref, technician_entry);
+        return technician_entry;
+        
     }
 
-    const technician_entry: Technician = {
-        id: id_ref.key,
-        name: name,
-        color: color,
-        active: active,
+export const retrieve_technician_entry: Query<{ id: string }, Technician> =
+    async ({ id }: { id: string }, f_db: FireDB): Promise<Technician | QueryError> => {
+        const data: DataSnapshot = await get(f_db.technician_entries([id]));
+
+        if(!data.exists()){
+            return server_error("retrieving non exist Technician {".concat(id, "}"));
+        }
+
+        return to_technician(data.val());
     }
 
-    await set(id_ref, technician_entry);
-    return technician_entry;
-}
-
-export async function retrieve_technician_entry(id: string, redirect: string): Promise<Technician | null> {
-    const data: DataSnapshot = await get(ref(f_db, fb_technician_entries(redirect).concat(id)));
-
-    if(!data.exists()){
-        return null;
+export const update_technician_entry: Query<Technician, undefined> =
+    async (technician: Technician, f_db: FireDB): Promise<undefined> => {
+        await update(
+            f_db.technician_entries([technician.id]), 
+            { name: technician.name, color: technician.color, active: technician.active }
+        );
     }
 
-    return data.val() as Technician;
-}
-
-export async function update_technician_entry( technician: Technician, redirect: string) {
-    await update(
-        ref(f_db, fb_technician_entries(redirect).concat(technician.id)), 
-        { name: technician.name, color: technician.color, active: technician.active }
-    );
-}
-
-export async function delete_technician_entry(id: string, redirect: string){
-    await remove(ref(f_db, fb_technician_entries(redirect).concat(id)));
-}
+export const delete_technician_entry: Query<{ id: string },undefined> =
+    async ({ id }: { id: string }, f_db: FireDB): Promise<undefined> => {
+        await remove(f_db.technician_entries([id]));
+    }

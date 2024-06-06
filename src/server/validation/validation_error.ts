@@ -1,10 +1,3 @@
-import * as Sentry from "@sentry/nextjs"
-export class TypeConversionError {
-    message = "";
+import { ServerError } from "../server_error";
 
-    constructor(error: string){
-        this.message = error;
-        Sentry.captureMessage(this.message);
-    }
-}
-
+export type TypeConversionError = ServerError;
