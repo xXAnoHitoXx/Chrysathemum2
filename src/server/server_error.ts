@@ -12,13 +12,17 @@ export function is_server_error(t: unknown): t is ServerError {
         return false;
     }
     
-    if (!("message" in t)) {
+    if (!("error" in t)) {
         return false;
     }
     
-    const { message } = t;
+    const error: unknown  = t.error;
 
-    return message instanceof ServerMessage;
+    if (error == null) {
+        return false;
+    }
+
+    return error instanceof ServerMessage;
 }
 
 class ServerMessage {

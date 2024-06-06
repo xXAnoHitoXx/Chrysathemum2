@@ -5,10 +5,9 @@ import { FireDB } from "~/server/db_schema/fb_schema";
 import type { Customer } from '~/server/db_schema/type_def';
 import { Query } from '../../queries_monad';
 
-export const create_customer_phone_index: Query<Customer, null> = 
-    async (customer: Customer, f_db: FireDB): Promise<null> => {
+export const create_customer_phone_index: Query<Customer, void> = 
+    async (customer: Customer, f_db: FireDB): Promise<void> => {
         await set(f_db.customers_phone_index([customer.phone_number, customer.id]), customer.id);
-        return null;
     }
 
 export const retrieve_customer_phone_index: Query<{ phone_number: string }, { customer_ids: string[] }> =
@@ -26,8 +25,7 @@ export const retrieve_customer_phone_index: Query<{ phone_number: string }, { cu
         return { customer_ids: index };
     }
 
-export const delete_customer_phone_index: Query<Customer, null> = 
-    async (customer: Customer, f_db: FireDB): Promise<null> => {
+export const delete_customer_phone_index: Query<Customer, void> = 
+    async (customer: Customer, f_db: FireDB): Promise<void> => {
         await remove(f_db.customers_phone_index([customer.phone_number, customer.id]));
-        return null;
     }

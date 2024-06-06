@@ -3,6 +3,7 @@ import { DatabaseReference, ref, remove } from "firebase/database";
 import { f_db } from ".";
 import { QueryError } from '../queries/queries_monad';
 import { ano_iter } from '~/util/anoiter/anoiter';
+import { server_error } from '../server_error';
 
 const prod="production";
 const dev="development";
@@ -18,7 +19,7 @@ export async function clear_test_data(test_name: string): Promise<QueryError | n
     if (!fire_db.is_in_test_mode()) {
         const message = "Node ENV is not in test mode";
         console.log(message);
-        return new QueryError(message);
+        return server_error(message);
     }
 
     await remove(fire_db.root());
@@ -55,7 +56,6 @@ export class FireDB {
             (u: string, t: string) => (u.concat(t, "/")), 
              "phone_number/"
         );
-
         return ref(f_db, this.root_path.concat(customers_root, path));
     }
 
@@ -64,7 +64,6 @@ export class FireDB {
             (u: string, t: string) => (u.concat(t, "/")), 
              "legacy_id/"
         );
-
         return ref(f_db, this.root_path.concat(customers_root, path));
     }
     
@@ -75,13 +74,14 @@ export class FireDB {
         );
         return ref(f_db, this.root_path.concat(technicians_root, path))
     }
-}
 
-export function fb_technician_entries(fb_root: string):string { 
-    return fb_root.concat(technicians_root, "id/");
-}
-export function fb_technicians_login(fb_root: string):string { 
-    return fb_root.concat(technicians_root, "login/");
+    technician_login(sub_path: string[] = []): DatabaseReference {
+        let path = ano_iter(sub_path).reduce(
+            (u: string, t: string) => (u.concat(t, "/")), 
+            "login/"
+        );
+        return ref(f_db, this.root_path.concat(technicians_root, path))
+    }
 }
 export function fb_technicians_legacy_id_index(fb_root: string):string { 
     return fb_root.concat(technicians_root, "legacy_id/");

@@ -5,10 +5,9 @@ import { FireDB } from "~/server/db_schema/fb_schema";
 import { Query, QueryError } from '../../queries_monad';
 import { server_error } from '~/server/server_error';
 
-export const create_customer_migration_index: Query<{ customer_id: string, legacy_id: string }, null> = 
-    async (params: { customer_id: string, legacy_id: string }, f_db: FireDB): Promise<null> => {
+export const create_customer_migration_index: Query<{ customer_id: string, legacy_id: string }, void> = 
+    async (params: { customer_id: string, legacy_id: string }, f_db: FireDB): Promise<void> => {
         await set(f_db.customers_legacy_id_index([params.legacy_id]), params.customer_id);
-        return null;
     }
 
 export const retrieve_customer_id_from_legacy_id: Query<{ legacy_id: string }, { customer_id: string }> =
@@ -22,7 +21,7 @@ export const retrieve_customer_id_from_legacy_id: Query<{ legacy_id: string }, {
         return { customer_id: data.val() as string };
     }
 
-export const delete_customer_migration_index: Query<{ legacy_id: string }, undefined> = 
-    async (params: { legacy_id: string }, f_db: FireDB): Promise<undefined> => {
+export const delete_customer_migration_index: Query<{ legacy_id: string }, void> = 
+    async (params: { legacy_id: string }, f_db: FireDB): Promise<void> => {
         await remove(f_db.customers_legacy_id_index([params.legacy_id]));
     }

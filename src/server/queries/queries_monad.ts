@@ -1,6 +1,5 @@
 import { FireDB } from "../db_schema/fb_schema";
-import { remove } from "firebase/database";
-import { ServerError, is_server_error, server_error } from "../server_error";
+import { ServerError, is_server_error } from "../server_error";
 
 export type QueryError = ServerError;
 
@@ -9,7 +8,6 @@ export type Query<T, U> = (t: T, fire_db: FireDB) => Promise<U | QueryError>;
 export interface iServerQueryData<T> {
     unpack(): Promise<T | QueryError>;
     bind<U>(query: Query<T, U>): iServerQueryData<U>;
-    clear_test_data(): Promise<QueryError | null>;
 }
 
 export function is_successful_query<T>(result: T | QueryError): result is T {
@@ -62,23 +60,6 @@ class SimpleQueryData<T> implements iServerQueryData<T> {
     bind<U>(query: Query<T, U>): iServerQueryData<U> {
         return new ServerQueryData<T, U>(this, query, this.fire_db, this.is_test);
     }
-
-    async clear_test_data(): Promise<QueryError | null> {
-        if (!this.is_test) {
-            const message = "Server Query is not in test mode";
-            console.log(message);
-            return server_error(message);
-        }
-        
-        if (!this.fire_db.is_in_test_mode()) {
-            const message = "Node ENV is not in test mode";
-            console.log(message);
-            return server_error(message);
-        }
-
-        await remove(this.fire_db.root());
-        return null;
-    }
 }
 
 class ServerQueryData<T, U> implements iServerQueryData<U> {
@@ -106,9 +87,5 @@ class ServerQueryData<T, U> implements iServerQueryData<U> {
 
     bind<V>(query: Query<U, V>): iServerQueryData<V> {
         return new ServerQueryData<U, V>(this, query, this.fire_db, this.is_test);
-    }
-
-    async clear_test_data(): Promise<QueryError | null> {
-        return await this.data.clear_test_data();
     }
 }

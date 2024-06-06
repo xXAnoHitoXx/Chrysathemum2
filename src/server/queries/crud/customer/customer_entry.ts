@@ -10,7 +10,7 @@ import { to_customer } from '~/server/validation/customer_validation';
 
 export const create_customer_entry: Query<{name: string, phone_number: string}, Customer> = 
     async (params: { name: string, phone_number: string }, f_db: FireDB): Promise<Customer | QueryError> => {
-        const id: DatabaseReference = await push(f_db.customer_entries());
+        const id: DatabaseReference = await push(f_db.customer_entries([]));
         
         if(id.key == null) {
             return server_error("failed to create customer entry: null id");
