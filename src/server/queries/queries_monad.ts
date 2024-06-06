@@ -7,7 +7,9 @@ export class QueryError {
 
     constructor(error: string){
         this.message = error;
-        Sentry.captureMessage(this.message);
+        if(!(new FireDB()).is_in_test_mode()){
+            Sentry.captureMessage(this.message);
+        }
     }
 }
 

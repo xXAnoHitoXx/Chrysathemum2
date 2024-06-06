@@ -58,8 +58,13 @@ export class FireDB {
         return ref(f_db, this.root_path.concat(customers_root, path));
     }
 
-    customers_legacy_id_index(): DatabaseReference {
-        return ref(f_db, this.root_path.concat(customers_root, "legacy_id/"));
+    customers_legacy_id_index(sub_path : string[]): DatabaseReference {
+        let path = ano_iter(sub_path).reduce(
+            (u: string, t: string) => (u.concat(t, "/")), 
+             "legacy_id/"
+        );
+
+        return ref(f_db, this.root_path.concat(customers_root, path));
     }
 }
 

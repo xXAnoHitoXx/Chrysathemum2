@@ -90,22 +90,52 @@ test("test customer_phone_index CRUDs querries", async () => {
         notes: "",
     }
 
-    let index = await retrieve_customer_phone_index(customer_1.phone_number, test_name);
-    expect(index).toHaveLength(0);
+    let index: { customer_ids: string[] } | QueryError = await 
+        pack_test({ phone_number: customer_1.phone_number }, test_name)
+        .bind(retrieve_customer_phone_index) 
+        .unpack();
 
-    await create_customer_phone_index(customer_1, test_name);
-    await create_customer_phone_index(customer_2, test_name);
+    if(is_successful_query(index)) {
+        expect(index.customer_ids).toHaveLength(0);
+    } else {
+        fail();
+    }
 
-    index = await retrieve_customer_phone_index(customer_1.phone_number, test_name);
-    expect(index).toHaveLength(2);
-    expect(index).toContain(customer_1.id);
-    expect(index).toContain(customer_2.id);
+    await pack_test(customer_1, test_name)
+        .bind(create_customer_phone_index)
+        .unpack();
+    await pack_test(customer_2, test_name)
+        .bind(create_customer_phone_index)
+        .unpack();
 
-    await delete_customer_phone_index(customer_1, test_name);
-    index = await retrieve_customer_phone_index(customer_1.phone_number, test_name);
-    expect(index).toHaveLength(1);
-    expect(index).not.toContain(customer_1.id);
-    expect(index).toContain(customer_2.id);
+    index = await 
+        pack_test({ phone_number: customer_1.phone_number }, test_name)
+        .bind(retrieve_customer_phone_index)
+        .unpack();
+
+    if(is_successful_query(index)) {
+        expect(index.customer_ids).toHaveLength(2);
+        expect(index.customer_ids).toContain(customer_1.id);
+        expect(index.customer_ids).toContain(customer_2.id);
+    } else {
+        fail();
+    }
+
+    await pack_test(customer_1, test_name)
+        .bind(delete_customer_phone_index)
+        .unpack();
+
+    index = await pack_test({ phone_number: customer_1.phone_number }, test_name)
+        .bind(retrieve_customer_phone_index)
+        .unpack();
+    
+    if(is_successful_query(index)) {
+        expect(index.customer_ids).toHaveLength(1);
+        expect(index.customer_ids).not.toContain(customer_1.id);
+        expect(index.customer_ids).toContain(customer_2.id);
+    } else {
+        fail();
+    }
 })
 
 test("test customer_migration_index CRUDs querries", async () => {
@@ -113,16 +143,34 @@ test("test customer_migration_index CRUDs querries", async () => {
 
     const test_ids = { id: "BaNaNa", legacy_id: "banana" };
 
-    let conversion: string | null = await retrieve_customer_id_from_legacy_id(test_ids.legacy_id, test_name);
-    expect(conversion).toBeNull();
+    let conversion: { customer_id: string } | QueryError = await 
+        pack_test({ legacy_id: test_ids.legacy_id }, test_name)
+        .bind(retrieve_customer_id_from_legacy_id)
+        .unpack();
 
-    await create_customer_migration_index({customer_id: test_ids.id, legacy_id: test_ids.legacy_id}, test_name);
+    expect(is_successful_query(conversion)).toBe(false);
 
-    conversion = await retrieve_customer_id_from_legacy_id(test_ids.legacy_id, test_name);
-    expect(conversion).toBe(test_ids.id);
+    await pack_test({customer_id: test_ids.id, legacy_id: test_ids.legacy_id}, test_name)
+        .bind(create_customer_migration_index)
+        .unpack();
 
-    await delete_customer_migration_index(test_ids.legacy_id, test_name);
+    conversion = await pack_test({ legacy_id: test_ids.legacy_id }, test_name)
+        .bind(retrieve_customer_id_from_legacy_id)
+        .unpack();
 
-    conversion = await retrieve_customer_id_from_legacy_id(test_ids.legacy_id, test_name);
-    expect(conversion).toBeNull();
+    if(is_successful_query(conversion)) {
+        expect(conversion.customer_id).toBe(test_ids.id);
+    } else {
+        fail();
+    }
+
+    await pack_test({ legacy_id: test_ids.legacy_id }, test_name)
+        .bind(delete_customer_migration_index)
+        .unpack();
+
+    conversion = await pack_test({ legacy_id: test_ids.legacy_id }, test_name)
+        .bind(retrieve_customer_id_from_legacy_id)
+        .unpack();
+
+    expect(is_successful_query(conversion)).toBe(false);
 })
