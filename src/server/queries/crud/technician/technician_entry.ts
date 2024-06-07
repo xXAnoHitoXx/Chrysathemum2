@@ -5,7 +5,7 @@ import { FireDB } from "~/server/db_schema/fb_schema";
 import type { Technician } from '~/server/db_schema/type_def';
 import { QueryError, Query } from '../../queries_monad';
 import { server_error } from '~/server/server_error';
-import { to_technician } from '~/server/validation/technician_validation';
+import { to_technician } from '~/server/validation/db_types/technician_validation';
 
 export const create_technician_entry: Query<{ name: string, color: string, active: boolean }, Technician> =
     async (params: { name: string, color: string, active: boolean }, f_db: FireDB) : Promise<Technician | QueryError> => {

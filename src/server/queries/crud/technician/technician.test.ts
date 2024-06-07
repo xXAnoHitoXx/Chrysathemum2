@@ -77,21 +77,41 @@ test("test technician_login_index CRUDs querries", async () => {
 
     const login = {
         user_id: "banana",
-        tech_id: "bruh-nuh-nuh"
+        technician_id: "bruh-nuh-nuh"
     };
 
-    let conversion: string | null = await retrieve_technician_id_from_user_id(login.user_id, test_name);
-    expect(conversion).toBeNull();
+    let conversion = await 
+        pack_test({ user_id: login.user_id }, test_name)
+        .bind(retrieve_technician_id_from_user_id)
+        .unpack();
 
-    await create_technician_login_index({user_id: login.user_id, technician_id: login.tech_id}, test_name);
+    expect(is_successful_query(conversion)).toBe(false);
 
-    conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
-    expect(conversion).toBe(login.tech_id);
+    await pack_test(login, test_name)
+        .bind(create_technician_login_index)
+        .unpack();
 
-    await delete_technician_login_index(login.user_id, test_name);
+    conversion = await
+        pack_test({ user_id: login.user_id }, test_name)
+        .bind(retrieve_technician_id_from_user_id)
+        .unpack();
 
-    conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
-    expect(conversion).toBeNull();
+    if(is_successful_query(conversion)) {
+        expect(conversion.technician_id).toBe(login.technician_id);
+    } else {
+        fail();
+    }
+
+    await pack_test({ user_id: login.user_id }, test_name)
+        .bind(delete_technician_login_index)
+        .unpack();
+
+    conversion = await
+        pack_test({ user_id: login.user_id }, test_name)
+        .bind(retrieve_technician_id_from_user_id)
+        .unpack();
+
+    expect(is_successful_query(conversion)).toBe(false);
 })
 
 test("test technician_migration_index CRUDs querries", async () => {

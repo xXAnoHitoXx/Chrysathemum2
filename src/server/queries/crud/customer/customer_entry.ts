@@ -6,7 +6,7 @@ import type { Customer } from '~/server/db_schema/type_def';
 import { Query, QueryError } from '../../queries_monad';
 import { FireDB } from '~/server/db_schema/fb_schema';
 import { server_error } from '~/server/server_error';
-import { to_customer } from '~/server/validation/customer_validation';
+import { to_customer } from '~/server/validation/db_types/customer_validation';
 
 export const create_customer_entry: Query<{name: string, phone_number: string}, Customer> = 
     async (params: { name: string, phone_number: string }, f_db: FireDB): Promise<Customer | QueryError> => {
