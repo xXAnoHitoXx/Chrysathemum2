@@ -12,6 +12,7 @@ const operarion="operarion";
 
 const customers_root="customers/";
 const technicians_root="technicians/";
+const locations_root="locations/";
 
 export async function clear_test_data(test_name: string): Promise<QueryError | null> {
     const fire_db: FireDB = new FireDB(test_name);
@@ -67,6 +68,14 @@ export class FireDB {
         return this.ref(technicians_root, "legacy_id/", sub_path);
     }
 
+    location_entries(sub_path: string[] = []): DatabaseReference {
+        return this.ref(locations_root, "id/", sub_path);
+    }
+
+    location_roster(sub_path: string[] = []): DatabaseReference {
+        return this.ref(locations_root, "roster/", sub_path);
+    }
+
     private ref(root: string, branch: string, sub_path: string[]){
         let path = ano_iter(sub_path).reduce(
             (u: string, t: string) => (u.concat(t, "/")), 
@@ -74,14 +83,6 @@ export class FireDB {
         );
         return ref(f_db, this.root_path.concat(root, path))
     }
-}
-
-const locations_root="locations/";
-export function fb_location_entries(fb_root: string) { 
-    return fb_root.concat(locations_root, "id/");
-}
-export function fb_location_roster(fb_root: string) { 
-    return fb_root.concat(locations_root, "roster/");
 }
 
 /*
