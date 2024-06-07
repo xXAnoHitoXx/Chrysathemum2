@@ -7,7 +7,7 @@ import { server_error } from '~/server/server_error';
 import { is_string } from '~/server/validation/simple_type';
 
 export const create_technician_login_index: Query<{ user_id: string, technician_id: string }, void> =
-    async ({ user_id, technician_id }: { user_id: string, technician_id: string }, f_db: FireDB): Promise<void> => {
+    async ({ user_id, technician_id }: { user_id: string, technician_id: string }, f_db: FireDB) => {
         await set(f_db.technician_login([user_id]), technician_id);
     }
 
@@ -28,6 +28,6 @@ export const retrieve_technician_id_from_user_id: Query<{ user_id: string }, { t
     }
 
 export const delete_technician_login_index: Query<{ user_id: string }, void> =
-    async ({ user_id }: { user_id: string }, f_db: FireDB): Promise<void> => {
+    async ({ user_id }: { user_id: string }, f_db: FireDB) => {
         await remove(f_db.technician_login([user_id]));
     }

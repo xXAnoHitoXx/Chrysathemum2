@@ -44,47 +44,36 @@ export class FireDB {
     }
 
     customer_entries(sub_path: string[] = []): DatabaseReference {
-        let path = ano_iter(sub_path).reduce(
-            (u: string, t: string) => (u.concat(t, "/")), 
-            "id/"
-        );
-        return ref(f_db, this.root_path.concat(customers_root, path));
+        return this.ref(customers_root, "id/", sub_path);
     }
 
     customers_phone_index(sub_path : string[] = []): DatabaseReference {
-        let path = ano_iter(sub_path).reduce(
-            (u: string, t: string) => (u.concat(t, "/")), 
-             "phone_number/"
-        );
-        return ref(f_db, this.root_path.concat(customers_root, path));
+        return this.ref(customers_root, "phone_number/", sub_path);
     }
 
     customers_legacy_id_index(sub_path : string[] = []): DatabaseReference {
-        let path = ano_iter(sub_path).reduce(
-            (u: string, t: string) => (u.concat(t, "/")), 
-             "legacy_id/"
-        );
-        return ref(f_db, this.root_path.concat(customers_root, path));
+        return this.ref(customers_root, "legacy_id/", sub_path);
     }
     
     technician_entries(sub_path : string[] = []): DatabaseReference {
-        let path = ano_iter(sub_path).reduce(
-            (u: string, t: string) => (u.concat(t, "/")), 
-            "id/"
-        );
-        return ref(f_db, this.root_path.concat(technicians_root, path))
+        return this.ref(technicians_root, "id/", sub_path);
     }
 
     technician_login(sub_path: string[] = []): DatabaseReference {
+        return this.ref(technicians_root, "login/", sub_path);
+    }
+
+    technician_legacy_index(sub_path: string[] = []): DatabaseReference {
+        return this.ref(technicians_root, "legacy_id/", sub_path);
+    }
+
+    private ref(root: string, branch: string, sub_path: string[]){
         let path = ano_iter(sub_path).reduce(
             (u: string, t: string) => (u.concat(t, "/")), 
-            "login/"
+            branch
         );
-        return ref(f_db, this.root_path.concat(technicians_root, path))
+        return ref(f_db, this.root_path.concat(root, path))
     }
-}
-export function fb_technicians_legacy_id_index(fb_root: string):string { 
-    return fb_root.concat(technicians_root, "legacy_id/");
 }
 
 const locations_root="locations/";

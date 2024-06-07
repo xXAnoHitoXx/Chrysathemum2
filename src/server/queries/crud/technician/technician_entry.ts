@@ -39,7 +39,7 @@ export const retrieve_technician_entry: Query<{ id: string }, Technician> =
     }
 
 export const update_technician_entry: Query<Technician, void> =
-    async (technician: Technician, f_db: FireDB): Promise<void> => {
+    async (technician: Technician, f_db: FireDB) => {
         await update(
             f_db.technician_entries([technician.id]), 
             { name: technician.name, color: technician.color, active: technician.active }
@@ -47,6 +47,6 @@ export const update_technician_entry: Query<Technician, void> =
     }
 
 export const delete_technician_entry: Query<{ id: string },void> =
-    async ({ id }: { id: string }, f_db: FireDB): Promise<void> => {
+    async ({ id }: { id: string }, f_db: FireDB) => {
         await remove(f_db.technician_entries([id]));
     }

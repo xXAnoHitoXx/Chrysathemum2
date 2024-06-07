@@ -33,7 +33,7 @@ class ServerMessage {
         if(!(new FireDB()).is_in_test_mode()){
             Sentry.captureMessage(this.message);
         } else {
-            console.log();
+            console.log(this.message);
         }
     }
 }

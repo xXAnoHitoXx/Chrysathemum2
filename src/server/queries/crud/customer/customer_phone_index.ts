@@ -8,7 +8,7 @@ import { is_string } from '~/server/validation/simple_type';
 import { server_error } from '~/server/server_error';
 
 export const create_customer_phone_index: Query<Customer, void> = 
-    async (customer: Customer, f_db: FireDB): Promise<void> => {
+    async (customer: Customer, f_db: FireDB) => {
         await set(f_db.customers_phone_index([customer.phone_number, customer.id]), customer.id);
     }
 
@@ -33,6 +33,6 @@ export const retrieve_customer_phone_index: Query<{ phone_number: string }, { cu
     }
 
 export const delete_customer_phone_index: Query<Customer, void> = 
-    async (customer: Customer, f_db: FireDB): Promise<void> => {
+    async (customer: Customer, f_db: FireDB) => {
         await remove(f_db.customers_phone_index([customer.phone_number, customer.id]));
     }

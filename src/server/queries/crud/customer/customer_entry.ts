@@ -39,7 +39,7 @@ export const retrieve_customer_entry: Query<{ id: string }, Customer> =
     }
 
 export const update_customer_entry: Query<Customer, void> =
-    async (customer: Customer, f_db: FireDB): Promise<void> => {
+    async (customer: Customer, f_db: FireDB) => {
         await update(f_db.customer_entries([customer.id]), { 
             name: customer.name, 
             phone_number: customer.phone_number, 
@@ -48,6 +48,6 @@ export const update_customer_entry: Query<Customer, void> =
     }
 
 export const delete_customer_entry: Query<{ id: string }, void> =
-    async (params: { id : string }, f_db: FireDB): Promise<void> => {
+    async (params: { id : string }, f_db: FireDB) => {
         await remove(f_db.customer_entries([params.id]));
     }
