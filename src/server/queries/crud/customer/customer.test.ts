@@ -3,7 +3,8 @@ import type { Customer } from "~/server/db_schema/type_def";
 import { create_customer_entry, delete_customer_entry, retrieve_customer_entry, update_customer_entry } from "./customer_entry"
 import { create_customer_phone_index, delete_customer_phone_index, retrieve_customer_phone_index } from "./customer_phone_index";
 import { create_customer_migration_index, delete_customer_migration_index, retrieve_customer_id_from_legacy_id } from "./customer_migration_index";
-import { QueryError, is_successful_query, pack_test } from "../../queries_monad";
+import { QueryError, is_successful_query, pack_test } from "../../server_queries_monad";
+import { is_server_error } from "~/server/server_error";
 
 const test_suit = "cust_cruds";
 
@@ -19,7 +20,7 @@ test("test customer_entries CRUDs querries", async () => {
         .bind(create_customer_entry)
         .unpack();
 
-    if (!is_successful_query(test_customer_entry)) {
+    if (is_server_error(test_customer_entry)) {
         fail();
     }
 

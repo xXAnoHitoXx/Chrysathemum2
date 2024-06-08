@@ -1,5 +1,5 @@
 import { type DataSnapshot, get, set, remove } from "firebase/database";
-import { Query, QueryError } from "../../queries_monad";
+import { Query, QueryError } from "../../server_queries_monad";
 import { FireDB } from "~/server/db_schema/fb_schema";
 import { is_string } from "~/server/validation/simple_type";
 import { server_error } from "~/server/server_error";

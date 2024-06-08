@@ -1,23 +1,32 @@
-import { type Customer } from "~/server/db_schema/type_def";
+import { CustomerCreationInfo, CustomerData, type Customer } from "~/server/db_schema/type_def";
 import { create_customer_entry, update_customer_entry } from "../crud/customer/customer_entry";
 import { create_customer_phone_index, delete_customer_phone_index } from "../crud/customer/customer_phone_index";
+import { ServerQueryData, map, merge, retain_input } from "../server_queries_monad";
 
-export async function create_new_customer({ name, phone_number }: { name: string, phone_number: string }, redirect = ""): Promise<Customer> {
-    const customer: Customer = await create_customer_entry({ name, phone_number }, redirect);
-    await create_customer_phone_index(customer, redirect);
-
-    return customer;
+export async function create_new_customer(data: ServerQueryData<CustomerCreationInfo>)
+: Promise<ServerQueryData<Customer>> {
+    return data.bind(create_customer_entry)
+        .bind(retain_input(create_customer_phone_index));
 }
 
-export async function update_customer_info(customer: Customer, { name = customer.name, phone_number = customer.phone_number, notes = customer.notes}, redirect = ""): Promise<Customer> {
-    await delete_customer_phone_index(customer, redirect);
+export async function update_customer_info(
+    data: ServerQueryData<{ customer: Customer, update: CustomerData }>
+) : Promise<ServerQueryData<void>> {
 
-    const update_target: Customer = { id: customer.id, name: name, phone_number: phone_number, notes: notes}; 
-    await update_customer_entry(update_target, redirect);
+    const customer: ServerQueryData<Customer> = data.bind(map(({ customer }: { customer: Customer }) => (customer)))
+    const result_1 = customer.bind(delete_customer_phone_index);
 
-    await create_customer_phone_index(update_target, redirect);
+    const update_target: ServerQueryData<Customer> = data.bind(map(
+        ({ customer, update }: { customer: Customer, update: CustomerData }) => (
+            { id: customer.id, name: update.name, phone_number: update.phone_number, notes: update.notes }
+        )
+    ))
 
-    return update_target;
+    const result_2 = update_target
+        .bind(retain_input(update_customer_entry))
+        .bind(create_customer_phone_index)
+
+    return merge(result_1, result_2, () => {});
 }
 
 export function is_no_book(customer: Customer): boolean {

@@ -1,7 +1,8 @@
 import { Appointment } from "~/server/db_schema/type_def";
 
+/*
  export async function create_appointment_entry(
-    {customer_id, date, time, duration, detail}: {
+    {customer_id, date, time, duration, details}: {
         customer_id: string,
         date: string,
         time: string,
@@ -16,3 +17,4 @@ import { Appointment } from "~/server/db_schema/type_def";
  }
  export async function delete_appointment_entry(redirect: string) {
  }
+*/

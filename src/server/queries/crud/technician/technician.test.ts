@@ -3,7 +3,8 @@ import { create_technician_entry, delete_technician_entry, retrieve_technician_e
 import { create_technician_login_index, delete_technician_login_index, retrieve_technician_id_from_user_id } from "./technician_login_index";
 import { create_technician_migration_index, delete_technician_migration_index, retrieve_technician_id_from_legacy_id } from "./technician_migration_index";
 import type { Technician } from "~/server/db_schema/type_def";
-import { QueryError, is_successful_query, pack_test } from "../../queries_monad";
+import { QueryError, is_successful_query, pack_test } from "../../server_queries_monad";
+import { is_server_error } from "~/server/server_error";
 
 const test_suit = "tech_cruds";
 
@@ -19,7 +20,7 @@ test("test technician entries CRUD queries", async () => {
         .bind(create_technician_entry)
         .unpack();
 
-    if (!is_successful_query(test_technician_entry)) {
+    if (is_server_error(test_technician_entry)) {
         fail();
     }
 

@@ -3,7 +3,7 @@ import 'server-only';
 import { type DataSnapshot, set, get, remove } from "firebase/database";
 import { FireDB } from "~/server/db_schema/fb_schema";
 import type { Customer } from '~/server/db_schema/type_def';
-import { Query } from '../../queries_monad';
+import { Query } from '../../server_queries_monad';
 import { is_string } from '~/server/validation/simple_type';
 import { server_error } from '~/server/server_error';
 

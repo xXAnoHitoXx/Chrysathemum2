@@ -3,7 +3,7 @@ import 'server-only';
 import { type DatabaseReference, push, set, get, type DataSnapshot, update, remove } from "firebase/database";
 import { FireDB } from "~/server/db_schema/fb_schema";
 import type { Technician } from '~/server/db_schema/type_def';
-import { QueryError, Query } from '../../queries_monad';
+import { QueryError, Query } from '../../server_queries_monad';
 import { server_error } from '~/server/server_error';
 import { to_technician } from '~/server/validation/db_types/technician_validation';
 

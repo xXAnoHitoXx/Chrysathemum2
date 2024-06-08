@@ -1,7 +1,7 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { create_new_location, retrieve_location } from "./location";
 import { assign_technician_to_roster, remove_technician_from_roster, retrieve_roster } from "./location_roster";
-import { is_successful_query, pack_test } from "../../queries_monad";
+import { is_successful_query, pack_test } from "../../server_queries_monad";
 
 const test_suit = "location_cruds";
 

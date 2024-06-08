@@ -1,7 +1,7 @@
 import { type DataSnapshot, get, set } from "firebase/database";
 import { FireDB } from "~/server/db_schema/fb_schema";
 import { type Location } from "~/server/db_schema/type_def";
-import { Query, QueryError } from "../../queries_monad";
+import { Query, QueryError } from "../../server_queries_monad";
 import { server_error } from "~/server/server_error";
 import { to_location } from "~/server/validation/db_types/location_validation";
 

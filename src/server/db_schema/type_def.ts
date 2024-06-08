@@ -1,6 +1,17 @@
 import "reflect-metadata"
 import "es6-shim"
 
+export type CustomerCreationInfo = {
+    name: string, 
+    phone_number: string,
+}
+
+export type CustomerData = {
+    name: string, 
+    phone_number: string,
+    notes: string,
+}
+
 export type Customer = { 
     id: string, 
     name: string, 

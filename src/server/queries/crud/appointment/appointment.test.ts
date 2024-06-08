@@ -1,6 +1,6 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { Appointment } from "~/server/db_schema/type_def";
-import { create_appointment_entry, retrieve_appointment_entry } from "./appointment_entry";
+//import { create_appointment_entry, retrieve_appointment_entry } from "./appointment_entry";
 
 const test_suit = "appointment_cruds";
 
