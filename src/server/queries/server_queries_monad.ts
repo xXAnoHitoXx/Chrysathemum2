@@ -8,6 +8,7 @@ export type Query<T, U> = (t: T, fire_db: FireDB) => Promise<U | QueryError>;
 export interface ServerQueryData<T> {
     unpack(): Promise<T | QueryError>;
     bind<U>(query: Query<T, U>): ServerQueryData<U>;
+    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U>;
 }
 
 export function is_successful_query<T>(result: T | QueryError): result is T {
@@ -40,7 +41,10 @@ export function map<T, U>(mapper: (t: T) => U): Query<T, U> {
     }
 }
 
-export function packed_query<T, U, V>(query: Query<T, U>, packer: (t: T, u: U) => V | QueryError): Query<T, V> {
+export function retain_input_n_output<T, U, V>(
+    query: Query<T, U>, 
+    packer: (input: T, output: U) => V | QueryError
+): Query<T, V> {
     return async (t: T, fire_db: FireDB) => {
         const u = await query(t, fire_db);
         if (is_server_error(u)) {
@@ -77,6 +81,11 @@ class SimpleQueryData<T> implements ServerQueryData<T> {
 
     bind<U>(query: Query<T, U>): ServerQueryData<U> {
         return new ChainedQueryData<T, U>(this, query, this.fire_db, this.is_test);
+    }
+
+    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U> {
+        const packed_data = new SimpleQueryData(this, this.fire_db, this.is_test);
+        return packed_data.bind(query);
     }
 }
 
@@ -115,5 +124,10 @@ class ChainedQueryData<S, T> implements ServerQueryData<T> {
 
     bind<U>(query: Query<T, U>): ServerQueryData<U> {
         return new ChainedQueryData<T, U>(this, query, this.fire_db, this.is_test);
+    }
+
+    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U> {
+        const packed_data = new SimpleQueryData(this, this.fire_db, this.is_test);
+        return packed_data.bind(query);
     }
 }

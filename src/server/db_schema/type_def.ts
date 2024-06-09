@@ -1,15 +1,17 @@
 import "reflect-metadata"
 import "es6-shim"
 
+export const DEFAULT_VALUE = "default";
+
 export type CustomerCreationInfo = {
     name: string, 
     phone_number: string,
 }
 
-export type CustomerData = {
-    name: string, 
-    phone_number: string,
-    notes: string,
+export type CustomerUpdateData = {
+    name: string | null, 
+    phone_number: string | null,
+    notes: string | null,
 }
 
 export type Customer = { 

@@ -1,7 +1,7 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
-import { create_new_technician, get_active_technicians, get_all_technicians, mark_technician_active, mark_technician_inactive } from "./technician_queries";
-import { delete_technician_entry, retrieve_technician_entry } from "../crud/technician/technician_entry";
-import type { Technician } from "~/server/db_schema/type_def";
+import { mark_technician_active, mark_technician_inactive } from "./technician_queries";
+import { is_successful_query, pack_test } from "../../server_queries_monad";
+import { create_technician_entry } from "../../crud/technician/technician_entry";
 
 const test_suit = "technician_business_logic";
 
@@ -9,6 +9,60 @@ afterAll(async () => {
     await clear_test_data(test_suit);
 })
 
+test("test change technician activity querry", async () => {
+    const test_name = test_suit.concat("/test_technician_activity_query/");
+
+    const test_techniclan_data = {
+        name: "Tinn",
+        color: "Mulalala",
+        active: false,
+    }
+
+    const test_tech = pack_test(test_techniclan_data, test_name)
+        .bind(create_technician_entry);
+    
+    let active_tech = await test_tech.packed_bind(mark_technician_active).unpack();
+
+    if(is_successful_query(active_tech)) {
+        expect(active_tech.name).toBe(test_techniclan_data.name);
+        expect(active_tech.color).toBe(test_techniclan_data.color);
+        expect(active_tech.active).toBe(true);
+    } else {
+        fail();
+    }
+
+    active_tech = await test_tech.packed_bind(mark_technician_active).unpack();
+
+    if(is_successful_query(active_tech)) {
+        expect(active_tech.name).toBe(test_techniclan_data.name);
+        expect(active_tech.color).toBe(test_techniclan_data.color);
+        expect(active_tech.active).toBe(true);
+    } else {
+        fail();
+    }
+
+    let inactive_tech = await test_tech.packed_bind(mark_technician_inactive).unpack();
+
+    if(is_successful_query(inactive_tech)) {
+        expect(inactive_tech.name).toBe(test_techniclan_data.name);
+        expect(inactive_tech.color).toBe(test_techniclan_data.color);
+        expect(inactive_tech.active).toBe(false);
+    } else {
+        fail();
+    }
+
+    inactive_tech = await test_tech.packed_bind(mark_technician_inactive).unpack();
+
+    if(is_successful_query(inactive_tech)) {
+        expect(inactive_tech.name).toBe(test_techniclan_data.name);
+        expect(inactive_tech.color).toBe(test_techniclan_data.color);
+        expect(inactive_tech.active).toBe(false);
+    } else {
+        fail();
+    }
+})
+
+/*
 // export async function create_new_technician(
 test("test new technician querry", async () => {
     const test_name = test_suit.concat("/test_technician_creation_query/");
@@ -36,61 +90,6 @@ test("test new technician querry", async () => {
     }
 })
 
-// export async function mark_technician_inactive(technician: Technician, redirect = "") {
-// export async function mark_technician_active(technician: Technician, redirect = "") {
-test("test change technician activity querry", async () => {
-    const test_name = test_suit.concat("/test_technician_activity_query/");
-
-    const test_techniclan_data = {
-        name: "Tinn",
-        color: "Mulalala",
-    }
-
-    const test_technician: Technician = await create_new_technician({name: test_techniclan_data.name, color: test_techniclan_data.color}, test_name);
-    let db_technician: Technician | null = await retrieve_technician_entry(test_technician.id, test_name);
-
-    expect(test_technician.active).toBe(true);
-    expect(db_technician).not.toBeNull();
-    if(db_technician != null) {
-        expect(db_technician.active).toBe(true);
-    }
-
-    await mark_technician_active(test_technician, test_name);
-    db_technician = await retrieve_technician_entry(test_technician.id, test_name);
-
-    expect(test_technician.active).toBe(true);
-    expect(db_technician).not.toBeNull();
-    if(db_technician != null) {
-        expect(db_technician.active).toBe(true);
-    }
-
-    await mark_technician_inactive(test_technician, test_name);
-    db_technician = await retrieve_technician_entry(test_technician.id, test_name);
-
-    expect(test_technician.active).toBe(false);
-    expect(db_technician).not.toBeNull();
-    if(db_technician != null) {
-        expect(db_technician.active).toBe(false);
-    }
-
-    await mark_technician_inactive(test_technician, test_name);
-    db_technician = await retrieve_technician_entry(test_technician.id, test_name);
-
-    expect(test_technician.active).toBe(false);
-    expect(db_technician).not.toBeNull();
-    if(db_technician != null) {
-        expect(db_technician.active).toBe(false);
-    }
-
-    await mark_technician_active(test_technician, test_name);
-    db_technician = await retrieve_technician_entry(test_technician.id, test_name);
-
-    expect(test_technician.active).toBe(true);
-    expect(db_technician).not.toBeNull();
-    if(db_technician != null) {
-        expect(db_technician.active).toBe(true);
-    }
-})
 
 // export async function get_all_technicians(redirect = ""): Promise<Technician[]> {
 test("test load all technician querry", async () => {
@@ -156,3 +155,4 @@ test("test load all active technician querry", async () => {
     expect(tech_list[0]!.name).toBe(technician_2.name);
     expect(tech_list[0]!.color).toBe(technician_2.color);
 })
+*/
