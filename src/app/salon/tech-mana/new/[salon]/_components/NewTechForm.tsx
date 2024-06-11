@@ -7,8 +7,9 @@ import TechPreview from './TechPreview';
 import sanitizer from '~/server/validation/text_sanitization'
 import type { Technician } from '~/server/db_schema/type_def';
 import TechDisplayBar from './TechDisplayBar';
-import { TypeConversionError } from '~/server/validation/validation_error';
-import { res_into_technician } from '~/server/validation/technician_validation';
+import { parse } from '~/app/api/response_parser';
+import { to_technician } from '~/server/validation/db_types/technician_validation';
+import { is_successful_query } from '~/server/queries/server_queries_monad';
 
 export function NewTechForm({ starting_active_technicians, salon }: { starting_active_technicians: Technician[], salon: string}) {
     const [active_techs, set_active_techs] = useState(starting_active_technicians);
@@ -39,11 +40,9 @@ export function NewTechForm({ starting_active_technicians, salon }: { starting_a
             body: JSON.stringify({ name: name, color: color_data, active_salon: salon }),
         }));
         
-        const new_tech: Technician | TypeConversionError = await res_into_technician(response);
+        const new_tech = await parse(response, to_technician);
 
-        if (new_tech instanceof TypeConversionError) {
-            // handle error lol
-        } else {
+        if (is_successful_query(new_tech)) {
             set_active_techs([
                 new_tech,
                 ...active_techs
