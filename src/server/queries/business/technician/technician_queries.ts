@@ -1,16 +1,26 @@
 import 'server-only';
 import { create_technician_entry, update_technician_entry } from '~/server/queries/crud/technician/technician_entry';
 import type { Technician } from '~/server/db_schema/type_def';
-import { Query, QueryError, ServerQueryData, map, retain_input } from '../../server_queries_monad';
+import { Query, QueryError, ServerQueryData, map, merge, retain_input } from '../../server_queries_monad';
 import { FireDB } from '~/server/db_schema/fb_schema';
 import { DataSnapshot, get } from 'firebase/database';
+import { TechnicianCreationInfo } from '~/app/api/technician/create/validation';
+import { assign_technician_to_location } from '../location/location';
 
-export const create_new_technician: Query<ServerQueryData<{ name: string, color: string }>, Technician> =
-    async (data: ServerQueryData<{ name: string, color: string }>) => {
-        return await data
-            .bind(map(({ name, color }) => ({ name: name, color: color, active: false })))
-            .bind(create_technician_entry)
-            .unpack();
+export const create_new_technician: Query<ServerQueryData<TechnicianCreationInfo>, Technician> =
+    async (data: ServerQueryData<TechnicianCreationInfo>) => {
+        const entry = data.bind(map(({ name, color }) => ({ 
+            name: name, 
+            color: color, 
+            active: false 
+        }))).bind(create_technician_entry);
+        
+        const assignment = merge(entry, data, (tech: Technician, info: TechnicianCreationInfo) => ({
+            location_id: info.active_salon,
+            technician: tech,
+        })).bind(assign_technician_to_location);
+
+        return await assignment.unpack();
     }
 
 export const mark_technician_active: Query<Technician, Technician> = 
@@ -27,7 +37,7 @@ export const mark_technician_active: Query<Technician, Technician> =
         } 
 
         const update = retain_input(update_technician_entry);
-        return update(active_tech, f_db);
+        return await update(active_tech, f_db);
     }
 
 export const mark_technician_inactive: Query<Technician, Technician> = 
@@ -44,7 +54,7 @@ export const mark_technician_inactive: Query<Technician, Technician> =
         } 
 
         const update = retain_input(update_technician_entry);
-        return update(inactive_tech, f_db);
+        return await update(inactive_tech, f_db);
     }
 
 export const get_all_technicians: Query<void, Technician[]> =
@@ -61,30 +71,8 @@ export const get_all_technicians: Query<void, Technician[]> =
 
         return technicians;
     }
+
 /*
-export async function create_new_technician(
-    { name, color }: { name: string, color: string }, 
-    redirect = ""
-): 
-    Promise<Technician> 
-{
-    return await create_technician_entry({ name: name, color: color, active: true }, redirect);
-}
-
-export async function get_all_technicians(redirect = ""): Promise<Technician[]> {
-    const data: DataSnapshot = await get(ref(f_db, fb_technician_entries(redirect)));
-
-    const technicians: Technician[] = [];
-
-    if(data.exists()) {
-        data.forEach((child) => {
-            technicians.push(child.val() as Technician);
-        });
-    }
-
-    return technicians;
-}
-
 export async function get_active_technicians(redirect = ""): Promise<Technician[]> {
     const data: DataSnapshot = await get(query(
         ref(f_db, fb_technician_entries(redirect)), 

@@ -28,12 +28,6 @@ export type Technician = {
     active: boolean,
 };
 
-export type TechnicianCreationInfo = {
-    name: string,
-    color: string,
-    active_salon: string,
-}
-
 export type Location = { 
     id: string, 
     address: string 
