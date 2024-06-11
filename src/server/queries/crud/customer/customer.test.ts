@@ -144,12 +144,16 @@ test("test customer_migration_index CRUDs querries", async () => {
 
     const test_ids = { id: "BaNaNa", legacy_id: "banana" };
 
-    let conversion: { customer_id: string } | QueryError = await 
+    let conversion: { customer_id: string | null } | QueryError = await 
         pack_test({ legacy_id: test_ids.legacy_id }, test_name)
         .bind(retrieve_customer_id_from_legacy_id)
         .unpack();
 
-    expect(is_successful_query(conversion)).toBe(false);
+    if(is_successful_query(conversion)) {
+        expect(conversion.customer_id).toBeNull();
+    } else {
+        fail();
+    }
 
     await pack_test({customer_id: test_ids.id, legacy_id: test_ids.legacy_id}, test_name)
         .bind(create_customer_migration_index)
@@ -173,5 +177,9 @@ test("test customer_migration_index CRUDs querries", async () => {
         .bind(retrieve_customer_id_from_legacy_id)
         .unpack();
 
-    expect(is_successful_query(conversion)).toBe(false);
+    if(is_successful_query(conversion)) {
+        expect(conversion.customer_id).toBeNull();
+    } else {
+        fail();
+    }
 })

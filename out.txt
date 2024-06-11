@@ -1,6 +1,0 @@
- WARN  This project is configured to use v8.15.7 of pnpm. Your current pnpm is v9.1.4
-
-> chrysanthemum-2@0.1.0 test /home/xxanohitoxx/Dev/Chrysathemum2
-> jest
-
- ELIFECYCLE  Test failed. See above for more details.

@@ -1,34 +1,53 @@
-import type { Technician } from "~/server/db_schema/type_def";
-import { assign_technician_to_roster } from "~/server/queries/crud/location/location_roster";
-import { mark_technician_active } from "~/server/queries/business/technician/technician_queries";
-import { Query, ServerQueryData, map, merge } from "~/server/queries/server_queries_monad";
+import { DEFAULT_VALUE, type Technician } from "~/server/db_schema/type_def";
+import { assign_technician_to_roster, remove_technician_from_roster, retrieve_roster } from "~/server/queries/crud/location/location_roster";
+import { get_all_technicians, mark_technician_active } from "~/server/queries/business/technician/technician_queries";
+import { Query, QueryError } from "~/server/queries/server_queries_monad";
+import { FireDB } from "~/server/db_schema/fb_schema";
+import { is_server_error } from "~/server/server_error";
 
 export const assign_technician_to_location: Query< 
-    ServerQueryData<{ location_id: string, technician: Technician }>, 
-    void 
-> = async (data: ServerQueryData<{ location_id: string, technician: Technician }>) => {
-        const to_roster = data.bind(map(
-            ({location_id, technician}) => ({ 
-                location_id: location_id, 
-                technician: { technician_id: technician.id, color: technician.color } 
-            })
-        )).bind(assign_technician_to_roster)
+    { location_id: string, technician: Technician }, 
+    Technician
+> = async ({ location_id, technician }, f_db: FireDB ) => {
+        const err = await assign_technician_to_roster({ 
+            location_id: location_id, 
+            technician: { technician_id: technician.id, color: technician.color },
+        }, f_db);
        
-        const mark_active = data.bind(map(
-            ({ technician } ) => (technician)
-        )).packed_bind(mark_technician_active);
+        if(is_server_error(err)) {
+            return err;
+        }
         
-        return await merge(to_roster, mark_active, () => {}).unpack();
+        return await mark_technician_active(technician, f_db);
     }
 
-/*
-export async function remove_technician_from_location({ location_id, technician_id }: { location_id: string, technician_id: string}, redirect = "") {
-    await remove(ref(f_db, fb_location_roster(redirect).concat(location_id, "/", technician_id)));
-}
+export const remove_technician_from_location = remove_technician_from_roster;
 
-export async function retrieve_technicians_at(location_id: string, redirect = ""): Promise<Technician[]> {
-    const active_tech: Technician[] = await get_active_technicians(redirect);
-    const roster: string[] = await retrieve_roster_ids(location_id, redirect);
-    return active_tech.filter((tech) => (roster.includes(tech.id)));
-}
-*/
+export const retrieve_technicians_at_location: Query<{ location_id: string }, Technician[]> =
+    async (data, f_db: FireDB): Promise<Technician[] | QueryError> => {
+        const v: void = undefined;
+        const roster = await retrieve_roster(data, f_db);
+        const technicians = await get_all_technicians(v, f_db);
+
+        if(is_server_error(roster)) { return roster }
+        if(is_server_error(technicians)) { return technicians }
+
+        const local_color_record : Record<string, string> = {}
+        const local_tech_ids: string[] = [];
+        for (const {technician_id, color} of roster) {
+            if(color !== DEFAULT_VALUE) {
+                local_color_record[technician_id] = color;
+            }
+            local_tech_ids.push(technician_id);
+        }
+
+        return technicians.filter((t: Technician) => (
+            local_tech_ids.includes(t.id)
+        )).map((t: Technician) => {
+            const local_color = local_color_record[t.id];
+            if(local_color != undefined) {
+                t.color = local_color;
+            }
+            return t;
+        });
+    }

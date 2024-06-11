@@ -11,12 +11,12 @@ export const create_customer_migration_index: Query<{ customer_id: string, legac
         await set(f_db.customers_legacy_id_index([params.legacy_id]), params.customer_id);
     }
 
-export const retrieve_customer_id_from_legacy_id: Query<{ legacy_id: string }, { customer_id: string }> =
-    async (params: { legacy_id: string }, f_db: FireDB): Promise<{ customer_id: string } | QueryError> => {
+export const retrieve_customer_id_from_legacy_id: Query<{ legacy_id: string }, { customer_id: string | null }> =
+    async (params: { legacy_id: string }, f_db: FireDB): Promise<{ customer_id: string | null } | QueryError> => {
         const data: DataSnapshot = await get(f_db.customers_legacy_id_index([params.legacy_id]));
 
         if(!data.exists()) {
-            return server_error("legacy index {".concat(params.legacy_id, "} does not exist"));
+            return { customer_id: null };
         }
         
         const result: unknown = data.val();

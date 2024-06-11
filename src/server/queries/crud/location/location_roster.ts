@@ -1,8 +1,8 @@
 import { type DataSnapshot, get, set, remove } from "firebase/database";
-import { Query, QueryError } from "../../server_queries_monad";
+import { Query } from "../../server_queries_monad";
 import { FireDB } from "~/server/db_schema/fb_schema";
 import { is_string } from "~/server/validation/simple_type";
-import { server_error } from "~/server/server_error";
+import { DEFAULT_VALUE } from "~/server/db_schema/type_def";
 
 export const assign_technician_to_roster: 
     Query<
@@ -17,11 +17,11 @@ export const assign_technician_to_roster:
 
 export const retrieve_roster: Query<
     { location_id: string }, 
-    { technician_id: string, color: string | QueryError }[]
+    { technician_id: string, color: string }[]
 > = async ({ location_id }: { location_id: string }, f_db: FireDB): 
-    Promise<{ technician_id: string, color: string | QueryError }[]> => {
+    Promise<{ technician_id: string, color: string }[]> => {
         const data: DataSnapshot = await get(f_db.location_roster([ location_id ]));
-        const roster: { technician_id: string, color: string | QueryError }[] = [];
+        const roster: { technician_id: string, color: string }[] = [];
 
         if(data.exists()) {
             data.forEach((child) => {
@@ -34,7 +34,7 @@ export const retrieve_roster: Query<
                 } else {
                     roster.push({
                         technician_id: child.key,
-                        color: server_error("corrupted technician entry in roster {".concat(child.key, "}"))
+                        color: DEFAULT_VALUE,
                     });
                 }
             });
