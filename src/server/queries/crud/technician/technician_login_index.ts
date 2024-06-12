@@ -16,7 +16,7 @@ export const retrieve_technician_id_from_user_id: Query<{ user_id: string }, { t
         const data: DataSnapshot = await get(f_db.technician_login([user_id]));
 
         if(!data.exists()){
-            return server_error("user does not have a log in attached");
+            return server_error("user does not have an entry in technician_login index");
         }
 
         const result: unknown = data.val();

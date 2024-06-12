@@ -10,7 +10,7 @@ export type TechnicianCreationInfo = {
 
 export function to_technician_creation_info(t: unknown): TechnicianCreationInfo | TypeConversionError {
     if (!is_object(t)) {
-        return server_error("unknown is not Technician");
+        return server_error("unknown is not TechnicianCreationInfo");
     }
     
     if (!("name" in t && "color" in t && "active_salon" in t)) {
@@ -20,7 +20,7 @@ export function to_technician_creation_info(t: unknown): TechnicianCreationInfo 
     const { name, color, active_salon } = t;
 
     if (!(is_string(name) && is_string(color) && is_string(active_salon))) {
-        return server_error("unknown is not Technician");
+        return server_error("unknown is not TechnicianCreationInfo");
     }
 
     return { name: name, color: color, active_salon: active_salon }

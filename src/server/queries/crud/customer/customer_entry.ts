@@ -27,12 +27,12 @@ export const create_customer_entry: Query<{name: string, phone_number: string}, 
         return customer_entry;
     }
 
-export const retrieve_customer_entry: Query<{ id: string }, Customer> = 
-    async (params: { id: string }, f_db: FireDB): Promise<Customer | QueryError> => {
-        const data: DataSnapshot = await get(f_db.customer_entries([params.id]));
+export const retrieve_customer_entry: Query<{ customer_id: string }, Customer> = 
+    async ({ customer_id }, f_db: FireDB): Promise<Customer | QueryError> => {
+        const data: DataSnapshot = await get(f_db.customer_entries([customer_id]));
 
         if (!data.exists()) {
-            return server_error("customer entry {".concat(params.id, "} not found"));
+            return server_error("customer entry {".concat(customer_id, "} not found"));
         }
 
         return to_customer(data.val());

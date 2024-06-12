@@ -1,9 +1,9 @@
 import 'server-only';
 import { DatabaseReference, ref, remove } from "firebase/database";
 import { f_db } from ".";
-import { QueryError } from '../queries/queries_monad';
 import { ano_iter } from '~/util/anoiter/anoiter';
 import { server_error } from '../server_error';
+import { QueryError } from '../queries/server_queries_monad';
 
 const prod="production";
 const dev="development";
@@ -74,6 +74,14 @@ export class FireDB {
 
     location_roster(sub_path: string[] = []): DatabaseReference {
         return this.ref(locations_root, "roster/", sub_path);
+    }
+
+    old_db(sub_path: string[] = []): DatabaseReference {
+        let path = ano_iter(sub_path).reduce(
+            (u: string, t: string) => (u.concat(t, "/")), 
+            "/"
+        );
+        return ref(f_db, path);
     }
 
     private ref(root: string, branch: string, sub_path: string[]){

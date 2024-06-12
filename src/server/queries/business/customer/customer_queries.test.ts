@@ -4,7 +4,6 @@ import { create_new_customer, is_no_book, update_customer_info } from "./custome
 import { retrieve_customer_entry } from "~/server/queries/crud/customer/customer_entry";
 import { retrieve_customer_phone_index } from "~/server/queries/crud/customer/customer_phone_index";
 import { is_successful_query, pack_test } from "~/server/queries/server_queries_monad";
-import { execute_api_query } from "~/server/queries/api/api_queries";
 import { is_server_error } from "~/server/server_error";
 
 const test_suit = "customer_business_logic";
@@ -21,7 +20,9 @@ test("customer creation", async () => {
         phone_number: "Thyme"
     };
 
-    const customer = await execute_api_query(create_new_customer, pack_test(customer_info, test_name));
+    const customer = await pack_test(customer_info, test_name)
+        .packed_bind(create_new_customer)
+        .unpack();
 
     if (is_successful_query(customer)) {
         expect(customer.name).toBe(customer_info.name);
@@ -30,7 +31,7 @@ test("customer creation", async () => {
         fail();
     }
 
-    const entry = await pack_test({ id: customer.id }, test_name)
+    const entry = await pack_test({ customer_id: customer.id }, test_name)
         .bind(retrieve_customer_entry).unpack();
 
     if (is_successful_query(entry)) {
@@ -60,7 +61,9 @@ test("update customer name", async () => {
         phone_number: "Thyme"
     };
 
-    const starting_customer = await execute_api_query(create_new_customer, pack_test(customer_info, test_name));
+    const starting_customer = await pack_test(customer_info, test_name) 
+        .packed_bind(create_new_customer)
+        .unpack();
 
     if(is_server_error(starting_customer)) {
         fail();
@@ -72,16 +75,16 @@ test("update customer name", async () => {
         notes: null,
     }
 
-    const name_changed = await execute_api_query(
-        update_customer_info, 
-        pack_test({ customer: starting_customer, update: name_change_info }, test_name)
-    );
+    const name_changed = await pack_test({ customer: starting_customer, update: name_change_info }, test_name)
+        .packed_bind(update_customer_info)
+        .unpack();
+        
 
     if(is_server_error(name_changed)) {
         fail();
     }
 
-    const name_changed_entry = await pack_test({ id: starting_customer.id }, test_name)
+    const name_changed_entry = await pack_test({ customer_id: starting_customer.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack();
 
@@ -103,7 +106,9 @@ test("update customer phone_number", async () => {
         phone_number: "Thyme"
     };
 
-    const starting_customer = await execute_api_query(create_new_customer, pack_test(customer_info, test_name));
+    const starting_customer = await pack_test(customer_info, test_name)
+        .packed_bind(create_new_customer)
+        .unpack();
 
     if(is_server_error(starting_customer)) {
         fail();
@@ -115,16 +120,15 @@ test("update customer phone_number", async () => {
         notes: null,
     }
 
-    const phone_changed = await execute_api_query(
-        update_customer_info, 
-        pack_test({ customer: starting_customer, update: phone_change_info }, test_name)
-    );
+    const phone_changed = await pack_test({ customer: starting_customer, update: phone_change_info }, test_name)
+        .packed_bind(update_customer_info)
+        .unpack();
 
     if(is_server_error(phone_changed)) {
         fail();
     }
 
-    const phone_changed_entry = await pack_test({ id: starting_customer.id }, test_name)
+    const phone_changed_entry = await pack_test({ customer_id: starting_customer.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack();
 
@@ -146,7 +150,9 @@ test("update customer notes", async () => {
         phone_number: "Thyme"
     };
 
-    const starting_customer = await execute_api_query(create_new_customer, pack_test(customer_info, test_name));
+    const starting_customer = await pack_test(customer_info, test_name)
+        .packed_bind(create_new_customer)
+        .unpack();
 
     if(is_server_error(starting_customer)) {
         fail();
@@ -158,16 +164,15 @@ test("update customer notes", async () => {
         notes: "Justin Wong"
     }
 
-    const phone_changed = await execute_api_query(
-        update_customer_info, 
-        pack_test({ customer: starting_customer, update: notes_change_info }, test_name)
-    );
+    const phone_changed = await pack_test({ customer: starting_customer, update: notes_change_info }, test_name)
+        .packed_bind(update_customer_info)
+        .unpack();
 
     if(is_server_error(phone_changed)) {
         fail();
     }
 
-    const notes_changed_entry = await pack_test({ id: starting_customer.id }, test_name)
+    const notes_changed_entry = await pack_test({ customer_id: starting_customer.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack();
 
@@ -189,7 +194,9 @@ test("update customer info", async () => {
         phone_number: "Thyme"
     };
 
-    const starting_customer = await execute_api_query(create_new_customer, pack_test(customer_info, test_name));
+    const starting_customer = await pack_test(customer_info, test_name)
+        .packed_bind(create_new_customer)
+        .unpack();
 
     if(is_server_error(starting_customer)) {
         fail();
@@ -201,16 +208,15 @@ test("update customer info", async () => {
         notes: "Get Daigo Parried"
     }
 
-    const phone_changed = await execute_api_query(
-        update_customer_info, 
-        pack_test({ customer: starting_customer, update: update_target }, test_name)
-    );
+    const phone_changed = await pack_test({ customer: starting_customer, update: update_target }, test_name)
+        .packed_bind(update_customer_info)
+        .unpack();
 
     if(is_server_error(phone_changed)) {
         fail();
     }
 
-    const updated_entry = await pack_test({ id: starting_customer.id }, test_name)
+    const updated_entry = await pack_test({ customer_id: starting_customer.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack();
 

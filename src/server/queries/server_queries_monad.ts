@@ -29,7 +29,7 @@ export function merge<R, S, T>(
     merger: (r: R, s: S) => T | QueryError
 ): ServerQueryData<T> {
     return r.bind(async (r: R, _): Promise<T | QueryError> => {
-        return await s.bind(async (s: S, _): Promise<T | QueryError> => {
+        return s.bind(async (s: S, _): Promise<T | QueryError> => {
             return merger(r, s);
         }).unpack();
     });

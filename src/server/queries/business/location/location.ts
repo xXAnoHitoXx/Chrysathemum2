@@ -18,7 +18,7 @@ export const assign_technician_to_location: Query<
             return err;
         }
         
-        return await mark_technician_active(technician, f_db);
+        return mark_technician_active(technician, f_db);
     }
 
 export const remove_technician_from_location = remove_technician_from_roster;

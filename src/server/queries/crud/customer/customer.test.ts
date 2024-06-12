@@ -25,7 +25,7 @@ test("test customer_entries CRUDs querries", async () => {
     }
 
     const created_customer_entry: Customer | QueryError = await 
-        pack_test({ id: test_customer_entry.id }, test_name)
+        pack_test({ customer_id: test_customer_entry.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack();
     
@@ -49,7 +49,7 @@ test("test customer_entries CRUDs querries", async () => {
         .unpack()
 
     const updated_customer_entry: Customer | QueryError = await 
-        pack_test({ id: test_customer_entry.id }, test_name)
+        pack_test({ customer_id: test_customer_entry.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack()
 
@@ -67,7 +67,7 @@ test("test customer_entries CRUDs querries", async () => {
         .unpack();
 
     const empty_customer_entry: Customer | QueryError = await
-        pack_test({ id: test_customer_entry.id }, test_name)
+        pack_test({ customer_id: test_customer_entry.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack()
 

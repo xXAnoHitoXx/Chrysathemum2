@@ -1,38 +1,39 @@
 "use client"
 
 import { useState } from "react";
-import type { Old_Customer_Data } from "~/server/queries/migration/customer";
-import { res_into_Old_Customer_Data } from "~/server/validation/migration/customer/customer_validation";
-import { TypeConversionError } from "~/server/validation/validation_error";
+import { Method, fetch_query, fetch_void_query } from "~/app/api/api_query";
+import { to_old_customer_data } from "~/app/api/migration/customer/validation";
+import { is_server_error } from "~/server/server_error";
+import { to_array } from "~/server/validation/simple_type";
 import { ano_iter } from "~/util/anoiter/anoiter";
-import type { AnoIter } from "~/util/anoiter/anoiter";
 
 export default function MigrationStation() {
     const [is_loading, set_is_loading] = useState(false);
 
     async function migration_sequence() {
         set_is_loading(true);
-        const old_customers: AnoIter<Old_Customer_Data> = 
-            ano_iter(
-                await res_into_Old_Customer_Data(
-                    await fetch(new Request(
-                        "/api/migration/customer", {
-                            method: "GET"
-                        }
-                    )
-                ))
-            ) .imap((data) => ( (data instanceof TypeConversionError)? null : data ))
-            .icompact<Old_Customer_Data>();
+        const old_customers = await fetch_query({
+            url: "/api/migration/customer",
+            method: Method.GET,
+            to: to_array(to_old_customer_data),
+            params: null,
+        })
 
-        for (const customers of old_customers.ichunk(20).collect()){
-            console.log(customers);
-            await Promise.all(customers.map((customer) => (
-                fetch(
-                    "/api/migration/customer", {
-                        method: "POST",
-                        body: JSON.stringify(customer),
-                    }
-                )
+        if(is_server_error(old_customers)) { 
+            console.log("failed to retrieve old customers")
+            return 
+        }
+
+        const batches = ano_iter(old_customers).ichunk(20).collect();
+
+        for (const batch_of_customers of batches){
+            console.log(batch_of_customers);
+            await Promise.all(batch_of_customers.map((customer) => (
+                fetch_void_query({
+                    url: "/api/migration/customer",
+                    method: Method.POST,
+                    params: { data: customer },
+                })
             )));
         }
     }
