@@ -1,16 +1,33 @@
 'use client'
 
 import { Button } from "@nextui-org/button";
-import { type Technician } from "~/server/db_schema/type_def";
+import { Technician } from "~/server/db_schema/type_def";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
-import { useState, type FormEvent } from "react";
-import { ano_iter, ano_chain_iter, type AnoIter } from "~/util/anoiter/anoiter"
+import { useState, FormEvent } from "react";
+import { ano_iter, ano_chain_iter, AnoIter } from "~/util/anoiter/anoiter"
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
 
-export default function ClientSide({ technicians, roster, salon }: { technicians: Technician[], roster: string[], salon: string }) {
+export default function ClientSide(
+    { technicians, roster, salon }
+        : { technicians: Technician[], 
+            roster: { technician_id: string, color: string }[], 
+            salon: string }
+) {
     const inactive_list: Technician[] = technicians.filter((technician) => (!technician.active));
-    const active_list: Technician[] = technicians.filter((technician) => (technician.active && !roster.includes(technician.id)));
-    const at_this_location_list: Technician[] = technicians.filter((technician) => (technician.active && roster.includes(technician.id)));
+
+    const roster_ids: string[] = [];
+
+    for (const { technician_id, color } of roster ) {
+        roster_ids.push(technician_id);
+        for (const technician of technicians) {
+            if (technician.id == technician_id) {
+                technician.color = color;
+            }
+        }
+    }
+
+    const active_list: Technician[] = technicians.filter((technician) => (technician.active && !roster_ids.includes(technician.id)));
+    const at_this_location_list: Technician[] = technicians.filter((technician) => (technician.active && roster_ids.includes(technician.id)));
 
     const [current_location, current_location_tech_list] = useDragAndDrop<HTMLUListElement, Technician>(
         at_this_location_list,
