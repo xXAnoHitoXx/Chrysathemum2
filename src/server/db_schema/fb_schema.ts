@@ -13,6 +13,7 @@ const operarion="operarion";
 const customers_root="customers/";
 const technicians_root="technicians/";
 const locations_root="locations/";
+const appointments_root="appointments/"
 
 export async function clear_test_data(test_name: string): Promise<QueryError | null> {
     const fire_db: FireDB = new FireDB(test_name);
@@ -74,6 +75,10 @@ export class FireDB {
 
     location_roster(sub_path: string[] = []): DatabaseReference {
         return this.ref(locations_root, "roster/", sub_path);
+    }
+
+    appointment_entries(sub_path: string[] = []): DatabaseReference {
+        return this.ref(appointments_root, "id/", sub_path);
     }
 
     old_db(sub_path: string[] = []): DatabaseReference {
