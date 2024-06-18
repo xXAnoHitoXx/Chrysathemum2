@@ -1,8 +1,7 @@
-import { parse_request } from "../../request_parser";
 import { to_old_customer_data } from "./validation";
 import { pack } from "~/server/queries/server_queries_monad";
-import { unpack_response } from "../../response_parser";
 import { import_customer_from_old_db, migrate_customer_data } from "~/server/queries/business/migration/customer";
+import { parse_request, unpack_response } from "../../server_parser";
 
 export async function POST(request: Request): Promise<Response> {
     const query = pack(request).bind(parse_request(to_old_customer_data))

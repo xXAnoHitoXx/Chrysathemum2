@@ -1,5 +1,4 @@
-import { parse_request } from "~/app/api/request_parser";
-import { unpack_response } from "~/app/api/response_parser";
+import { parse_request, unpack_response } from "~/app/api/server_parser";
 import type { Technician } from "~/server/db_schema/type_def"
 import { assign_technician_to_location, remove_technician_from_location } from "~/server/queries/business/location/location";
 import { map, pack } from "~/server/queries/server_queries_monad";

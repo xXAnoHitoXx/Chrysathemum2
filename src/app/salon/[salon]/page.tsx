@@ -1,3 +1,7 @@
+import { Board } from "./_component/board";
+
 export default function Salon() {
-    return(<div>Not yet implemented</div>);
+    return (
+        <Board appointments={[]}/>
+    );
 }

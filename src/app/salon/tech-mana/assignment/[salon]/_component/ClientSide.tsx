@@ -6,6 +6,8 @@ import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useState, FormEvent } from "react";
 import { ano_iter, ano_chain_iter, AnoIter } from "~/util/anoiter/anoiter"
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
+import { fetch_query, Method } from "~/app/api/api_query";
+import { ResponseError } from "~/app/api/response_parser";
 
 export default function ClientSide(
     { technicians, roster, salon }
@@ -59,57 +61,61 @@ export default function ClientSide(
 
     async function requests_changes() {
 
-        const add_requests: AnoIter<Promise<Response>> = ano_iter(current_location_tech_list)
+       const add_requests: AnoIter<Promise<ResponseError | null>> = ano_iter(current_location_tech_list)
             .ifilter((technician) => {
                 return !initially_at_location_ids.includes(technician.id);
             })
             .imap((technician) => (
-                fetch(new Request(
-                    "/api/technician/location/".concat(salon),{
-                    method: "POST",
-                    body: JSON.stringify(technician),
-                }))
+                fetch_query({
+                    url: "/api/technician/location/".concat(salon),
+                    method: Method.POST,
+                    params: { data: technician },
+                    to: () => (null),
+                })
             ));
 
-        const remove_requests: AnoIter<Promise<Response>> = ano_chain_iter(active_tech_list, inactive_tech_list)
+        const remove_requests: AnoIter<Promise<ResponseError | null>> = ano_chain_iter(active_tech_list, inactive_tech_list)
             .ifilter((technician) => (
                 initially_at_location_ids.includes(technician.id)
             ))
             .imap((technician) => (
-                fetch(new Request(
-                    "/api/technician/location/".concat(salon),{
-                    method: "DELETE",
-                    body: JSON.stringify(technician),
-                }))
+                fetch_query({
+                    url: "/api/technician/location/".concat(salon), 
+                    method: Method.DELETE,
+                    params: { data: technician },
+                    to: () => (null),
+                })
             ));
 
-        const activation_requests: AnoIter<Promise<Response>> =
+        const activation_requests: AnoIter<Promise<ResponseError | null>> =
             ano_iter(active_tech_list)
                 .ifilter((technician) => (
                     initially_inactive_ids.includes(technician.id)
                 ))
                 .imap((technician) => (
-                    fetch(new Request(
-                        "/api/technician/activation", {
-                        method: "PATCH",
-                        body: JSON.stringify(technician)
-                    }))
+                    fetch_query({
+                        url: "/api/technician/activation",
+                        method: Method.PATCH,
+                        params: { data: technician },
+                        to: () => (null),
+                    })
                 ));
 
-        const deactivation_requests: AnoIter<Promise<Response>> =
+        const deactivation_requests: AnoIter<Promise<ResponseError | null>> =
             ano_iter(inactive_tech_list)
                 .ifilter((technician) => (
                     !initially_inactive_ids.includes(technician.id)
                 ))
                 .imap((technician) => (
-                    fetch(new Request(
-                        "/api/technician/deactivation",{
-                        method: "PATCH",
-                        body: JSON.stringify(technician),
-                    }))
+                    fetch_query({
+                        url: "/api/technician/deactivation",
+                        method: Method.PATCH,
+                        params: { data: technician },
+                        to: () => (null),
+                    })
                 ));
 
-        const requests_iter: AnoIter<Promise<Response>> =
+        const requests_iter: AnoIter<Promise<ResponseError | null>> =
             ano_chain_iter(
                 add_requests, remove_requests, activation_requests, deactivation_requests
             );

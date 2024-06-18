@@ -1,5 +1,5 @@
 import { FireDB } from "../db_schema/fb_schema";
-import { ServerError, is_server_error } from "../server_error";
+import { is_server_error, ServerError } from "../server_error";
 
 export type QueryError = ServerError;
 

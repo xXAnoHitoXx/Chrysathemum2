@@ -38,7 +38,10 @@ export type Appointment = {
     customer_id: string,
     technician_id: string | null,
     date: string,
-    time: string,
+    time: number,
     duration: string,
     details: string,
 }
+
+export type Hour = { open: number, close: number }
+export type Schedule = Hour[]

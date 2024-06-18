@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react";
-import { Method, fetch_query, fetch_void_query } from "~/app/api/api_query";
+import { Method, fetch_query } from "~/app/api/api_query";
 import { to_old_customer_data } from "~/app/api/migration/customer/validation";
-import { is_server_error } from "~/server/server_error";
 import { to_array } from "~/server/validation/simple_type";
+import { is_response_error } from "~/server/validation/validation_error";
 import { ano_iter } from "~/util/anoiter/anoiter";
 
 export default function MigrationStation() {
@@ -19,7 +19,7 @@ export default function MigrationStation() {
             params: null,
         })
 
-        if(is_server_error(old_customers)) { 
+        if(is_response_error(old_customers)) { 
             console.log("failed to retrieve old customers")
             return 
         }
@@ -29,10 +29,11 @@ export default function MigrationStation() {
         for (const batch_of_customers of batches){
             console.log(batch_of_customers);
             await Promise.all(batch_of_customers.map((customer) => (
-                fetch_void_query({
+                fetch_query({
                     url: "/api/migration/customer",
                     method: Method.POST,
                     params: { data: customer },
+                    to: () => (null),
                 })
             )));
         }

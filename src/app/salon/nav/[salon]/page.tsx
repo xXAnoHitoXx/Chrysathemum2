@@ -1,8 +1,13 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { get_current_user } from "~/app/api/c_user";
 
 export default async function Nav({ params }: { params: { salon: string } }) {
 
-    const user = await currentUser();
+    const user = await get_current_user();
+
+    if(!user){
+        redirect("/");
+    }
 
     return(
         <div>

@@ -77,6 +77,10 @@ export class FireDB {
         return this.ref(locations_root, "roster/", sub_path);
     }
 
+    location_schedule(sub_path: string[] = []): DatabaseReference {
+        return this.ref(locations_root, "schedule/", sub_path);
+    }
+
     appointment_entries(sub_path: string[] = []): DatabaseReference {
         return this.ref(appointments_root, "id/", sub_path);
     }
