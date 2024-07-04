@@ -12,7 +12,7 @@ export function parse_request<T>(into: (t: unknown) => T | TypeConversionError):
 export async function unpack_response<T>(data: ServerQueryData<T>): Promise<Response> {
     const t: T | QueryError = await data.unpack();
     if (is_server_error(t)) {
-        return new Response(t.error.message, { status: 418 });
+        return new Response(t.error, { status: 418 });
     }
 
     if(t == null) {

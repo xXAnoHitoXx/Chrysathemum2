@@ -16,8 +16,8 @@ test("test appointment_entries CRUDs querries", async () => {
         customer_id: "Banana",
         technician_id: null,
         date: "20 3 2021",
-        time: "100",
-        duration: "30",
+        time: 5,
+        duration: 10,
         details: "emotional damage",
     }
 
@@ -55,8 +55,8 @@ test("test appointment_entries CRUDs querries", async () => {
         customer_id: "Bruhnuhnuh",
         technician_id: "portmonaie",
         date: "22 3 2021",
-        time: "150",
-        duration: "320",
+        time: 15,
+        duration: 5,
         details: "emotional damage++",
     }
 

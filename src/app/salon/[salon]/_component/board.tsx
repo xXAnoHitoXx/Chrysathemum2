@@ -1,16 +1,9 @@
 "use client"
 
-import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { map, range } from "itertools";
-import { RefObject, useState } from "react";
+import { useState } from "react";
 import { Appointment, Hour } from "~/server/db_schema/type_def";
-import { quick_sort } from "~/util/ano_quick_sort";
-
-function Display(props: { appointments: Appointment[] }) {
-    return(
-        <div/>
-    );
-}
+import { bubble_sort } from "~/util/ano_bubble_sort";
 
 function timestamp(time: number, hours: Hour) {
     const stamp = (time < 12)? time.toString().concat(" am") : 
@@ -24,50 +17,47 @@ function timestamp(time: number, hours: Hour) {
         (time % 2 == 1)? "bg-neutral-800 text-zinc-300" : "bg-neutral-400 text-zinc-900"
 
     return(
-        <div key={"time_".concat(time.toString())} className={"h-10 row-start-1".concat(" col-start-", ((time - 8) * 4 + 1).toString(), 
+        <div key={"time_".concat(time.toString())} draggable="false" className={"h-10 row-start-1".concat(" col-start-", ((time - 8) * 4 + 1).toString(), 
             " col-span-4 ", color)}>
             {stamp}
-        </div>);
+        </div>
+    );
 }
 
 export function Board(props:{ appointments: Appointment[] }) {
-    quick_sort(props.appointments, (a: Appointment, b: Appointment) => {
+    bubble_sort(props.appointments, (a: Appointment, b: Appointment) => {
         if (a.time == b.time) {
-            return a.customer_id.localeCompare(b.customer_id);
+            return a.customer.id.localeCompare(b.customer.id);
         }
         return a.time - b.time;
-    })
+    });
 
     const [appointments, set_appointments] = useState(props.appointments);
 
-    const [grid] = useDragAndDrop<HTMLDivElement, Appointment>([], {
-        dropZone: false,
-    })
-
-    const dragging_windows: { index: string, window: RefObject<HTMLDivElement>, appointments: Appointment[] }[] = [];
-
-    for (const index of range(1, 53)) {
-        const [window, items] = useDragAndDrop<HTMLDivElement, Appointment>([]);
-        dragging_windows.push({ index: index.toString(), window: window, appointments: items })
-    }
-
     return (
-        <div className="grid grid-cols-1 grid-rows-1 m-1" >
-            <div className="row-start-1 col-start-1 grid auto-rows-max grid-cols-appointment-board">
-                {dragging_windows.map(({ index, window }) => (
-                    <div 
-                        key={index}
-                        ref={window} 
-                        className={"border-1 border-blue-500 min-h-32 row-start-1 row-span-1 col-span-1 col-start-".concat(index)}
-                    />
-                ))}
-            </div>
-            <div ref={grid} className="row-start-1 col-start-1 grid auto-rows-max grid-cols-appointment-board">
-                { map(range(8, 21), (i) => (
-                    timestamp(i, { open: 10, close: 19 })
-                )) }
-                <Display appointments={appointments}/>
-            </div>
-        </div>
+        <ul className="grid auto-rows-max grid-cols-appointment-board m-2">
+            { map(range(8, 21), (i) => (
+                timestamp(i, { open: 10, close: 19 })
+            )) }
+            { appointments.map((app: Appointment) => {
+                const app_color = (app.technician == null)? "border-violet-500 text-violet-500 bg-slate-950" : app.technician.color;
+                const app_col = "col-start-".concat(app.time.toString());
+                const app_span = "col-span-".concat(app.duration.toString());
+
+                return (
+                    <li className={"border-2 ".concat(app_color, " ",
+                        app_col, " ", app_span, " row-span-2 rounded m-1"
+                    )}>
+                        <button className="w-full h-full text-ellipsis">
+                        {app.customer.name}
+                        <br/>
+                        {app.customer.phone_number}
+                        <br/>
+                        {app.details}
+                        </button>
+                    </li>
+                );
+            }) }
+        </ul>
     );
 }

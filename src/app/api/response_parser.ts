@@ -6,6 +6,5 @@ export async function parse_response<T>(response: Response, to: (t: unknown) => 
     if(!response.ok){
         return { error: await response.text() };
     }
-    const validated_response = to(await response.json());
-    return validated_response;
+    return to(await response.json());
 }

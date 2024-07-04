@@ -1,4 +1,4 @@
-import { Appointment } from "~/server/db_schema/type_def";
+import { AppointmentEntry } from "~/server/db_schema/type_def";
 import { Query } from "../../server_queries_monad";
 import { DataSnapshot, DatabaseReference, get, push, remove, set, update } from "firebase/database";
 import { server_error } from "~/server/server_error";
@@ -8,17 +8,17 @@ export const create_appointment_entry: Query<{
         customer_id: string,
         technician_id: string | null,
         date: string,
-        time: string,
-        duration: string,
+        time: number,
+        duration: number,
         details: string,
-    }, Appointment> = async (params, f_db) => {
+    }, AppointmentEntry> = async (params, f_db) => {
         const id_ref: DatabaseReference = await push(f_db.appointment_entries([]));
 
         if(id_ref.key == null) {
             return server_error("failed to create appointment entry with null id");
         }
 
-        const appointment: Appointment = {
+        const appointment: AppointmentEntry = {
             id: id_ref.key,
             customer_id: params.customer_id,
             technician_id: params.technician_id,
@@ -32,18 +32,19 @@ export const create_appointment_entry: Query<{
         return appointment;
     }
 
-export const retrieve_appointment_entry: Query<{ id: string }, Appointment> =
+export const retrieve_appointment_entry: Query<{ id: string }, AppointmentEntry> =
     async ({ id }, f_db) => {
         const data: DataSnapshot = await get(f_db.appointment_entries([id]));
 
         if(!data.exists()){
-            return server_error("retrieving non exist Appointment {".concat(id, "}"));
+            return server_error("retrieving non exist AppointmentEntry {".concat(id, "}"));
         }
 
+        
         return to_appointment(data.val());
     }
 
-export const update_appointment_entry: Query<Appointment, void> =
+export const update_appointment_entry: Query<AppointmentEntry, void> =
     async (appointment, f_db) => {
         await update(f_db.appointment_entries([appointment.id]), appointment);
     }
