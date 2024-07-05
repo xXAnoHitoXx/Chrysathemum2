@@ -1,16 +1,11 @@
-import type { Technician, TechnicianCreationInfo } from "~/server/db_schema/type_def"
-import { create_new_technician } from "~/server/queries/business/technician_queries";
-import { req_into_technician_creation_info } from "~/server/validation/technician_validation"
-import { TypeConversionError } from "~/server/validation/validation_error";
+import { pack } from "~/server/queries/server_queries_monad";
+import { to_technician_creation_info } from "./validation";
+import { create_new_technician } from "~/server/queries/business/technician/technician_queries";
+import { parse_request, unpack_response } from "../../server_parser";
 
 export async function POST(request: Request): Promise<Response> {
-    const tech_info: TechnicianCreationInfo | TypeConversionError = await req_into_technician_creation_info(request);
-
-    if (tech_info instanceof TypeConversionError) {
-        return Response.error();
-    }
-
-    const tech: Technician = await create_new_technician({ name: tech_info.name, color: tech_info.color });
-
-    return Response.json(tech);
+    const technician_creation_query = pack(request)
+        .bind(parse_request(to_technician_creation_info))
+        .packed_bind(create_new_technician);
+    return unpack_response(technician_creation_query);
 }

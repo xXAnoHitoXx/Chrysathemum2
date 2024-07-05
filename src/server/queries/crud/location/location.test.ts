@@ -1,7 +1,7 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
-import type { Location } from "~/server/db_schema/type_def";
 import { create_new_location, retrieve_location } from "./location";
-import { assign_technician_to_roster, remove_technician_from_roster, retrieve_roster_ids } from "./location_roster";
+import { assign_technician_to_roster, remove_technician_from_roster, retrieve_roster } from "./location_roster";
+import { is_successful_query, pack_test } from "../../server_queries_monad";
 
 const test_suit = "location_cruds";
 
@@ -14,17 +14,23 @@ test("location entry cruds", async () => {
 
     const location_info = { id: "5CBL", address: "5 Cumberland Dr" };
 
-    const location: Location = await create_new_location(location_info, test_name);
-    const location_entry: Location | null = await retrieve_location({ id: location_info.id }, test_name);
+    const location = await 
+        pack_test(location_info, test_name)
+        .bind(create_new_location)
+        .unpack();
+    const location_entry = await 
+        pack_test({ id: location_info.id }, test_name)
+        .bind(retrieve_location)
+        .unpack();
 
-    expect(location_entry).not.toBeNull();
-    if(location_entry != null){
-        expect(location_entry.id).toBe(location.id);
-        expect(location_entry.address).toBe(location.address);
+    expect(is_successful_query(location)).toBe(true);
+
+    if(is_successful_query(location_entry)) {
+        expect(location_entry.id).toBe(location_info.id);
+        expect(location_entry.address).toBe(location_info.address);
+    } else {
+        fail();
     }
-
-    expect(location.id).toBe(location_info.id);
-    expect(location.address).toBe(location_info.address);
 })
 
 test("location roster", async () => {
@@ -32,28 +38,46 @@ test("location roster", async () => {
 
     const location_id = "location_lololllol";
     const tech1_info = {
-        id: "Chicken Noodle",
+        technician_id: "Chicken Noodle",
         color: "lolol",
     };
     const tech2_info = {
-        id: "Banana Bread hmmmmmm",
+        technician_id: "Banana Bread hmmmmmm",
         color: "lolanstnol",
     };
 
-    await assign_technician_to_roster({ location_id: location_id, technician: tech1_info }, test_name);
-    await assign_technician_to_roster({ location_id: location_id, technician: tech2_info }, test_name);
+    await pack_test({ location_id: location_id, technician: tech1_info }, test_name)
+        .bind(assign_technician_to_roster)
+        .unpack();
+    await pack_test({ location_id: location_id, technician: tech2_info }, test_name)
+        .bind(assign_technician_to_roster)
+        .unpack();
 
-    const roster: string[] = await retrieve_roster_ids(location_id, test_name);
+    const roster = await pack_test({ location_id: location_id }, test_name)
+        .bind(retrieve_roster)
+        .unpack()
 
-    expect(roster).toHaveLength(2);
-    expect(roster).toContain(tech1_info.id);
-    expect(roster).toContain(tech2_info.id);
+    if(is_successful_query(roster)){
+        expect(roster).toHaveLength(2);
+        expect(roster).toContainEqual(tech1_info);
+        expect(roster).toContainEqual(tech2_info);
+    } else {
+        fail();
+    }
 
-    await remove_technician_from_roster({ location_id: location_id, technician_id: tech2_info.id }, test_name);
+    await pack_test({ location_id: location_id, technician_id: tech2_info.technician_id }, test_name)
+        .bind(remove_technician_from_roster)
+        .unpack();
 
-    const post_del_roster: string[] = await retrieve_roster_ids(location_id, test_name);
-
-    expect(post_del_roster).toHaveLength(1);
-    expect(post_del_roster).toContain(tech1_info.id);
-    expect(post_del_roster).not.toContain(tech2_info.id);
+    const post_del_roster = await pack_test({ location_id: location_id }, test_name)
+        .bind(retrieve_roster)
+        .unpack();
+        
+    if(is_successful_query(roster)){
+        expect(post_del_roster).toHaveLength(1);
+        expect(post_del_roster).toContainEqual(tech1_info);
+        expect(post_del_roster).not.toContainEqual(tech2_info);
+    } else {
+        fail();
+    }
 })

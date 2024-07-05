@@ -1,23 +1,22 @@
-import { type DataSnapshot, get, ref, set } from "firebase/database";
-import { f_db } from "~/server/db_schema";
-import { fb_location_entries } from "~/server/db_schema/fb_schema";
+import { type DataSnapshot, get, set } from "firebase/database";
+import { FireDB } from "~/server/db_schema/fb_schema";
 import { type Location } from "~/server/db_schema/type_def";
+import { Query, QueryError } from "../../server_queries_monad";
+import { server_error } from "~/server/server_error";
+import { to_location } from "~/server/validation/db_types/location_validation";
 
-export async function create_new_location({ id, address }: { id: string, address: string }, redirect: string ): Promise<Location> {
-    const location: Location = { id: id, address: address };
-    await set(ref(f_db, fb_location_entries(redirect).concat(id)), location);
-
-    return location;
-}
-
-export async function retrieve_location({ id }: { id: string }, redirect: string): Promise<Location | null> {
-    const data: DataSnapshot = await get(ref(f_db, fb_location_entries(redirect).concat(id)));
-
-    if(!data.exists()) {
-        return null;
+export const create_new_location: Query<{ id: string, address: string }, void> =
+    async (location: { id: string, address: string }, f_db: FireDB) => {
+        await set(f_db.location_entries([location.id]),location);
     }
 
-    return data.val() as Location;
-}
+export const retrieve_location: Query<{ id: string }, Location> =
+    async ({ id }: { id: string }, f_db: FireDB): Promise<Location | QueryError> => {
+        const data: DataSnapshot = await get(f_db.location_entries([id]));
 
+        if(!data.exists()) {
+            return server_error("location {".concat(id, "} does not exists"));
+        }
 
+        return to_location(data.val());
+    }

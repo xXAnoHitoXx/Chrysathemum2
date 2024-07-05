@@ -1,24 +1,52 @@
-import { type DataSnapshot, get, ref, set, remove } from "firebase/database";
-import { f_db } from "~/server/db_schema";
-import { fb_location_roster } from "~/server/db_schema/fb_schema";
+import { type DataSnapshot, get, set, remove } from "firebase/database";
+import { Query } from "../../server_queries_monad";
+import { FireDB } from "~/server/db_schema/fb_schema";
+import { is_string } from "~/server/validation/simple_type";
+import { DEFAULT_VALUE } from "~/server/db_schema/type_def";
 
-export async function assign_technician_to_roster({ location_id, technician }: { location_id: string, technician: { id: string, color: string } }, redirect: string){
-    await set(ref(f_db, fb_location_roster(redirect).concat(location_id, "/", technician.id)), technician.color);
-}
-
-export async function retrieve_roster_ids(location_id: string, redirect = ""): Promise<string[]>{
-    const data: DataSnapshot = await get(ref(f_db, fb_location_roster(redirect).concat(location_id)));
-    const ids: string[] = [];
-
-    if(data.exists()) {
-        data.forEach((child) => {
-            ids.push(child.key);
-        });
+export const assign_technician_to_roster: 
+    Query<
+        { location_id: string, technician: { technician_id: string, color: string } },
+        void
+    > = async (
+        { location_id, technician }: { location_id: string, technician: { technician_id: string, color: string } }, 
+        f_db: FireDB
+    ) => {
+        await set(f_db.location_roster([location_id, technician.technician_id]), technician.color);
     }
 
-    return ids;
-}
+export const retrieve_roster: Query<
+    { location_id: string }, 
+    { technician_id: string, color: string }[]
+> = async ({ location_id }: { location_id: string }, f_db: FireDB): 
+    Promise<{ technician_id: string, color: string }[]> => {
+        const data: DataSnapshot = await get(f_db.location_roster([ location_id ]));
+        const roster: { technician_id: string, color: string }[] = [];
 
-export async function remove_technician_from_roster({ location_id, technician_id }: { location_id: string, technician_id: string }, redirect: string){
-    await remove(ref(f_db, fb_location_roster(redirect).concat(location_id, "/", technician_id)));
-}
+        if(data.exists()) {
+            data.forEach((child) => {
+                const color = child.val();
+                if(is_string(color)){
+                    roster.push({
+                        technician_id: child.key,
+                        color: color,
+                    });
+                } else {
+                    roster.push({
+                        technician_id: child.key,
+                        color: DEFAULT_VALUE,
+                    });
+                }
+            });
+        }
+
+        return roster;
+    }
+
+export const remove_technician_from_roster: Query< { location_id: string, technician_id: string }, void > = 
+    async (  
+        { location_id, technician_id }: { location_id: string, technician_id: string },
+        f_db: FireDB
+    ) => {
+        await remove(f_db.location_roster([location_id, technician_id]))
+    }
