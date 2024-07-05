@@ -1,7 +1,7 @@
 import { SignInButton } from "@clerk/nextjs"; 
 import { redirect } from "next/navigation";
 import { get_current_user } from "./api/c_user";
-import SalonSelect from "./_component/salon_select";
+import SalonSelect from "./_components/salon_select";
 
 export const dynamic = "force-dynamic";
 

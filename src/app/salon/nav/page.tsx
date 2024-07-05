@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { get_current_user } from "~/app/api/c_user";
 
-export default async function Nav({ params }: { params: { salon: string } }) {
+export default async function Nav() {
 
     const user = await get_current_user();
 
@@ -17,17 +17,17 @@ export default async function Nav({ params }: { params: { salon: string } }) {
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Sale</button>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Customer Finder</button>
             </div>
-            {AdminTasks(user?.publicMetadata.Role === "admin", params.salon)}
+            {AdminTasks(user?.publicMetadata.Role === "admin")}
         </div>
     );
 }
 
-function AdminTasks(is_admin: boolean, salon: string) {
+function AdminTasks(is_admin: boolean) {
 
     if (is_admin) {
         return(
             <div className="flex flex-wrap w-full h-fit p-4 gap-2 justify-center">
-                <a href={"/salon/tech-mana/nav/".concat(salon)}>
+                <a href={"/salon/tech-mana/nav/"}>
                     <button className="border-2 border-sky-400 rounded-full w-32 h-20">Manage Technicians</button>
                 </a>
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Daily Tally</button>

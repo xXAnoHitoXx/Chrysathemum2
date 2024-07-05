@@ -3,7 +3,7 @@ import { is_server_error, ServerError } from "../server_error";
 
 export type QueryError = ServerError;
 
-export type Query<T, U> = (t: T, fire_db: FireDB) => Promise<U | QueryError>;
+export type Query<T, U> = (t: T, fire_db: FireDB) => (Promise<U | QueryError> | U | QueryError);
 
 export interface ServerQueryData<T> {
     unpack(): Promise<T | QueryError>;

@@ -14,15 +14,10 @@ export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
             if(is_loading) return;
             set_loading(true);
 
-            const data: Bisquit = {
-                name: "salon_selection",
-                data: salon,
-            }
-
             await fetch_query({
                 url: "/api/bisquit",
                 method: Method.POST,
-                params: { data: data },
+                params: { data: { name: Bisquit.salon_selection, value: salon } },
                 to: ()=>{},
             });
 
