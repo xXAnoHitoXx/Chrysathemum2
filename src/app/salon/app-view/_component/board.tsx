@@ -48,7 +48,7 @@ export function Board(props:{ appointments: Appointment[] }) {
                     <li className={"border-2 ".concat(app_color, " ",
                         app_col, " ", app_span, " row-span-2 rounded m-1"
                     )}>
-                        <button className="w-full h-full text-ellipsis">
+                        <button className="w-full h-full text-ellipsis text-left ml-1">
                         {app.customer.name}
                         <br/>
                         {app.customer.phone_number}
