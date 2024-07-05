@@ -1,12 +1,13 @@
 "use client"
 
 import { Bisquit } from "~/server/validation/bisquit";
-import { fetch_query, Method } from "../api/api_query";
-import { redirect } from "next/navigation";
+import { fetch_void_query, Method } from "../api/api_query";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
-    const next_page : string = (is_admin) ? "/salon" : "/booking";
+    const next_page : string = (is_admin) ? "/salon/app-view" : "/booking";
+    const router = useRouter();
     const [is_loading, set_loading] = useState(false);
 
     const on_click = (salon: string): ()=>Promise<void> => {
@@ -14,14 +15,13 @@ export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
             if(is_loading) return;
             set_loading(true);
 
-            await fetch_query({
+            await fetch_void_query({
                 url: "/api/bisquit",
                 method: Method.POST,
                 params: { data: { name: Bisquit.salon_selection, value: salon } },
-                to: ()=>{},
             });
 
-            redirect(next_page);
+            router.push(next_page);
         }
     }
 
