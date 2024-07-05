@@ -1,3 +1,4 @@
+import { TypeConversionError } from "~/server/validation/validation_error";
 import { parse_response, ResponseError } from "./response_parser";
 
 export enum Method {
@@ -11,7 +12,7 @@ export async function fetch_query<T>({ url, method, params, to }: {
     url: string, 
     method: Method, 
     params: ({ data: unknown } | null),
-    to: (t: unknown) => T | ResponseError,
+    to: (t: unknown) => T | TypeConversionError,
 }): Promise<T | ResponseError> {
     const response = (params == null)? 
         await fetch(url, { method: method, }) :
