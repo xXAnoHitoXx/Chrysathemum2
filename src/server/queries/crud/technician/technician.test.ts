@@ -3,45 +3,73 @@ import { create_technician_entry, delete_technician_entry, retrieve_technician_e
 import { create_technician_login_index, delete_technician_login_index, retrieve_technician_id_from_user_id } from "./technician_login_index";
 import { create_technician_migration_index, delete_technician_migration_index, retrieve_technician_id_from_legacy_id } from "./technician_migration_index";
 import type { Technician } from "~/server/db_schema/type_def";
+import { QueryError, is_successful_query, pack_test } from "../../server_queries_monad";
+import { is_server_error } from "~/server/server_error";
 
 const test_suit = "tech_cruds";
 
 afterAll(async () => {
-    await clear_test_data(test_suit);
+    const res = await clear_test_data(test_suit);
+    expect(is_successful_query(res)).toBe(true);
 })
 
 test("test technician entries CRUD queries", async () => {
     const test_name = test_suit.concat("/test_customer_entries_cruds/");
-    const test_technician_entry: Technician = await create_technician_entry({name: "Tinn", color: "blu", active: false}, test_name);
+    const test_technician_entry: Technician | QueryError = await 
+        pack_test({name: "Tinn", color: "blu", active: false}, test_name)
+        .bind(create_technician_entry)
+        .unpack();
 
-    const created_technician_entry: Technician | null = await retrieve_technician_entry(test_technician_entry.id, test_name);
-    expect(created_technician_entry).not.toBeNull();
-    if(created_technician_entry != null){
+    if (is_server_error(test_technician_entry)) {
+        fail();
+    }
+
+    const created_technician_entry: Technician | QueryError = await 
+        pack_test({ id: test_technician_entry.id }, test_name)
+        .bind(retrieve_technician_entry)
+        .unpack();
+
+    if (is_successful_query(created_technician_entry)) {
         expect(created_technician_entry.id).toBe(test_technician_entry.id);
         expect(created_technician_entry.name).toBe(test_technician_entry.name);
         expect(created_technician_entry.color).toBe(test_technician_entry.color);
         expect(created_technician_entry.active).toBe(test_technician_entry.active);
+    } else {
+        fail();
     }
 
     const update_target: Technician = {
         id: test_technician_entry.id, name: "chicken", color: "yolo", active: true,
     };
 
-    await update_technician_entry(update_target, test_name);
+    await pack_test(update_target, test_name)
+        .bind(update_technician_entry)
+        .unpack();
 
-    const updated_technician_entry: Technician | null = await retrieve_technician_entry(test_technician_entry.id, test_name);
-    expect(updated_technician_entry).not.toBeNull();
-    if(updated_technician_entry != null){
+    const updated_technician_entry: Technician | QueryError = await 
+        pack_test({ id: test_technician_entry.id }, test_name)
+        .bind(retrieve_technician_entry)
+        .unpack();
+
+    if(is_successful_query(updated_technician_entry)){
         expect(updated_technician_entry.id).toBe(update_target.id);
         expect(updated_technician_entry.name).toBe(update_target.name);
         expect(updated_technician_entry.color).toBe(update_target.color);
         expect(updated_technician_entry.active).toBe(update_target.active);
+    } else {
+        fail();
     }
 
-    await delete_technician_entry(test_technician_entry.id, test_name);
+    await pack_test({ id: test_technician_entry.id }, test_name)
+        .bind(delete_technician_entry)
+        .unpack();
 
-    const no_technician_entry: Technician | null = await retrieve_technician_entry(test_technician_entry.id, test_name);
-    expect(no_technician_entry).toBeNull();
+    const no_technician_entry: Technician | QueryError = await 
+        pack_test({ id: test_technician_entry.id }, test_name)
+        .bind(retrieve_technician_entry)
+        .unpack();
+
+    expect(is_successful_query(no_technician_entry)).toBe(false);
 });
 
 
@@ -50,21 +78,41 @@ test("test technician_login_index CRUDs querries", async () => {
 
     const login = {
         user_id: "banana",
-        tech_id: "bruh-nuh-nuh"
+        technician_id: "bruh-nuh-nuh"
     };
 
-    let conversion: string | null = await retrieve_technician_id_from_user_id(login.user_id, test_name);
-    expect(conversion).toBeNull();
+    let conversion = await 
+        pack_test({ user_id: login.user_id }, test_name)
+        .bind(retrieve_technician_id_from_user_id)
+        .unpack();
 
-    await create_technician_login_index({user_id: login.user_id, technician_id: login.tech_id}, test_name);
+    expect(is_successful_query(conversion)).toBe(false);
 
-    conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
-    expect(conversion).toBe(login.tech_id);
+    await pack_test(login, test_name)
+        .bind(create_technician_login_index)
+        .unpack();
 
-    await delete_technician_login_index(login.user_id, test_name);
+    conversion = await
+        pack_test({ user_id: login.user_id }, test_name)
+        .bind(retrieve_technician_id_from_user_id)
+        .unpack();
 
-    conversion = await retrieve_technician_id_from_user_id(login.user_id, test_name);
-    expect(conversion).toBeNull();
+    if(is_successful_query(conversion)) {
+        expect(conversion.technician_id).toBe(login.technician_id);
+    } else {
+        fail();
+    }
+
+    await pack_test({ user_id: login.user_id }, test_name)
+        .bind(delete_technician_login_index)
+        .unpack();
+
+    conversion = await
+        pack_test({ user_id: login.user_id }, test_name)
+        .bind(retrieve_technician_id_from_user_id)
+        .unpack();
+
+    expect(is_successful_query(conversion)).toBe(false);
 })
 
 test("test technician_migration_index CRUDs querries", async () => {
@@ -72,20 +120,40 @@ test("test technician_migration_index CRUDs querries", async () => {
 
     const migration = {
         legacy_id: "banana",
-        tech_id: "bruh-nuh-nuh"
+        technician_id: "bruh-nuh-nuh"
     };
 
-    let conversion: string | null = await retrieve_technician_id_from_legacy_id(migration.legacy_id, test_name);
-    expect(conversion).toBeNull();
+    let conversion = await 
+        pack_test({ legacy_id: migration.legacy_id }, test_name)
+        .bind(retrieve_technician_id_from_legacy_id)
+        .unpack();
 
-    await create_technician_migration_index({legacy_id: migration.legacy_id, technician_id: migration.tech_id}, test_name);
+    expect(is_successful_query(conversion)).toBe(false);
 
-    conversion = await retrieve_technician_id_from_legacy_id(migration.legacy_id, test_name);
-    expect(conversion).toBe(migration.tech_id);
+    await pack_test(migration, test_name)
+        .bind(create_technician_migration_index)
+        .unpack()
 
-    await delete_technician_migration_index(migration.legacy_id, test_name);
+    conversion = await
+        pack_test({ legacy_id: migration.legacy_id }, test_name)
+        .bind(retrieve_technician_id_from_legacy_id)
+        .unpack();
 
-    conversion = await retrieve_technician_id_from_legacy_id(migration.legacy_id, test_name);
-    expect(conversion).toBeNull();
+    if (is_successful_query(conversion)) {
+        expect(conversion.technician_id).toBe(migration.technician_id);
+    } else {
+        fail();
+    }
+
+    await pack_test({ legacy_id: migration.legacy_id }, test_name)
+        .bind(delete_technician_migration_index)
+        .unpack();
+
+    conversion = await
+        pack_test({ legacy_id: migration.legacy_id }, test_name)
+        .bind(retrieve_technician_id_from_legacy_id)
+        .unpack();
+
+    expect(is_successful_query(conversion)).toBe(false);
 })
 

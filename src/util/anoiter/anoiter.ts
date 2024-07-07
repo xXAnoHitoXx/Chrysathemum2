@@ -1,4 +1,4 @@
-import { chain, chunked, icompact, ifilter, imap, iter, map } from "itertools";
+import { chain, chunked, icompact, ifilter, imap, iter, map, reduce } from "itertools";
 
 export function ano_iter<T>(data: Iterable<T>): AnoIter<T> {
     return new AnoIter<T>(iter(data));
@@ -40,8 +40,11 @@ export class AnoIter<T> {
         return new AnoIter(chunked(this.data, size));
     }
 
+    reduce<U>(reducer: (u: U, t: T) => U, initial_value: U): U {
+        return reduce(this.data, reducer, initial_value);
+    }
+
     collect(): T[] {
         return map(this.data, (t: T) => (t));
     }
 }
-
