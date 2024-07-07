@@ -14,6 +14,7 @@ const customers_root="customers/";
 const technicians_root="technicians/";
 const locations_root="locations/";
 const appointments_root="appointments/"
+const transactions_root="transactions/"
 
 export async function clear_test_data(test_name: string): Promise<QueryError | null> {
     const fire_db: FireDB = new FireDB(test_name);
@@ -83,6 +84,10 @@ export class FireDB {
 
     appointment_entries(sub_path: string[] = []): DatabaseReference {
         return this.ref(appointments_root, "id/", sub_path);
+    }
+
+    transaction_date_entries(sub_path: string[] = []): DatabaseReference {
+        return this.ref(transactions_root, "date_entry/", sub_path);
     }
 
     old_db(sub_path: string[] = []): DatabaseReference {

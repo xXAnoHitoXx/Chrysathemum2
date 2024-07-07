@@ -10,8 +10,8 @@ export default async function RootLayout({
     const appointments: Appointment[] = [
         {
             id: "Banana",
-            customer: { id: "PoopyPooh", name: "Poopy Poo Bert", phone_number: "your mother", notes: "" },
-            technician: null,
+            customer_id: "PoopyPooh",
+            technician_id: null,
             date: "idk_lol",
             duration: 4,
             time: 15,

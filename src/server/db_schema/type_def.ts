@@ -35,22 +35,26 @@ export type Location = {
 
 export type Appointment = {
     id: string,
-    customer: Customer,
-    technician: Technician | null,
-    date: string,
-    time: number,
-    duration: number,
-    details: string,
-}
-
-export type AppointmentEntry = {
-    id: string,
     customer_id: string,
     technician_id: string | null,
     date: string,
     time: number,
     duration: number,
     details: string,
+}
+
+export type Transaction = {
+    id: string,
+    customer_id: string,
+    technician_id: string,
+    date: string,
+    time: number,
+    details: string,
+    amount: number,
+    tip: number,
+    cash: number,
+    gift: number,
+    discount: number,
 }
 
 export type Hour = { open: number, close: number };
