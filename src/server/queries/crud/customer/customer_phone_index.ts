@@ -1,22 +1,27 @@
 import 'server-only';
 
-import { type DataSnapshot, set, get, remove } from "firebase/database";
-import { FireDB } from "~/server/db_schema/fb_schema";
 import type { Customer } from '~/server/db_schema/type_def';
-import { Query } from '../../server_queries_monad';
+import { db_query, Query } from '../../server_queries_monad';
 import { is_string } from '~/server/validation/simple_type';
-import { server_error } from '~/server/server_error';
+import { data_error, DataError, is_data_error, lotta_errors, PartialResult } from '~/server/data_error';
+import { get, remove, set } from 'firebase/database';
 
 export const create_customer_phone_index: Query<Customer, void> = 
-    async (customer: Customer, f_db: FireDB) => {
-        await set(f_db.customers_phone_index([customer.phone_number, customer.id]), customer.id);
+    async (customer, f_db) => {
+        return db_query(
+            "Creating phone index for Customer { ".concat(customer.name, " }"),
+            set(f_db.customers_phone_index([customer.phone_number, customer.id]), customer.id),
+        );
     }
 
-export const retrieve_customer_phone_index: Query<{ phone_number: string }, { customer_ids: string[] }> =
-    async ({ phone_number }: { phone_number: string }, f_db: FireDB): Promise<{ customer_ids: string[] }> => {
+export const retrieve_customer_phone_index: Query<{ phone_number: string }, PartialResult<{customer_ids: string[]}>> =
+    async ({ phone_number }, f_db) => {
+        const context = "Retrieving customers with phone number { ".concat(phone_number, " }");
         const index: string[] = [];
+        const error: DataError[] = [];
 
-        const data: DataSnapshot = await get(f_db.customers_phone_index([phone_number]));
+        const data = await db_query(context, get(f_db.customers_phone_index([phone_number])));
+        if(is_data_error(data)) return data;
 
         if(data.exists()) {
             data.forEach((child) => {
@@ -24,15 +29,25 @@ export const retrieve_customer_phone_index: Query<{ phone_number: string }, { cu
                 if(is_string(val)) {
                     index.push(val);
                 } else {
-                    server_error("customer {".concat(child.key, "} phone index {", phone_number,"} corrupted"));
+                    error.push(data_error( 
+                        "Parsing entry { ".concat(child.key, " }"), 
+                        "corrupted, not a string",
+                    ));
                 }
             })
         }
- 
-        return { customer_ids: index };
+
+        return {
+            data: { customer_ids: index },
+            error: (error.length == 0)?
+                null : lotta_errors(context, "index contained some corrupted entries", error), 
+        }
     }
 
 export const delete_customer_phone_index: Query<Customer, void> = 
-    async (customer: Customer, f_db: FireDB) => {
-        await remove(f_db.customers_phone_index([customer.phone_number, customer.id]));
+    async (customer, f_db) => {
+        return db_query(
+            "Deleting customer phone index { ".concat(customer.phone_number, " }"),
+            remove(f_db.customers_phone_index([customer.phone_number, customer.id]))
+        );
     }

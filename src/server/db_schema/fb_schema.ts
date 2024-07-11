@@ -2,8 +2,8 @@ import 'server-only';
 import { DatabaseReference, ref, remove } from "firebase/database";
 import { f_db } from ".";
 import { ano_iter } from '~/util/anoiter/anoiter';
-import { server_error } from '../server_error';
-import { QueryError } from '../queries/server_queries_monad';
+import { data_error, DataError } from '../data_error';
+import { db_query } from '../queries/server_queries_monad';
 
 const prod="production";
 const dev="development";
@@ -16,17 +16,15 @@ const locations_root="locations/";
 const appointments_root="appointments/"
 const transactions_root="transactions/"
 
-export async function clear_test_data(test_name: string): Promise<QueryError | null> {
+export async function clear_test_data(test_name: string): Promise<DataError | void> {
+    const context = "cleanup after test suit { ".concat(test_name, " }");
     const fire_db: FireDB = new FireDB(test_name);
 
     if (!fire_db.is_in_test_mode()) {
-        const message = "Node ENV is not in test mode";
-        console.log(message);
-        return server_error(message);
+        return data_error(context,  "Node ENV is not in test mode");
     }
 
-    await remove(fire_db.root());
-    return null;
+    await db_query(context, remove(fire_db.root()));
 }
 
 export class FireDB {

@@ -1,12 +1,14 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { create_new_location, retrieve_location } from "./location";
 import { assign_technician_to_roster, remove_technician_from_roster, retrieve_roster } from "./location_roster";
-import { is_successful_query, pack_test } from "../../server_queries_monad";
+import { pack_test } from "../../server_queries_monad";
+import { is_data_error } from "~/server/data_error";
 
 const test_suit = "location_cruds";
 
 afterAll(async () => {
-    await clear_test_data(test_suit);
+    const res = await clear_test_data(test_suit);
+    expect(is_data_error(res)).toBe(false);
 })
 
 test("location entry cruds", async () => {
@@ -23,12 +25,16 @@ test("location entry cruds", async () => {
         .bind(retrieve_location)
         .unpack();
 
-    expect(is_successful_query(location)).toBe(true);
+    if(is_data_error(location)){
+        location.log();
+        fail();
+    }
 
-    if(is_successful_query(location_entry)) {
+    if(!is_data_error(location_entry)) {
         expect(location_entry.id).toBe(location_info.id);
         expect(location_entry.address).toBe(location_info.address);
     } else {
+        location_entry.log();
         fail();
     }
 })
@@ -57,11 +63,12 @@ test("location roster", async () => {
         .bind(retrieve_roster)
         .unpack()
 
-    if(is_successful_query(roster)){
+    if(!is_data_error(roster)){
         expect(roster).toHaveLength(2);
         expect(roster).toContainEqual(tech1_info);
         expect(roster).toContainEqual(tech2_info);
     } else {
+        roster.log();
         fail();
     }
 
@@ -73,11 +80,12 @@ test("location roster", async () => {
         .bind(retrieve_roster)
         .unpack();
         
-    if(is_successful_query(roster)){
+    if(!is_data_error(roster)){
         expect(post_del_roster).toHaveLength(1);
         expect(post_del_roster).toContainEqual(tech1_info);
         expect(post_del_roster).not.toContainEqual(tech2_info);
     } else {
+        roster.log();
         fail();
     }
 })

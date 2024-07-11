@@ -1,8 +1,8 @@
 import { Appointment } from "~/server/db_schema/type_def";
-import { Query } from "../../server_queries_monad";
-import { DataSnapshot, DatabaseReference, get, push, remove, set, update } from "firebase/database";
-import { server_error } from "~/server/server_error";
+import { db_query, Query } from "../../server_queries_monad";
 import { to_appointment } from "~/server/validation/db_types/appointment_validation";
+import { data_error, is_data_error } from "~/server/data_error";
+import { get, push, remove, set, update } from "firebase/database";
 
 export const create_appointment_entry: Query<{
         customer_id: string,
@@ -12,10 +12,11 @@ export const create_appointment_entry: Query<{
         duration: number,
         details: string,
     }, Appointment> = async (params, f_db) => {
-        const id_ref: DatabaseReference = await push(f_db.appointment_entries([]));
+        const context = "Create appointment entry { ".concat(params.details, " }");
+        const id_ref = push(f_db.appointment_entries([]));
 
         if(id_ref.key == null) {
-            return server_error("failed to create appointment entry with null id");
+            return data_error(context, "failed to create appointment entry with null id");
         }
 
         const appointment: Appointment = {
@@ -28,28 +29,39 @@ export const create_appointment_entry: Query<{
             details: params.details,
         }
 
-        await set(id_ref, appointment);
+        const res = await db_query(context, set(id_ref, appointment));
+        if(is_data_error(res)) return res;
+
         return appointment;
     }
 
 export const retrieve_appointment_entry: Query<{ id: string }, Appointment> =
     async ({ id }, f_db) => {
-        const data: DataSnapshot = await get(f_db.appointment_entries([id]));
+        const context = "Retrieving appointment entry { ".concat(id, " }");
+        const data = await db_query(context, get(f_db.appointment_entries([id])));
+        if(is_data_error(data)) return data;
 
         if(!data.exists()){
-            return server_error("retrieving non exist Appointment {".concat(id, "}"));
+            return data_error(context, "retrieving non exist Appointment {".concat(id, "}"));
         }
 
-        
-        return to_appointment(data.val());
+        const e = to_appointment(data.val());
+        if(is_data_error(e)) return e.stack(context, "corrupted entry");
+        return e;
     }
 
 export const update_appointment_entry: Query<Appointment, void> =
     async (appointment, f_db) => {
-        await update(f_db.appointment_entries([appointment.id]), appointment);
+        return db_query(
+            "Update Appointment Entry",
+            update(f_db.appointment_entries([appointment.id]), appointment)
+        );
     }
 
 export const delete_appointment_entry : Query<{ id: string }, void> =
-    async (params: { id : string }, f_db) => {
-        await remove(f_db.appointment_entries([params.id]));
+    async ({ id }, f_db) => {
+        return db_query(
+            "Remove appointment entry { ".concat(id, " }"),
+            remove(f_db.appointment_entries([id]))
+        )
     }

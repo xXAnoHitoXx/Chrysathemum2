@@ -3,8 +3,8 @@ import type { Customer, CustomerUpdateData } from "~/server/db_schema/type_def";
 import { create_new_customer, is_no_book, update_customer_info } from "./customer_queries";
 import { retrieve_customer_entry } from "~/server/queries/crud/customer/customer_entry";
 import { retrieve_customer_phone_index } from "~/server/queries/crud/customer/customer_phone_index";
-import { is_successful_query, pack_test } from "~/server/queries/server_queries_monad";
-import { is_server_error } from "~/server/server_error";
+import { pack_test } from "~/server/queries/server_queries_monad";
+import { is_data_error } from "~/server/data_error";
 
 const test_suit = "customer_business_logic";
 
@@ -21,36 +21,40 @@ test("customer creation", async () => {
     };
 
     const customer = await pack_test(customer_info, test_name)
-        .packed_bind(create_new_customer)
+        .bind(create_new_customer)
         .unpack();
 
-    if (is_successful_query(customer)) {
-        expect(customer.name).toBe(customer_info.name);
-        expect(customer.phone_number).toBe(customer_info.phone_number);
-    } else {
+    if(is_data_error(customer)) {
+        customer.log();
         fail();
     }
+
+    expect(customer.name).toBe(customer_info.name);
+    expect(customer.phone_number).toBe(customer_info.phone_number);
 
     const entry = await pack_test({ customer_id: customer.id }, test_name)
         .bind(retrieve_customer_entry).unpack();
 
-    if (is_successful_query(entry)) {
-        expect(entry.id).toBe(customer.id);
-        expect(entry.name).toBe(customer.name);
-        expect(entry.phone_number).toBe(customer.phone_number);
-    } else {
+    if(is_data_error(entry)) {
+        entry.log();
         fail();
     }
+
+    expect(entry.id).toBe(customer.id);
+    expect(entry.name).toBe(customer.name);
+    expect(entry.phone_number).toBe(customer.phone_number);
 
     const index = await pack_test({ phone_number: customer.phone_number }, test_name)
         .bind(retrieve_customer_phone_index)
         .unpack()
 
-    if (is_successful_query(index)) {
-        expect(index.customer_ids).toContain(customer.id);
-    } else {
+    if(is_data_error(index)) {
+        index.log();
         fail();
     }
+
+    expect(index.error).toBeNull();
+    expect(index.data.customer_ids).toContain(customer.id);
 })
 
 test("update customer name", async () => {
@@ -62,10 +66,11 @@ test("update customer name", async () => {
     };
 
     const starting_customer = await pack_test(customer_info, test_name) 
-        .packed_bind(create_new_customer)
+        .bind(create_new_customer)
         .unpack();
 
-    if(is_server_error(starting_customer)) {
+    if(is_data_error(starting_customer)) {
+        starting_customer.log();
         fail();
     }
 
@@ -76,11 +81,12 @@ test("update customer name", async () => {
     }
 
     const name_changed = await pack_test({ customer: starting_customer, update: name_change_info }, test_name)
-        .packed_bind(update_customer_info)
+        .bind(update_customer_info)
         .unpack();
         
 
-    if(is_server_error(name_changed)) {
+    if(is_data_error(name_changed)) {
+        name_changed.log();
         fail();
     }
 
@@ -88,14 +94,15 @@ test("update customer name", async () => {
         .bind(retrieve_customer_entry)
         .unpack();
 
-    if(is_successful_query(name_changed_entry)) {
-        expect(name_changed_entry.id).toBe(starting_customer.id);
-        expect(name_changed_entry.name).toBe(name_change_info.name);
-        expect(name_changed_entry.phone_number).toBe(starting_customer.phone_number);
-        expect(name_changed_entry.notes).toBe(starting_customer.notes);
-    } else {
+    if(is_data_error(name_changed_entry)) {
+        name_changed_entry.log();
         fail();
     }
+
+    expect(name_changed_entry.id).toBe(starting_customer.id);
+    expect(name_changed_entry.name).toBe(name_change_info.name);
+    expect(name_changed_entry.phone_number).toBe(starting_customer.phone_number);
+    expect(name_changed_entry.notes).toBe(starting_customer.notes);
 })
 
 test("update customer phone_number", async () => {
@@ -107,10 +114,11 @@ test("update customer phone_number", async () => {
     };
 
     const starting_customer = await pack_test(customer_info, test_name)
-        .packed_bind(create_new_customer)
+        .bind(create_new_customer)
         .unpack();
 
-    if(is_server_error(starting_customer)) {
+    if(is_data_error(starting_customer)) {
+        starting_customer.log();
         fail();
     }
 
@@ -121,10 +129,11 @@ test("update customer phone_number", async () => {
     }
 
     const phone_changed = await pack_test({ customer: starting_customer, update: phone_change_info }, test_name)
-        .packed_bind(update_customer_info)
+        .bind(update_customer_info)
         .unpack();
 
-    if(is_server_error(phone_changed)) {
+    if(is_data_error(phone_changed)) {
+        phone_changed.log();
         fail();
     }
 
@@ -132,14 +141,15 @@ test("update customer phone_number", async () => {
         .bind(retrieve_customer_entry)
         .unpack();
 
-    if(is_successful_query(phone_changed_entry)) {
-        expect(phone_changed_entry.id).toBe(starting_customer.id);
-        expect(phone_changed_entry.name).toBe(starting_customer.name);
-        expect(phone_changed_entry.phone_number).toBe(phone_change_info.phone_number);
-        expect(phone_changed_entry.notes).toBe(starting_customer.notes);
-    } else {
+    if(is_data_error(phone_changed_entry)) {
+        phone_changed_entry.log();
         fail();
     }
+
+    expect(phone_changed_entry.id).toBe(starting_customer.id);
+    expect(phone_changed_entry.name).toBe(starting_customer.name);
+    expect(phone_changed_entry.phone_number).toBe(phone_change_info.phone_number);
+    expect(phone_changed_entry.notes).toBe(starting_customer.notes);
 })
 
 test("update customer notes", async () => {
@@ -151,10 +161,11 @@ test("update customer notes", async () => {
     };
 
     const starting_customer = await pack_test(customer_info, test_name)
-        .packed_bind(create_new_customer)
+        .bind(create_new_customer)
         .unpack();
 
-    if(is_server_error(starting_customer)) {
+    if(is_data_error(starting_customer)) {
+        starting_customer.log();
         fail();
     }
 
@@ -165,10 +176,11 @@ test("update customer notes", async () => {
     }
 
     const phone_changed = await pack_test({ customer: starting_customer, update: notes_change_info }, test_name)
-        .packed_bind(update_customer_info)
+        .bind(update_customer_info)
         .unpack();
 
-    if(is_server_error(phone_changed)) {
+    if(is_data_error(phone_changed)) {
+        phone_changed.log();
         fail();
     }
 
@@ -176,14 +188,20 @@ test("update customer notes", async () => {
         .bind(retrieve_customer_entry)
         .unpack();
 
-    if(is_successful_query(notes_changed_entry)) {
-        expect(notes_changed_entry.id).toBe(starting_customer.id);
-        expect(notes_changed_entry.name).toBe(starting_customer.name);
-        expect(notes_changed_entry.phone_number).toBe(starting_customer.phone_number);
-        expect(notes_changed_entry.notes).toBe(notes_change_info.notes);
-    } else {
+    if(is_data_error(notes_changed_entry)) {
+        notes_changed_entry.log();
         fail();
     }
+
+    if(is_data_error(notes_changed_entry)) {
+        notes_changed_entry.log();
+        fail();
+    }
+
+    expect(notes_changed_entry.id).toBe(starting_customer.id);
+    expect(notes_changed_entry.name).toBe(starting_customer.name);
+    expect(notes_changed_entry.phone_number).toBe(starting_customer.phone_number);
+    expect(notes_changed_entry.notes).toBe(notes_change_info.notes);
 })
 
 test("update customer info", async () => {
@@ -195,10 +213,11 @@ test("update customer info", async () => {
     };
 
     const starting_customer = await pack_test(customer_info, test_name)
-        .packed_bind(create_new_customer)
+        .bind(create_new_customer)
         .unpack();
 
-    if(is_server_error(starting_customer)) {
+    if(is_data_error(starting_customer)) {
+        starting_customer.log();
         fail();
     }
 
@@ -209,10 +228,11 @@ test("update customer info", async () => {
     }
 
     const phone_changed = await pack_test({ customer: starting_customer, update: update_target }, test_name)
-        .packed_bind(update_customer_info)
+        .bind(update_customer_info)
         .unpack();
 
-    if(is_server_error(phone_changed)) {
+    if(is_data_error(phone_changed)) {
+        phone_changed.log();
         fail();
     }
 
@@ -220,14 +240,15 @@ test("update customer info", async () => {
         .bind(retrieve_customer_entry)
         .unpack();
 
-    if(is_successful_query(updated_entry)) {
-        expect(updated_entry.id).toBe(starting_customer.id);
-        expect(updated_entry.name).toBe(update_target.name);
-        expect(updated_entry.phone_number).toBe(update_target.phone_number);
-        expect(updated_entry.notes).toBe(update_target.notes);
-    } else {
+    if(is_data_error(updated_entry)) {
+        updated_entry.log();
         fail();
     }
+
+    expect(updated_entry.id).toBe(starting_customer.id);
+    expect(updated_entry.name).toBe(update_target.name);
+    expect(updated_entry.phone_number).toBe(update_target.phone_number);
+    expect(updated_entry.notes).toBe(update_target.notes);
 })
 
 test("check for no book flag", () => {

@@ -1,18 +1,12 @@
+import { data_error, DataError, is_data_error } from "../data_error";
 import { FireDB } from "../db_schema/fb_schema";
-import { is_server_error, ServerError } from "../server_error";
 
-export type QueryError = ServerError;
-
-export type Query<T, U> = (t: T, fire_db: FireDB) => (Promise<U | QueryError> | U | QueryError);
+export type Query<T, U> = (t: T, fire_db: FireDB) => (Promise<U | DataError> | U | DataError);
 
 export interface ServerQueryData<T> {
-    unpack(): Promise<T | QueryError>;
+    unpack(): Promise<T | DataError>;
     bind<U>(query: Query<T, U>): ServerQueryData<U>;
     packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U>;
-}
-
-export function is_successful_query<T>(result: T | QueryError): result is T {
-    return !(is_server_error(result));
 }
 
 export function pack<T>(data: T): ServerQueryData<T> {
@@ -23,13 +17,17 @@ export function pack_test<T>(data: T, test_name: string): ServerQueryData<T> {
     return new SimpleQueryData(data, new FireDB(test_name), true);
 }
 
+export async function db_query<T>(context: string, promise: Promise<T>): Promise<T | DataError> {
+    return promise.catch(()=> (data_error(context, "database error")))
+}
+
 export function merge<R, S, T>(
     r: ServerQueryData<R>,
     s: ServerQueryData<S>,
-    merger: (r: R, s: S) => T | QueryError
+    merger: (r: R, s: S) => T | DataError
 ): ServerQueryData<T> {
-    return r.bind(async (r: R, _): Promise<T | QueryError> => {
-        return s.bind(async (s: S, _): Promise<T | QueryError> => {
+    return r.bind(async (r: R, _): Promise<T | DataError> => {
+        return s.bind(async (s: S, _): Promise<T | DataError> => {
             return merger(r, s);
         }).unpack();
     });
@@ -43,11 +41,11 @@ export function map<T, U>(mapper: (t: T) => U): Query<T, U> {
 
 export function retain_input_n_output<T, U, V>(
     query: Query<T, U>, 
-    packer: (input: T, output: U) => V | QueryError
+    packer: (input: T, output: U) => V | DataError
 ): Query<T, V> {
     return async (t: T, fire_db: FireDB) => {
         const u = await query(t, fire_db);
-        if (is_server_error(u)) {
+        if (is_data_error(u)) {
             return u;
         }
         return packer(t, u);
@@ -56,8 +54,8 @@ export function retain_input_n_output<T, U, V>(
 
 export function retain_input<T, U>(query: Query<T, U>): Query<T, T> {
     return async (t: T, fire_db: FireDB) => {
-        const err: QueryError | U = await query(t, fire_db);
-        if (is_server_error(err)){
+        const err: DataError | U = await query(t, fire_db);
+        if (is_data_error(err)){
             return err;
         }
         return t;
@@ -65,17 +63,17 @@ export function retain_input<T, U>(query: Query<T, U>): Query<T, T> {
 }
 
 class SimpleQueryData<T> implements ServerQueryData<T> {
-    private data: T | QueryError; 
+    private data: T | DataError; 
     private fire_db: FireDB;
     private is_test: boolean;
 
-    constructor(data: T | QueryError, fire_db: FireDB, is_test: boolean) {
+    constructor(data: T | DataError, fire_db: FireDB, is_test: boolean) {
         this.data = data;
         this.fire_db = fire_db;
         this.is_test = is_test;
     }
 
-    async unpack(): Promise<T | QueryError> {
+    async unpack(): Promise<T | DataError> {
         return this.data;
     }
 
@@ -96,7 +94,7 @@ class ChainedQueryData<S, T> implements ServerQueryData<T> {
     private query: Query<S, T>;
     private fire_db: FireDB;
     private is_test: boolean;
-    private output: T | QueryError | NOTHING;
+    private output: T | DataError | NOTHING;
 
     constructor(data: ServerQueryData<S>, query: Query<S, T>, fire_db: FireDB, is_test: boolean) {
         this.data = data;
@@ -106,15 +104,15 @@ class ChainedQueryData<S, T> implements ServerQueryData<T> {
         this.output = new NOTHING();
     }
 
-    async unpack(): Promise<T | QueryError> {
+    async unpack(): Promise<T | DataError> {
         if (this.output instanceof NOTHING) {
-            const data: S | QueryError = await this.data.unpack();
+            const data: S | DataError = await this.data.unpack();
 
-            if (is_server_error(data)) {
+            if (is_data_error(data)) {
                 return data;
             }
 
-            const ret: T | QueryError = await this.query(data, this.fire_db);
+            const ret: T | DataError = await this.query(data, this.fire_db);
             this.output = ret;
             return ret;
         }

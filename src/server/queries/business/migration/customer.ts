@@ -1,55 +1,68 @@
 import { OldCustomerData, to_old_customer_data } from "~/app/api/migration/customer/validation";
-import { Query, QueryError, ServerQueryData, is_successful_query, merge } from "../../server_queries_monad";
+import { db_query, Query } from "../../server_queries_monad";
 import { create_customer_migration_index, retrieve_customer_id_from_legacy_id } from "../../crud/customer/customer_migration_index";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
-import { is_string } from "~/server/validation/simple_type";
 import { create_new_customer, update_customer_info } from "../../business/customer/customer_queries";
 import { Customer } from "~/server/db_schema/type_def";
-import { FireDB } from "~/server/db_schema/fb_schema";
-import { DataSnapshot, get } from "firebase/database";
+import { get } from "firebase/database";
+import { DataError, is_data_error, lotta_errors, PartialResult } from "~/server/data_error";
 
-export const migrate_customer_data: Query<ServerQueryData<OldCustomerData>, Customer> = 
-    async (data: ServerQueryData<OldCustomerData>): Promise<Customer | QueryError> => {
-        const id_index = data.bind(async (old_customer_data) => ({ legacy_id: old_customer_data.id }))
-            .bind(retrieve_customer_id_from_legacy_id)
-        const query = id_index.bind( async ({ customer_id }, f_db): Promise<Customer | QueryError> => {
-            if (is_string(customer_id)) {
-                const customer = await retrieve_customer_entry({ customer_id: customer_id }, f_db);
-                if(is_successful_query(customer)) {
-                    return data.bind(async (old_customer_data) => ({
-                        customer: customer,
-                        update: {
-                            name: old_customer_data.name,
-                            phone_number: old_customer_data.phoneNumber,
-                            notes: null,
-                        },
-                    })).packed_bind(update_customer_info).unpack();
-                }
-            }
+export const migrate_customer_data: Query<OldCustomerData, Customer> = 
+    async (data, f_db) => {
+        const context = "Migrating customer { ".concat(data.name, "-", data.phoneNumber, " }")
+        const result = await retrieve_customer_id_from_legacy_id({ legacy_id: data.id }, f_db);
 
-            const customer_query = data.bind(async (old_customer_data) => ({
-                name: old_customer_data.name, 
-                phone_number: old_customer_data.phoneNumber,
-            })).packed_bind(create_new_customer)
+        if(is_data_error(result)) return result.stack(context, "...");
 
-            return merge( data, customer_query, 
-                (old_customer_data: OldCustomerData, customer: Customer) => ({ 
-                    legacy_id: old_customer_data.id,
-                    customer_id: customer.id,
-            })).bind(create_customer_migration_index).bind(() => (customer_query.unpack())).unpack();
-        })
-        return query.unpack();
+        if(result.customer_id == null) {
+            const customer = await create_new_customer({
+                name: data.name,
+                phone_number: data.phoneNumber,
+            }, f_db);
+
+            if(is_data_error(customer)) return customer.stack(context, "...")
+
+            const index = await create_customer_migration_index({
+                legacy_id: data.id,
+                customer_id: customer.id,
+            }, f_db);
+
+            if(is_data_error(index)) return index.stack(context, "...");
+            
+            return customer;
+        }
+
+        const customer = await retrieve_customer_entry({ customer_id: result.customer_id }, f_db);
+        if(is_data_error(customer)) return customer.stack(context, "...");
+        
+        const update = await update_customer_info({
+            customer: customer,
+            update: {
+                name: data.name,
+                phone_number: data.phoneNumber,
+                notes: null,
+            },
+        }, f_db);
+
+        if(is_data_error(update)) return update.stack(context, "...")
+        return update;
     }
 
-export const import_customer_from_old_db: Query<void, OldCustomerData[]> = 
-    async (_, f_db: FireDB): Promise<OldCustomerData[] | QueryError> => {
-        const data_snapshot: DataSnapshot = await get(f_db.old_db(["customer", "id"]));
+export const import_customer_from_old_db: Query<void, PartialResult<OldCustomerData[]>> = 
+    async (_, f_db) => {
+        const context = "Import Customers from Old DB";
+        const data_snapshot = await db_query(context, get(f_db.old_db(["customer", "id"])));
+        if(is_data_error(data_snapshot)) return data_snapshot;
 
         const customers: OldCustomerData[] = [];
+        const errors: DataError[] = [];
+    
         data_snapshot.forEach((data) => {
             const customer = to_old_customer_data(data.val());
 
-            if(is_successful_query(customer)) {
+            if(is_data_error(customer)) {
+                errors.push(customer);
+            } else {
                 if(customer.name.includes("qt")){
                     customer.name = customer.name.replace("qt", "").replaceAll("  ", " ");
                 }
@@ -58,5 +71,8 @@ export const import_customer_from_old_db: Query<void, OldCustomerData[]> =
             }
         });
 
-        return customers;
+        return {
+            data: customers,
+            error: lotta_errors(context, "...", errors),
+        };
     }

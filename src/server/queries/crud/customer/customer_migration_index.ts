@@ -1,19 +1,24 @@
 import 'server-only';
 
-import { type DataSnapshot, set, get, remove } from "firebase/database";
-import { FireDB } from "~/server/db_schema/fb_schema";
-import { Query, QueryError } from '../../server_queries_monad';
-import { server_error } from '~/server/server_error';
+import { db_query, Query } from '../../server_queries_monad';
 import { is_string } from '~/server/validation/simple_type';
+import { data_error, is_data_error } from '~/server/data_error';
+import { get, remove, set } from 'firebase/database';
 
 export const create_customer_migration_index: Query<{ customer_id: string, legacy_id: string }, void> = 
-    async (params: { customer_id: string, legacy_id: string }, f_db: FireDB) => {
-        await set(f_db.customers_legacy_id_index([params.legacy_id]), params.customer_id);
+    async ({ customer_id, legacy_id }, f_db) => {
+        return db_query(
+            "Creating customer migration index",
+            set(f_db.customers_legacy_id_index([legacy_id]), customer_id)
+        );
     }
 
 export const retrieve_customer_id_from_legacy_id: Query<{ legacy_id: string }, { customer_id: string | null }> =
-    async (params: { legacy_id: string }, f_db: FireDB): Promise<{ customer_id: string | null } | QueryError> => {
-        const data: DataSnapshot = await get(f_db.customers_legacy_id_index([params.legacy_id]));
+    async ({ legacy_id }, f_db) => {
+        const context = "Retrieving customer id from legacy db { ".concat(legacy_id, " }");
+
+        const data = await db_query(context, get(f_db.customers_legacy_id_index([legacy_id])));
+        if (is_data_error(data)) return data;
 
         if(!data.exists()) {
             return { customer_id: null };
@@ -22,13 +27,16 @@ export const retrieve_customer_id_from_legacy_id: Query<{ legacy_id: string }, {
         const result: unknown = data.val();
 
         if(!is_string(result)) {
-            return server_error("legacy index {".concat(params.legacy_id, "} is not string"));
+            return data_error(context, "corrupted not a string")
         }
         
         return { customer_id: result};
     }
 
 export const delete_customer_migration_index: Query<{ legacy_id: string }, void> = 
-    async (params: { legacy_id: string }, f_db: FireDB) => {
-        await remove(f_db.customers_legacy_id_index([params.legacy_id]));
+    async ({ legacy_id }, f_db) => {
+        return db_query(
+            "Deleting migration index",
+            remove(f_db.customers_legacy_id_index([legacy_id]))
+        );
     }

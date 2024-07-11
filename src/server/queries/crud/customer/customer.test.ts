@@ -3,37 +3,41 @@ import type { Customer } from "~/server/db_schema/type_def";
 import { create_customer_entry, delete_customer_entry, retrieve_customer_entry, update_customer_entry } from "./customer_entry"
 import { create_customer_phone_index, delete_customer_phone_index, retrieve_customer_phone_index } from "./customer_phone_index";
 import { create_customer_migration_index, delete_customer_migration_index, retrieve_customer_id_from_legacy_id } from "./customer_migration_index";
-import { QueryError, is_successful_query, pack_test } from "../../server_queries_monad";
-import { is_server_error } from "~/server/server_error";
+import { pack_test } from "../../server_queries_monad";
+import { is_data_error } from "~/server/data_error";
 
 const test_suit = "cust_cruds";
 
 afterAll(async () => {
     const res = await clear_test_data(test_suit);
-    expect(is_successful_query(res)).toBe(true);
+    expect(is_data_error(res)).toBe(false);
 })
 
 test("test customer_entries CRUDs querries", async () => {
     const test_name = test_suit.concat("/test_customer_entries_cruds/");
-    const test_customer_entry: Customer | QueryError = await
-        pack_test({name: "Tinn", phone_number: "your mother is a murloc"}, test_name)
-        .bind(create_customer_entry)
+    const test_customer_entry = await pack_test(
+            {name: "Tinn", phone_number: "your mother is a murloc"}, 
+            test_name
+        ).bind(create_customer_entry)
         .unpack();
 
-    if (is_server_error(test_customer_entry)) {
+    if (is_data_error(test_customer_entry)) {
+        test_customer_entry.log();
         fail();
     }
 
-    const created_customer_entry: Customer | QueryError = await 
-        pack_test({ customer_id: test_customer_entry.id }, test_name)
-        .bind(retrieve_customer_entry)
+    const created_customer_entry = await pack_test(
+            {customer_id: test_customer_entry.id }, 
+            test_name
+        ).bind(retrieve_customer_entry)
         .unpack();
     
-    if (is_successful_query(created_customer_entry)) {
+    if (!is_data_error(created_customer_entry)) {
         expect(created_customer_entry.id).toBe(test_customer_entry.id);
         expect(created_customer_entry.name).toBe(test_customer_entry.name);
         expect(created_customer_entry.phone_number).toBe(test_customer_entry.phone_number);
     } else {
+        created_customer_entry.log();
         fail();
     }
 
@@ -48,17 +52,18 @@ test("test customer_entries CRUDs querries", async () => {
         .bind(update_customer_entry)
         .unpack()
 
-    const updated_customer_entry: Customer | QueryError = await 
+    const updated_customer_entry = await 
         pack_test({ customer_id: test_customer_entry.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack()
 
-    if (is_successful_query(updated_customer_entry)) {
+    if (!is_data_error(updated_customer_entry)) {
         expect(updated_customer_entry.id).toBe(update_target.id);
         expect(updated_customer_entry.name).toBe(update_target.name);
         expect(updated_customer_entry.phone_number).toBe(update_target.phone_number);
         expect(updated_customer_entry.notes).toBe(update_target.notes);
     } else {
+        updated_customer_entry.log();
         fail();
     }
 
@@ -66,12 +71,12 @@ test("test customer_entries CRUDs querries", async () => {
         .bind(delete_customer_entry)
         .unpack();
 
-    const empty_customer_entry: Customer | QueryError = await
+    const empty_customer_entry = await
         pack_test({ customer_id: test_customer_entry.id }, test_name)
         .bind(retrieve_customer_entry)
         .unpack()
 
-    expect(is_successful_query(empty_customer_entry)).toBe(false);
+    expect(is_data_error(empty_customer_entry)).toBe(true);
 })
 
 test("test customer_phone_index CRUDs querries", async () => {
@@ -91,14 +96,19 @@ test("test customer_phone_index CRUDs querries", async () => {
         notes: "",
     }
 
-    let index: { customer_ids: string[] } | QueryError = await 
+    let index = await 
         pack_test({ phone_number: customer_1.phone_number }, test_name)
         .bind(retrieve_customer_phone_index) 
         .unpack();
 
-    if(is_successful_query(index)) {
-        expect(index.customer_ids).toHaveLength(0);
+    if(!is_data_error(index)) {
+        if(index.error != null) {
+            index.error.log();
+            fail();
+        }
+        expect(index.data.customer_ids).toHaveLength(0);
     } else {
+        index.log();
         fail();
     }
 
@@ -114,11 +124,16 @@ test("test customer_phone_index CRUDs querries", async () => {
         .bind(retrieve_customer_phone_index)
         .unpack();
 
-    if(is_successful_query(index)) {
-        expect(index.customer_ids).toHaveLength(2);
-        expect(index.customer_ids).toContain(customer_1.id);
-        expect(index.customer_ids).toContain(customer_2.id);
+    if(!is_data_error(index)) {
+        if(index.error != null) {
+            index.error.log();
+            fail();
+        }
+        expect(index.data.customer_ids).toHaveLength(2);
+        expect(index.data.customer_ids).toContain(customer_1.id);
+        expect(index.data.customer_ids).toContain(customer_2.id);
     } else {
+        index.log();
         fail();
     }
 
@@ -130,10 +145,14 @@ test("test customer_phone_index CRUDs querries", async () => {
         .bind(retrieve_customer_phone_index)
         .unpack();
     
-    if(is_successful_query(index)) {
-        expect(index.customer_ids).toHaveLength(1);
-        expect(index.customer_ids).not.toContain(customer_1.id);
-        expect(index.customer_ids).toContain(customer_2.id);
+    if(!is_data_error(index)) {
+        if(index.error != null) {
+            index.error.log();
+            fail();
+        }
+        expect(index.data.customer_ids).toHaveLength(1);
+        expect(index.data.customer_ids).not.toContain(customer_1.id);
+        expect(index.data.customer_ids).toContain(customer_2.id);
     } else {
         fail();
     }
@@ -144,12 +163,12 @@ test("test customer_migration_index CRUDs querries", async () => {
 
     const test_ids = { id: "BaNaNa", legacy_id: "banana" };
 
-    let conversion: { customer_id: string | null } | QueryError = await 
+    let conversion = await 
         pack_test({ legacy_id: test_ids.legacy_id }, test_name)
         .bind(retrieve_customer_id_from_legacy_id)
         .unpack();
 
-    if(is_successful_query(conversion)) {
+    if(!is_data_error(conversion)) {
         expect(conversion.customer_id).toBeNull();
     } else {
         fail();
@@ -163,7 +182,7 @@ test("test customer_migration_index CRUDs querries", async () => {
         .bind(retrieve_customer_id_from_legacy_id)
         .unpack();
 
-    if(is_successful_query(conversion)) {
+    if(!is_data_error(conversion)) {
         expect(conversion.customer_id).toBe(test_ids.id);
     } else {
         fail();
@@ -177,7 +196,7 @@ test("test customer_migration_index CRUDs querries", async () => {
         .bind(retrieve_customer_id_from_legacy_id)
         .unpack();
 
-    if(is_successful_query(conversion)) {
+    if(!is_data_error(conversion)) {
         expect(conversion.customer_id).toBeNull();
     } else {
         fail();

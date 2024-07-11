@@ -1,10 +1,10 @@
 import { Transaction } from "~/server/db_schema/type_def";
-import { TypeConversionError } from "../validation_error";
 import { is_number, is_object, is_string } from "../simple_type";
+import { data_error, DataError } from "~/server/data_error";
 
-export function to_transaction(t: unknown): Transaction | TypeConversionError {
+export function to_transaction(t: unknown): Transaction | DataError {
     if (!is_object(t)) {
-        return { error: "unknown is not object" };
+        return data_error( "Casting to Transaction", "not an object", );
     }
 
     if (!("id" in t && "customer_id" in t && "technician_id" in t
@@ -12,7 +12,7 @@ export function to_transaction(t: unknown): Transaction | TypeConversionError {
         && "amount" in t && "tip" in t && "cash" in t
         && "gift" in t && "discount" in t
     )) {
-        return { error: "unknown is contain missing field" };
+        return data_error( "Casting to Transaction", "missing field", );
     }
 
     const {
@@ -25,7 +25,7 @@ export function to_transaction(t: unknown): Transaction | TypeConversionError {
         && is_number(amount) && is_number(tip) && is_number(cash)
         && is_number(gift) && is_number(discount)
     )) {
-        return { error: "unknown is contain missing field" };
+        return data_error( "Casting to Transaction", "wrong field type", );
     }
 
     return { id: id, customer_id: customer_id, technician_id: technician_id,
