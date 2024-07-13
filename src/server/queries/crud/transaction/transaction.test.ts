@@ -3,6 +3,7 @@ import { pack_test } from "../../server_queries_monad";
 import { create_trasaction_date_entry, delete_transaction_date_entry, retrieve_transactions_on_date, update_transaction_date_entry } from "./transaction_date_entry";
 import { is_data_error } from "~/server/data_error";
 import { Transaction } from "~/server/db_schema/type_def";
+import { create_customer_trasaction_history_entry, delete_customers_transaction_history_entry, retrieve_customer_transactions_history } from "./customer_transaction_entry";
 
 const test_suit = "transaction_cruds";
 
@@ -135,4 +136,63 @@ test("test transaction_entries CRUDs querries", async () => {
     }
 
     expect(db_transactions.data.length).toBe(0);
+});
+
+test("test customer transaction history entries CRUDs querries", async () => {
+    const test_name = test_suit.concat("/test_transaction_date_cruds/");
+
+    const history = {
+        customer_id: "bruh",
+        id: "q;wyfupl",
+        date: "20 2 2085"
+    }
+
+    const create = await pack_test(history, test_name)
+        .bind(create_customer_trasaction_history_entry).unpack();
+
+    if(is_data_error(create)){
+        create.log();
+        fail();
+    }
+
+    let customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
+        .bind(retrieve_customer_transactions_history).unpack();
+
+    if(is_data_error(customer_history)){
+        customer_history.log();
+        fail();
+    }
+
+    if(is_data_error(customer_history.error)) {
+        customer_history.error.log();
+        fail();
+    }
+
+    expect(customer_history.data.length).toBe(1);
+    expect(customer_history.data[0]).not.toBeUndefined();
+    expect(customer_history.data[0]?.id).toBe(history.id);
+    expect(customer_history.data[0]?.date).toBe(history.date);
+
+    const del = await pack_test({ customer_id: history.customer_id, id: history.id }, test_name)
+        .bind(delete_customers_transaction_history_entry).unpack();
+
+    if(is_data_error(del)) {
+        del.log();
+        fail();
+    }
+
+    customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
+        .bind(retrieve_customer_transactions_history).unpack();
+
+    if(is_data_error(customer_history)){
+        customer_history.log();
+        fail();
+    }
+
+    if(is_data_error(customer_history.error)) {
+        customer_history.error.log();
+        fail();
+    }
+
+    expect(customer_history.data.length).toBe(0);
 });

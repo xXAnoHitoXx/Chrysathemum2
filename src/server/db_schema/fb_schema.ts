@@ -52,6 +52,10 @@ export class FireDB {
         return this.ref(customers_root, "phone_number/", sub_path);
     }
 
+    customers_transaction_history(sub_path : string[] = []): DatabaseReference {
+        return this.ref(customers_root, "history/", sub_path);
+    }
+
     customers_legacy_id_index(sub_path : string[] = []): DatabaseReference {
         return this.ref(customers_root, "legacy_id/", sub_path);
     }
