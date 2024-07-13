@@ -7,7 +7,7 @@ import { get, remove, set, update } from "firebase/database";
 export const create_trasaction_date_entry: Query<Transaction, void> = async (params, f_db) => {
     const context = "Creating Transaction entry"
 
-    const ref = f_db.transaction_date_entries([params.date, params.id])
+    const ref = f_db.transaction_date_entries([params.date.toString(), params.id])
 
     const e = await db_query(context, set(ref, params));
     if(is_data_error(e)) return e;
@@ -46,7 +46,7 @@ export const retrieve_transactions_on_date: Query<{ date: string }, PartialResul
 
 export const update_transaction_date_entry: Query<Transaction, void> = 
     async (transaction, f_db) => {
-        const ref = f_db.transaction_date_entries([transaction.date, transaction.id]);
+        const ref = f_db.transaction_date_entries([transaction.date.toString(), transaction.id]);
         return db_query("Update Transaction entry", update(ref, transaction))
     }
 

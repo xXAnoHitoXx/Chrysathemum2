@@ -14,7 +14,7 @@ export function to_appointment(t: unknown): Appointment | DataError {
     
     const { id, customer_id, date, time, duration, details } = t;
 
-    if (!(is_string(id) && is_string(customer_id) && is_string(date) 
+    if (!(is_string(id) && is_string(customer_id) && is_number(date) 
         && is_number(time) && is_number(duration) && is_string(details))) {
         return data_error( "Casting to Appointment", "wrong field type" );
     }

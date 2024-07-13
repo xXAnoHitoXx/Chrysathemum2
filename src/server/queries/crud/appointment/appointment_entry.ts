@@ -7,7 +7,7 @@ import { get, push, remove, set, update } from "firebase/database";
 export const create_appointment_entry: Query<{
         customer_id: string,
         technician_id: string | null,
-        date: string,
+        date: number,
         time: number,
         duration: number,
         details: string,

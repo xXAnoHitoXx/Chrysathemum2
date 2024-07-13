@@ -18,7 +18,7 @@ test("test transaction_entries CRUDs querries", async () => {
         id: "naiesrntearinsteian",
         customer_id: "Banana",
         technician_id: "arstarsnteiano",
-        date: "20 3 2021",
+        date: 10870,
         time: 5,
         details: "emotional damage",
         amount: 11500,
@@ -36,7 +36,7 @@ test("test transaction_entries CRUDs querries", async () => {
         fail();
     }
 
-    let db_transactions = await pack_test({ date: template.date }, test_name)
+    let db_transactions = await pack_test({ date: template.date.toString() }, test_name)
         .bind(retrieve_transactions_on_date).unpack();
 
     if(is_data_error(db_transactions)) {
@@ -83,7 +83,7 @@ test("test transaction_entries CRUDs querries", async () => {
         fail();
     }
 
-    db_transactions = await pack_test({ date: template.date }, test_name)
+    db_transactions = await pack_test({ date: template.date.toString() }, test_name)
         .bind(retrieve_transactions_on_date).unpack();
 
     if(is_data_error(db_transactions)) {
@@ -114,7 +114,7 @@ test("test transaction_entries CRUDs querries", async () => {
     expect(db_transaction.gift).toBe(update_target.gift);
     expect(db_transaction.discount).toBe(update_target.discount);
 
-    const del = await pack_test({ date: db_transaction.date, id: db_transaction.id }, test_name)
+    const del = await pack_test({ date: db_transaction.date.toString(), id: db_transaction.id }, test_name)
         .bind(delete_transaction_date_entry).unpack();
 
     if(is_data_error(del)) {
@@ -122,7 +122,7 @@ test("test transaction_entries CRUDs querries", async () => {
         fail();
     }
 
-    db_transactions = await pack_test({ date: template.date }, test_name)
+    db_transactions = await pack_test({ date: template.date.toString() }, test_name)
         .bind(retrieve_transactions_on_date).unpack();
 
     if(is_data_error(db_transactions)) {

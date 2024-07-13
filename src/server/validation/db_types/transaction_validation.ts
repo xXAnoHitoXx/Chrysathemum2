@@ -21,7 +21,7 @@ export function to_transaction(t: unknown): Transaction | DataError {
     } = t;
 
     if (!(is_string(id) && is_string(customer_id) && is_string(technician_id)
-        && is_string(date) && is_number(time) && is_string(details)
+        && is_number(date) && is_number(time) && is_string(details)
         && is_number(amount) && is_number(tip) && is_number(cash)
         && is_number(gift) && is_number(discount)
     )) {

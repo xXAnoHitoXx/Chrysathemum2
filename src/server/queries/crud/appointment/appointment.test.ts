@@ -15,7 +15,7 @@ test("test appointment_entries CRUDs querries", async () => {
     const app_detail = {
         customer_id: "Banana",
         technician_id: null,
-        date: "20 3 2021",
+        date: 11160,
         time: 5,
         duration: 10,
         details: "emotional damage",
@@ -56,7 +56,7 @@ test("test appointment_entries CRUDs querries", async () => {
         id: appointment.id,
         customer_id: "Bruhnuhnuh",
         technician_id: "portmonaie",
-        date: "22 3 2021",
+        date: 10870,
         time: 15,
         duration: 5,
         details: "emotional damage++",
