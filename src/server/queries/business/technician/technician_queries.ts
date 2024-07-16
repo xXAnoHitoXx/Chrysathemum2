@@ -2,7 +2,7 @@ import 'server-only';
 
 import { create_technician_entry, update_technician_entry } from '~/server/queries/crud/technician/technician_entry';
 import type { Technician } from '~/server/db_schema/type_def';
-import { db_query, Query, retain_input } from '../../server_queries_monad';
+import { db_query, Query } from '../../server_queries_monad';
 import { DataSnapshot, equalTo, get, orderByChild, query } from 'firebase/database';
 import { TechnicianCreationInfo } from '~/app/api/technician/create/validation';
 import { assign_technician_to_location } from '../location/location';
@@ -38,9 +38,9 @@ export const mark_technician_active: Query<Technician, Technician> =
             active: true,
         } 
 
-        const update = await (retain_input(update_technician_entry))(active_tech, f_db);
+        const update = await update_technician_entry(active_tech, f_db);
         if(is_data_error(update)) return update.stack("Mark Technician Inactive", technician.name);
-        return update;
+        return active_tech;
     }
 
 export const mark_technician_inactive: Query<Technician, Technician> = 
@@ -56,9 +56,9 @@ export const mark_technician_inactive: Query<Technician, Technician> =
             active: false,
         } 
 
-        const update = await (retain_input(update_technician_entry))(inactive_tech, f_db);
+        const update = await update_technician_entry(inactive_tech, f_db);
         if(is_data_error(update)) return update.stack("Mark Technician Inactive", technician.name);
-        return update;
+        return inactive_tech;
     }
 
 export const get_all_technicians: Query<void, PartialResult<Technician[]>> =

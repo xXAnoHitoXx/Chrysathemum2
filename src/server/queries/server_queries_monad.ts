@@ -21,44 +21,9 @@ export async function db_query<T>(context: string, promise: Promise<T>): Promise
     return promise.catch(()=> (data_error(context, "database error")))
 }
 
-export function merge<R, S, T>(
-    r: ServerQueryData<R>,
-    s: ServerQueryData<S>,
-    merger: (r: R, s: S) => T | DataError
-): ServerQueryData<T> {
-    return r.bind(async (r: R, _): Promise<T | DataError> => {
-        return s.bind(async (s: S, _): Promise<T | DataError> => {
-            return merger(r, s);
-        }).unpack();
-    });
-}
-
 export function map<T, U>(mapper: (t: T) => U): Query<T, U> {
     return async (t: T, _): Promise<U> => {
         return mapper(t);
-    }
-}
-
-export function retain_input_n_output<T, U, V>(
-    query: Query<T, U>, 
-    packer: (input: T, output: U) => V | DataError
-): Query<T, V> {
-    return async (t: T, fire_db: FireDB) => {
-        const u = await query(t, fire_db);
-        if (is_data_error(u)) {
-            return u;
-        }
-        return packer(t, u);
-    }
-}
-
-export function retain_input<T, U>(query: Query<T, U>): Query<T, T> {
-    return async (t: T, fire_db: FireDB) => {
-        const err: DataError | U = await query(t, fire_db);
-        if (is_data_error(err)){
-            return err;
-        }
-        return t;
     }
 }
 

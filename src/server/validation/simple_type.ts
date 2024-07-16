@@ -23,12 +23,21 @@ export function is_function(t: unknown): t is Function {
 
     return (typeof t === "function");
 }
+
 export function is_number(t: unknown): t is number {
     if (t == null) {
         return false;
     }
 
     return (typeof t === "number");
+}
+
+export function is_big_int(t: unknown): t is BigInt {
+    if (t == null) {
+        return false;
+    }
+
+    return (typeof t === "bigint");
 }
 
 export function is_object(t: unknown): t is object {

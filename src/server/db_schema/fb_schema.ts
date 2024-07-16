@@ -93,10 +93,10 @@ export class FireDB {
     }
 
     old_db(sub_path: string[] = []): DatabaseReference {
-        let path = ano_iter(sub_path).reduce(
-            (u: string, t: string) => (u.concat(t, "/")), 
-            "/"
-        );
+        let path = "/";
+        sub_path.forEach((branch) => {
+            path = path.concat(branch, "/");
+        });
         return ref(f_db, path);
     }
 

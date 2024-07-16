@@ -108,7 +108,7 @@ test("test change technician activity querry", async () => {
     expect(db_tech.color).toBe(test_techniclan_data.color);
     expect(db_tech.active).toBe(true);
 
-    const inactive_tech = await test_tech.bind(mark_technician_inactive).unpack();
+    const inactive_tech = await pack_test(db_tech, test_name).bind(mark_technician_inactive).unpack();
 
     if(is_data_error(inactive_tech)){
         inactive_tech.log();

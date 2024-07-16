@@ -13,7 +13,9 @@ export const handle_void_return: Query<void, VoidReturn> = () => ({});
 
 export async function unpack_response<T>(data: ServerQueryData<T>): Promise<Response> {
     const t: T | DataError = await data.unpack();
+
     if (is_data_error(t)) {
+        t.log();
         t.report();
         return new Response(t.message(), { status: 418 });
     }
