@@ -46,6 +46,7 @@ export const retrieve_technician_entry: Query<{ id: string }, Technician> =
 
 export const update_technician_entry: Query<Technician, void> =
     async (technician, f_db) => {
+        console.log(technician);
         return db_query(
             "Updating Technician entry",
             update(

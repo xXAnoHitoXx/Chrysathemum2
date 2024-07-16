@@ -7,7 +7,7 @@ import { useState, FormEvent } from "react";
 import { ano_iter, ano_chain_iter, AnoIter } from "~/util/anoiter/anoiter"
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
 import { fetch_query, Method } from "~/app/api/api_query";
-import { ResponseError } from "~/app/api/response_parser";
+import { DataError } from "~/server/data_error";
 
 export default function ClientSide(
     { technicians, roster, salon }
@@ -61,7 +61,7 @@ export default function ClientSide(
 
     async function requests_changes() {
 
-       const add_requests: AnoIter<Promise<ResponseError | null>> = ano_iter(current_location_tech_list)
+       const add_requests: AnoIter<Promise<DataError | null>> = ano_iter(current_location_tech_list)
             .ifilter((technician) => {
                 return !initially_at_location_ids.includes(technician.id);
             })
@@ -74,7 +74,7 @@ export default function ClientSide(
                 })
             ));
 
-        const remove_requests: AnoIter<Promise<ResponseError | null>> = ano_chain_iter(active_tech_list, inactive_tech_list)
+        const remove_requests: AnoIter<Promise<DataError | null>> = ano_chain_iter(active_tech_list, inactive_tech_list)
             .ifilter((technician) => (
                 initially_at_location_ids.includes(technician.id)
             ))
@@ -87,7 +87,7 @@ export default function ClientSide(
                 })
             ));
 
-        const activation_requests: AnoIter<Promise<ResponseError | null>> =
+        const activation_requests: AnoIter<Promise<DataError | null>> =
             ano_iter(active_tech_list)
                 .ifilter((technician) => (
                     initially_inactive_ids.includes(technician.id)
@@ -101,7 +101,7 @@ export default function ClientSide(
                     })
                 ));
 
-        const deactivation_requests: AnoIter<Promise<ResponseError | null>> =
+        const deactivation_requests: AnoIter<Promise<DataError | null>> =
             ano_iter(inactive_tech_list)
                 .ifilter((technician) => (
                     !initially_inactive_ids.includes(technician.id)
@@ -115,7 +115,7 @@ export default function ClientSide(
                     })
                 ));
 
-        const requests_iter: AnoIter<Promise<ResponseError | null>> =
+        const requests_iter: AnoIter<Promise<DataError | null>> =
             ano_chain_iter(
                 add_requests, remove_requests, activation_requests, deactivation_requests
             );

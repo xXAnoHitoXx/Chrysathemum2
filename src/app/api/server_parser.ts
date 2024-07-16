@@ -1,18 +1,21 @@
-import { Query, QueryError, ServerQueryData } from "~/server/queries/server_queries_monad";
-import { ServerError, is_server_error, server_error } from "~/server/server_error";
-import { TypeConversionError, is_type_conversion_error } from "~/server/validation/validation_error";
+import { DataError, is_data_error } from "~/server/data_error";
+import { Query, ServerQueryData } from "~/server/queries/server_queries_monad";
 
-export function parse_request<T>(into: (t: unknown) => T | TypeConversionError): Query<Request, T> {
-    return async (request: Request): Promise<T | ServerError> => {
-        const req = into( await request.json());
-        return is_type_conversion_error(req)? server_error(req.error) : req;
+export type VoidReturn = {};
+
+export function parse_request<T>(into: (t: unknown) => T | DataError): Query<Request, T> {
+    return async (request: Request) => {
+        return into( await request.json());
     }
 }
 
+export const handle_void_return: Query<void, VoidReturn> = () => ({});
+
 export async function unpack_response<T>(data: ServerQueryData<T>): Promise<Response> {
-    const t: T | QueryError = await data.unpack();
-    if (is_server_error(t)) {
-        return new Response(t.error, { status: 418 });
+    const t: T | DataError = await data.unpack();
+    if (is_data_error(t)) {
+        t.report();
+        return new Response(t.message(), { status: 418 });
     }
 
     if(t == null) {

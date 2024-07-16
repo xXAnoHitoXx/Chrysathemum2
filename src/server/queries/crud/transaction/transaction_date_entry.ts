@@ -1,20 +1,17 @@
-import { Transaction } from "~/server/db_schema/type_def";
+import { TransactionEntry } from "~/server/db_schema/type_def";
 import { db_query, Query } from "../../server_queries_monad";
 import { to_transaction } from "~/server/validation/db_types/transaction_validation";
 import { DataError, is_data_error, lotta_errors, PartialResult } from "~/server/data_error";
 import { get, remove, set, update } from "firebase/database";
 
-export const create_trasaction_date_entry: Query<Transaction, void> = async (params, f_db) => {
-    const context = "Creating Transaction entry"
-
+export const create_trasaction_date_entry: Query<TransactionEntry, void> = async (params, f_db) => {
+    const context = "Creating TransactionEntry entry"
     const ref = f_db.transaction_date_entries([params.date.toString(), params.id])
-
-    const e = await db_query(context, set(ref, params));
-    if(is_data_error(e)) return e;
+    return db_query(context, set(ref, params));
 }
 
-export const retrieve_transactions_on_date: Query<{ date: string }, PartialResult<Transaction[]>> = 
-    async ({ date }, f_db): Promise<PartialResult<Transaction[]> | DataError> => {
+export const retrieve_transactions_on_date: Query<{ date: string }, PartialResult<TransactionEntry[]>> = 
+    async ({ date }, f_db): Promise<PartialResult<TransactionEntry[]> | DataError> => {
         const context = "Retrieving transaction of ".concat(date);
 
         const ref = f_db.transaction_date_entries([date]);
@@ -25,7 +22,7 @@ export const retrieve_transactions_on_date: Query<{ date: string }, PartialResul
             return { data: [], error: null };
         }
 
-        const transactions: Transaction[] = [];
+        const transactions: TransactionEntry[] = [];
         const error: DataError[] = [];
 
         data.forEach((child) => {
@@ -44,14 +41,14 @@ export const retrieve_transactions_on_date: Query<{ date: string }, PartialResul
         };
     }
 
-export const update_transaction_date_entry: Query<Transaction, void> = 
+export const update_transaction_date_entry: Query<TransactionEntry, void> = 
     async (transaction, f_db) => {
         const ref = f_db.transaction_date_entries([transaction.date.toString(), transaction.id]);
-        return db_query("Update Transaction entry", update(ref, transaction))
+        return db_query("Update TransactionEntry entry", update(ref, transaction));
     }
 
 export const delete_transaction_date_entry : Query<{ date: string, id: string }, void> =
     async ({ date, id }, f_db) => {
         const ref = f_db.transaction_date_entries([date, id]);
-        return db_query("Remove Transaction entry", remove(ref));
+        return db_query("Remove TransactionEntry entry", remove(ref));
     }

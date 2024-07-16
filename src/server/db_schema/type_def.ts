@@ -35,6 +35,16 @@ export type Location = {
 
 export type Appointment = {
     id: string,
+    customer: Customer,
+    technician: Technician | null,
+    date: number,
+    time: number,
+    duration: number,
+    details: string,
+}
+
+export type AppointmentEntry = {
+    id: string,
     customer_id: string,
     technician_id: string | null,
     date: number,
@@ -43,7 +53,7 @@ export type Appointment = {
     details: string,
 }
 
-export type Transaction = {
+export type TransactionEntry = {
     id: string,
     customer_id: string,
     technician_id: string,

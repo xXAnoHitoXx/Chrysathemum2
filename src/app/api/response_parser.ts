@@ -1,13 +1,8 @@
-export async function parse_response<T>(response: Response, to: (t: unknown) => T | ResponseError): Promise<T | ResponseError> {
-    if(!response.ok){
-        return { error: await response.text() };
-    }
-    return to(await response.json());
-}
+import { data_error, DataError } from "~/server/data_error";
 
-export async function pares_void_response(response: Response): Promise<ResponseError | null> {
+export async function parse_response<T>(response: Response, to: (t: unknown) => T | DataError): Promise<T | DataError> {
     if(!response.ok){
-        return { error: await response.text() };
+        return data_error("Parsing Server Response", "encountered error on server\n".concat(await response.text()));
     }
-    return null;
+   return to(await response.json());
 }

@@ -10,9 +10,14 @@ export default async function RootLayout({
     const appointments: Appointment[] = [
         {
             id: "Banana",
-            customer_id: "PoopyPooh",
-            technician_id: null,
-            date: "idk_lol",
+            customer: {
+                id: "ana",
+                name: "Poopy Poo",
+                phone_number: "(FaQ) yur-moma",
+                notes: "",
+            },
+            technician: null,
+            date: 111080,
             duration: 4,
             time: 15,
             details: "alotanothn",
@@ -24,7 +29,7 @@ export default async function RootLayout({
             <a href="/salon/nav/">
                 <button className="border-2 border-sky-400 rounded-full w-32 h-20">Actions</button>
             </a>
-            <div id="Appointment View" className="flex flex-nowrap w-full h-fit overflow-x-scroll">
+            <div id="AppointmentEntry View" className="flex flex-nowrap w-full h-fit overflow-x-scroll">
                 <Board appointments={appointments}/>
             </div>
             {children}

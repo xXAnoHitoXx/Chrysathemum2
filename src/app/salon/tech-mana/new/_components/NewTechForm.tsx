@@ -9,7 +9,7 @@ import type { Technician } from '~/server/db_schema/type_def';
 import TechDisplayBar from './TechDisplayBar';
 import { to_technician } from '~/server/validation/db_types/technician_validation';
 import { fetch_query, Method } from '~/app/api/api_query';
-import { is_response_error } from '~/server/validation/validation_error';
+import { is_data_error } from '~/server/data_error';
 
 export function NewTechForm({ starting_active_technicians, salon }: { starting_active_technicians: Technician[], salon: string}) {
     const [active_techs, set_active_techs] = useState(starting_active_technicians);
@@ -43,7 +43,7 @@ export function NewTechForm({ starting_active_technicians, salon }: { starting_a
             to: to_technician,
         })
 
-        if (!is_response_error(new_tech)) {
+        if (!is_data_error(new_tech)) {
             set_active_techs([
                 new_tech,
                 ...active_techs

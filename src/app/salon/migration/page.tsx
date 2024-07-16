@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Method, fetch_query } from "~/app/api/api_query";
 import { to_old_customer_data } from "~/app/api/migration/customer/validation";
+import { is_data_error } from "~/server/data_error";
 import { to_array } from "~/server/validation/simple_type";
-import { is_response_error } from "~/server/validation/validation_error";
 import { ano_iter } from "~/util/anoiter/anoiter";
 
 export default function MigrationStation() {
@@ -19,8 +19,8 @@ export default function MigrationStation() {
             params: null,
         })
 
-        if(is_response_error(old_customers)) { 
-            console.log("failed to retrieve old customers")
+        if(is_data_error(old_customers)) { 
+            old_customers.log();
             return 
         }
 

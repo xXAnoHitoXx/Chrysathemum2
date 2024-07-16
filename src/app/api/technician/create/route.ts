@@ -6,6 +6,6 @@ import { parse_request, unpack_response } from "../../server_parser";
 export async function POST(request: Request): Promise<Response> {
     const technician_creation_query = pack(request)
         .bind(parse_request(to_technician_creation_info))
-        .packed_bind(create_new_technician);
+        .bind(create_new_technician);
     return unpack_response(technician_creation_query);
 }

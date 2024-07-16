@@ -2,7 +2,7 @@ import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { pack_test } from "../../server_queries_monad";
 import { create_trasaction_date_entry, delete_transaction_date_entry, retrieve_transactions_on_date, update_transaction_date_entry } from "./transaction_date_entry";
 import { is_data_error } from "~/server/data_error";
-import { Transaction } from "~/server/db_schema/type_def";
+import { TransactionEntry } from "~/server/db_schema/type_def";
 import { create_customer_trasaction_history_entry, delete_customers_transaction_history_entry, retrieve_customer_transactions_history } from "./customer_transaction_entry";
 
 const test_suit = "transaction_cruds";
@@ -14,7 +14,7 @@ afterAll(async () => {
 test("test transaction_entries CRUDs querries", async () => {
     const test_name = test_suit.concat("/test_transaction_date_cruds/");
     
-    const template: Transaction = {
+    const template: TransactionEntry = {
         id: "naiesrntearinsteian",
         customer_id: "Banana",
         technician_id: "arstarsnteiano",
@@ -51,7 +51,7 @@ test("test transaction_entries CRUDs querries", async () => {
 
     expect(db_transactions.data.length).toBe(1);
 
-    let db_transaction: Transaction | undefined = db_transactions.data[0];
+    let db_transaction: TransactionEntry | undefined = db_transactions.data[0];
     if(db_transaction == null){
         fail();
     }

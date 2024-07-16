@@ -1,7 +1,7 @@
 "use client"
 
 import { Bisquit } from "~/server/validation/bisquit";
-import { fetch_void_query, Method } from "../api/api_query";
+import { fetch_query, Method } from "../api/api_query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -15,10 +15,11 @@ export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
             if(is_loading) return;
             set_loading(true);
 
-            await fetch_void_query({
+            await fetch_query({
                 url: "/api/bisquit",
                 method: Method.POST,
                 params: { data: { name: Bisquit.salon_selection, value: salon } },
+                to: ()=>{},
             });
 
             router.push(next_page);

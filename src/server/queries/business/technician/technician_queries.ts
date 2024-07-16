@@ -1,4 +1,5 @@
 import 'server-only';
+
 import { create_technician_entry, update_technician_entry } from '~/server/queries/crud/technician/technician_entry';
 import type { Technician } from '~/server/db_schema/type_def';
 import { db_query, Query, retain_input } from '../../server_queries_monad';
@@ -44,7 +45,7 @@ export const mark_technician_active: Query<Technician, Technician> =
 
 export const mark_technician_inactive: Query<Technician, Technician> = 
     async (technician, f_db) => {
-        if (technician.active) {
+        if (!technician.active) {
             return technician;
         }
 
