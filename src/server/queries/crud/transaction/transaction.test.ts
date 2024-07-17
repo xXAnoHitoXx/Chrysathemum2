@@ -1,7 +1,7 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { pack_test } from "../../server_queries_monad";
-import { create_trasaction_date_entry, delete_transaction_date_entry, retrieve_transactions_on_date, update_transaction_date_entry } from "./transaction_date_entry";
-import { is_data_error } from "~/server/data_error";
+import { create_trasaction_date_entry, delete_transaction_date_entry, retrieve_transaction_entry, retrieve_transactions_on_date, update_transaction_date_entry } from "./transaction_date_entry";
+import { extract_error, is_data_error } from "~/server/data_error";
 import { TransactionEntry } from "~/server/db_schema/type_def";
 import { create_customer_trasaction_history_entry, delete_customers_transaction_history_entry, retrieve_customer_transactions_history } from "./customer_transaction_entry";
 
@@ -37,25 +37,14 @@ test("test transaction_entries CRUDs querries", async () => {
         fail();
     }
 
-    let db_transactions = await pack_test({ date: template.date.toString() }, test_name)
-        .bind(retrieve_transactions_on_date).unpack();
+    let db_transaction = await pack_test({ date: template.date.toString(), id: template.id }, test_name)
+        .bind(retrieve_transaction_entry).unpack();
 
-    if(is_data_error(db_transactions)) {
-        db_transactions.log();
+    if(is_data_error(db_transaction)) {
+        db_transaction.log();
         fail();
     }
 
-    if(db_transactions.error != null){
-        db_transactions.error.log();
-        fail();
-    }
-
-    expect(db_transactions.data.length).toBe(1);
-
-    let db_transaction: TransactionEntry | undefined = db_transactions.data[0];
-    if(db_transaction == null){
-        fail();
-    }
 
     expect(db_transaction.id).toBe(template.id);
     expect(db_transaction.customer_id).toBe(template.customer_id);
@@ -84,22 +73,11 @@ test("test transaction_entries CRUDs querries", async () => {
         fail();
     }
 
-    db_transactions = await pack_test({ date: template.date.toString() }, test_name)
-        .bind(retrieve_transactions_on_date).unpack();
+    db_transaction = await pack_test({ date: template.date.toString(), id: template.id }, test_name)
+        .bind(retrieve_transaction_entry).unpack();
 
-    if(is_data_error(db_transactions)) {
-        db_transactions.log();
-        fail();
-    }
-
-    expect(db_transactions.data.length).toBe(1);
-    if(db_transactions.error != null){
-        db_transactions.error.log();
-        fail();
-    }
-
-    db_transaction = db_transactions.data[0];
-    if(db_transaction == null){
+    if(is_data_error(db_transaction)) {
+        db_transaction.log();
         fail();
     }
 
@@ -123,20 +101,192 @@ test("test transaction_entries CRUDs querries", async () => {
         fail();
     }
 
-    db_transactions = await pack_test({ date: template.date.toString() }, test_name)
-        .bind(retrieve_transactions_on_date).unpack();
+    db_transaction = await pack_test({ date: template.date.toString(), id: template.id }, test_name)
+        .bind(retrieve_transaction_entry).unpack();
 
-    if(is_data_error(db_transactions)) {
-        db_transactions.log();
+    if(!is_data_error(db_transaction)) {
+        fail();
+    }
+});
+
+test("test retrieve transactions on date querries", async () => {
+    const test_name = test_suit.concat("/test_ret_transactions_entry_on_date/");
+
+    const t1: TransactionEntry = {
+        id: "naiesrntearinsteian",
+        customer_id: "Banana",
+        technician_id: "arstarsnteiano",
+        salon: "5CBL",
+        date: 10870,
+        time: 5,
+        details: "emotional damage",
+        amount: 11500,
+        tip: 1725,
+        cash: 0,
+        gift: 5750,
+        discount: 2500,
+    }
+
+    const t2: TransactionEntry = {
+        id: "asrontaensr",
+        customer_id: "Banono",
+        technician_id: "arstarsnteiano",
+        salon: "5CBL",
+        date: 11560,
+        time: 5,
+        details: "emotional damage",
+        amount: 11500,
+        tip: 1725,
+        cash: 0,
+        gift: 5750,
+        discount: 2500,
+    }
+
+    const t3: TransactionEntry = {
+        id: "rstoaaoesnt",
+        customer_id: "Banunu",
+        technician_id: "arstarsnteiano",
+        salon: "5CBL",
+        date: 10870,
+        time: 5,
+        details: "emotional damage",
+        amount: 11500,
+        tip: 1725,
+        cash: 0,
+        gift: 5750,
+        discount: 2500,
+    }
+
+    const blank = await pack_test({date: t1.date.toString()}, test_name)
+        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
+            error.log();
+            fail();
+        })).unpack();
+
+    if(is_data_error(blank)) {
+        blank.log();
         fail();
     }
 
-    if(db_transactions.error != null){
-        db_transactions.error.log();
+    expect(blank.length).toBe(0);
+
+    const ct1 = await pack_test(t1, test_name).bind(create_trasaction_date_entry).unpack();
+    const ct2 = await pack_test(t2, test_name).bind(create_trasaction_date_entry).unpack();
+
+    if(is_data_error(ct1)) {
+        ct1.log();
         fail();
     }
 
-    expect(db_transactions.data.length).toBe(0);
+    if(is_data_error(ct2)) {
+        ct2.log();
+        fail();
+    }
+
+    let transactions = await pack_test({date: t1.date.toString()}, test_name)
+        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
+            error.log();
+            fail();
+        })).unpack();
+
+    if(is_data_error(transactions)) {
+        transactions.log();
+        fail();
+    }
+
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]?.id).toBe(t1.id);
+    expect(transactions[0]?.customer_id).toBe(t1.customer_id);
+    expect(transactions[0]?.technician_id).toBe(t1.technician_id);
+    expect(transactions[0]?.salon).toBe(t1.salon);
+    expect(transactions[0]?.date).toBe(t1.date);
+    expect(transactions[0]?.time).toBe(t1.time);
+    expect(transactions[0]?.details).toBe(t1.details);
+    expect(transactions[0]?.amount).toBe(t1.amount);
+    expect(transactions[0]?.tip).toBe(t1.tip);
+    expect(transactions[0]?.cash).toBe(t1.cash);
+    expect(transactions[0]?.gift).toBe(t1.gift);
+    expect(transactions[0]?.discount).toBe(t1.discount);
+
+    const ct3 = await pack_test(t3, test_name).bind(create_trasaction_date_entry).unpack();
+
+    if(is_data_error(ct3)) {
+        ct3.log();
+        fail();
+    }
+
+    transactions = await pack_test({date: t1.date.toString()}, test_name)
+        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
+            error.log();
+            fail();
+        })).unpack();
+
+    if(is_data_error(transactions)) {
+        transactions.log();
+        fail();
+    }
+
+    expect(transactions.length).toBe(2);
+
+    expect(transactions[0]?.id).toBe(t1.id);
+    expect(transactions[0]?.customer_id).toBe(t1.customer_id);
+    expect(transactions[0]?.technician_id).toBe(t1.technician_id);
+    expect(transactions[0]?.salon).toBe(t1.salon);
+    expect(transactions[0]?.date).toBe(t1.date);
+    expect(transactions[0]?.time).toBe(t1.time);
+    expect(transactions[0]?.details).toBe(t1.details);
+    expect(transactions[0]?.amount).toBe(t1.amount);
+    expect(transactions[0]?.tip).toBe(t1.tip);
+    expect(transactions[0]?.cash).toBe(t1.cash);
+    expect(transactions[0]?.gift).toBe(t1.gift);
+    expect(transactions[0]?.discount).toBe(t1.discount);
+
+    expect(transactions[1]?.id).toBe(t3.id);
+    expect(transactions[1]?.customer_id).toBe(t3.customer_id);
+    expect(transactions[1]?.technician_id).toBe(t3.technician_id);
+    expect(transactions[1]?.salon).toBe(t3.salon);
+    expect(transactions[1]?.date).toBe(t3.date);
+    expect(transactions[1]?.time).toBe(t3.time);
+    expect(transactions[1]?.details).toBe(t3.details);
+    expect(transactions[1]?.amount).toBe(t3.amount);
+    expect(transactions[1]?.tip).toBe(t3.tip);
+    expect(transactions[1]?.cash).toBe(t3.cash);
+    expect(transactions[1]?.gift).toBe(t3.gift);
+    expect(transactions[1]?.discount).toBe(t3.discount);
+    
+    const del = await pack_test({id: t1.id, date: t1.date.toString()}, test_name)
+        .bind(delete_transaction_date_entry).unpack();
+    
+    if(is_data_error(del)) {
+        del.log();
+        fail();
+    }
+
+    transactions = await pack_test({date: t1.date.toString()}, test_name)
+        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
+            error.log();
+            fail();
+        })).unpack();
+
+    if(is_data_error(transactions)) {
+        transactions.log();
+        fail();
+    }
+
+    expect(transactions.length).toBe(1);
+
+    expect(transactions[0]?.id).toBe(t3.id);
+    expect(transactions[0]?.customer_id).toBe(t3.customer_id);
+    expect(transactions[0]?.technician_id).toBe(t3.technician_id);
+    expect(transactions[0]?.salon).toBe(t3.salon);
+    expect(transactions[0]?.date).toBe(t3.date);
+    expect(transactions[0]?.time).toBe(t3.time);
+    expect(transactions[0]?.details).toBe(t3.details);
+    expect(transactions[0]?.amount).toBe(t3.amount);
+    expect(transactions[0]?.tip).toBe(t3.tip);
+    expect(transactions[0]?.cash).toBe(t3.cash);
+    expect(transactions[0]?.gift).toBe(t3.gift);
+    expect(transactions[0]?.discount).toBe(t3.discount);
 });
 
 test("test customer transaction history entries CRUDs querries", async () => {

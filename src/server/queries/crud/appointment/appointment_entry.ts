@@ -1,7 +1,7 @@
 import { AppointmentEntry } from "~/server/db_schema/type_def";
 import { db_query, Query } from "../../server_queries_monad";
 import { to_appointment } from "~/server/validation/db_types/appointment_validation";
-import { data_error, is_data_error } from "~/server/data_error";
+import { data_error, DataError, is_data_error, lotta_errors, PartialResult } from "~/server/data_error";
 import { get, push, remove, set, update } from "firebase/database";
 
 export const create_appointment_entry: Query<{
@@ -35,6 +35,37 @@ export const create_appointment_entry: Query<{
         return appointment;
     }
 
+export const retrieve_appointment_entries_on_date: Query<{ date: string }, PartialResult<AppointmentEntry[]>> =
+    async ({date}, f_db) => {
+        const context = "Retrieving appointments of ".concat(date);
+
+        const ref = f_db.appointment_date_entries([date]);
+        const data = await db_query(context, get(ref));
+        if (is_data_error(data)) return data;
+
+        if(!data.exists()){
+            return { data: [], error: null };
+        }
+
+        const appointments: AppointmentEntry[] = [];
+        const error: DataError[] = [];
+
+        data.forEach((child) => {
+            const appointment = to_appointment(child.val());
+            if (is_data_error(appointment)) {
+                error.push(appointment.stack("Parsing { ".concat(child.key, " }"), "corrupted entry"));
+                return;
+            }
+            appointments.push(appointment);
+        });
+
+        return {
+            data: appointments,
+            error: (error.length == 0)?
+                null : lotta_errors(context, error.length.toString().concat(" corrupted entries"), error)
+        };
+    }
+
 export const retrieve_appointment_entry: Query<{ id: string, date: string }, AppointmentEntry> =
     async ({ id, date }, f_db) => {
         const context = "Retrieving appointment entry { ".concat(id, " }");
@@ -42,7 +73,7 @@ export const retrieve_appointment_entry: Query<{ id: string, date: string }, App
         if(is_data_error(data)) return data;
 
         if(!data.exists()){
-            return data_error(context, "retrieving non exist AppointmentEntry {".concat(id, "}"));
+            return data_error(context, "retrieving non existing AppointmentEntry {".concat(id, "}"));
         }
 
         const e = to_appointment(data.val());
@@ -58,7 +89,7 @@ export const update_appointment_entry: Query<AppointmentEntry, void> =
         );
     }
 
-export const delete_appointment_date_entry : Query<{ date: string, id: string }, void> =
+export const delete_appointment_entry : Query<{ date: string, id: string }, void> =
     async ({ id, date }, f_db) => {
         return db_query(
             "Remove appointment entry { ".concat(id, " }"),

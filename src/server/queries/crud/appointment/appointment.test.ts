@@ -36,7 +36,7 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(appointment.duration).toBe(app_detail.duration);
     expect(appointment.details).toBe(app_detail.details);
 
-    const appointment_in_db = await pack_test({ id: appointment.id }, test_name)
+    const appointment_in_db = await pack_test({ id: appointment.id, date: appointment.date.toString() }, test_name)
         .bind(retrieve_appointment_entry).unpack();
 
     if(is_data_error(appointment_in_db)) {
@@ -56,7 +56,7 @@ test("test appointment_entries CRUDs querries", async () => {
         id: appointment.id,
         customer_id: "Bruhnuhnuh",
         technician_id: "portmonaie",
-        date: 10870,
+        date: appointment.date,
         time: 15,
         duration: 5,
         details: "emotional damage++",
@@ -65,7 +65,7 @@ test("test appointment_entries CRUDs querries", async () => {
     const update = await pack_test(update_target, test_name)
         .bind(update_appointment_entry).unpack();
 
-    const updated_appointment = await pack_test({ id: appointment.id }, test_name)
+    const updated_appointment = await pack_test({ id: appointment.id, date: appointment.date.toString() }, test_name)
         .bind(retrieve_appointment_entry).unpack();
 
     if(is_data_error(update)) {
@@ -85,15 +85,16 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(updated_appointment.duration).toBe(update_target.duration);
     expect(updated_appointment.details).toBe(update_target.details);
 
-    const delete_app = await pack_test({ id: appointment.id }, test_name)
+    const delete_app = await pack_test({ date: appointment.date.toString(), id: appointment.id }, test_name)
         .bind(delete_appointment_entry).unpack();
 
-    const not_exist = await pack_test({ id: appointment.id }, test_name)
+    const not_exist = await pack_test({ id: appointment.id, date: appointment.date.toString() }, test_name)
         .bind(retrieve_appointment_entry).unpack();
 
     if(is_data_error(delete_app)) {
         delete_app.log();
         fail();
     }
+
     expect(is_data_error(not_exist)).toBe(true);
 })
