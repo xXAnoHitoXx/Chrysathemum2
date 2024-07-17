@@ -2,6 +2,7 @@ import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { create_appointment_entry, delete_appointment_entry, retrieve_appointment_entry, update_appointment_entry } from "./appointment_entry";
 import { pack_test } from "../../server_queries_monad";
 import { is_data_error } from "~/server/data_error";
+import { create_customers_appointments_entry, delete_customers_appointment_entry, retrieve_customer_appointments } from "./customer_appointments";
 
 const test_suit = "appointment_cruds";
 
@@ -98,3 +99,62 @@ test("test appointment_entries CRUDs querries", async () => {
 
     expect(is_data_error(not_exist)).toBe(true);
 })
+
+test("test customer appointment list entries CRUDs querries", async () => {
+    const test_name = test_suit.concat("/test_customer_appointment_list/");
+
+    const history = {
+        customer_id: "bruh",
+        id: "q;wyfupl",
+        date: "20 2 2085"
+    }
+
+    const create = await pack_test(history, test_name)
+        .bind(create_customers_appointments_entry).unpack();
+
+    if(is_data_error(create)){
+        create.log();
+        fail();
+    }
+
+    let customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
+        .bind(retrieve_customer_appointments).unpack();
+
+    if(is_data_error(customer_history)){
+        customer_history.log();
+        fail();
+    }
+
+    if(is_data_error(customer_history.error)) {
+        customer_history.error.log();
+        fail();
+    }
+
+    expect(customer_history.data.length).toBe(1);
+    expect(customer_history.data[0]).not.toBeUndefined();
+    expect(customer_history.data[0]?.id).toBe(history.id);
+    expect(customer_history.data[0]?.date).toBe(history.date);
+
+    const del = await pack_test({ customer_id: history.customer_id, id: history.id }, test_name)
+        .bind(delete_customers_appointment_entry).unpack();
+
+    if(is_data_error(del)) {
+        del.log();
+        fail();
+    }
+
+    customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
+        .bind(retrieve_customer_appointments).unpack();
+
+    if(is_data_error(customer_history)){
+        customer_history.log();
+        fail();
+    }
+
+    if(is_data_error(customer_history.error)) {
+        customer_history.error.log();
+        fail();
+    }
+
+    expect(customer_history.data.length).toBe(0);
+});

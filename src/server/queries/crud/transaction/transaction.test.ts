@@ -290,7 +290,7 @@ test("test retrieve transactions on date querries", async () => {
 });
 
 test("test customer transaction history entries CRUDs querries", async () => {
-    const test_name = test_suit.concat("/test_transaction_date_cruds/");
+    const test_name = test_suit.concat("/test_transaction_history_cruds/");
 
     const history = {
         customer_id: "bruh",
