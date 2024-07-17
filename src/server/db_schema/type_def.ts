@@ -33,6 +33,14 @@ export type Location = {
     address: string 
 }
 
+export type AppointmentCreationInfo = {
+    customer: Customer,
+    date: number,
+    time: number,
+    duration: number,
+    details: string,
+}
+
 export type Appointment = {
     id: string,
     customer: Customer,
