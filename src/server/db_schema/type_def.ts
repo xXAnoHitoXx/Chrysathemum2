@@ -57,6 +57,7 @@ export type TransactionEntry = {
     id: string,
     customer_id: string,
     technician_id: string,
+    salon: string,
     date: number,
     time: number,
     details: string,

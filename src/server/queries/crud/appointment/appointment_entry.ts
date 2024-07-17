@@ -13,7 +13,7 @@ export const create_appointment_entry: Query<{
         details: string,
     }, AppointmentEntry> = async (params, f_db) => {
         const context = "Create appointment entry { ".concat(params.details, " }");
-        const id_ref = push(f_db.appointment_entries([]));
+        const id_ref = push(f_db.appointment_date_entries([params.date.toString()]));
 
         if(id_ref.key == null) {
             return data_error(context, "failed to create appointment entry with null id");
@@ -35,10 +35,10 @@ export const create_appointment_entry: Query<{
         return appointment;
     }
 
-export const retrieve_appointment_entry: Query<{ id: string }, AppointmentEntry> =
-    async ({ id }, f_db) => {
+export const retrieve_appointment_entry: Query<{ id: string, date: string }, AppointmentEntry> =
+    async ({ id, date }, f_db) => {
         const context = "Retrieving appointment entry { ".concat(id, " }");
-        const data = await db_query(context, get(f_db.appointment_entries([id])));
+        const data = await db_query(context, get(f_db.appointment_date_entries([date, id])));
         if(is_data_error(data)) return data;
 
         if(!data.exists()){
@@ -54,14 +54,14 @@ export const update_appointment_entry: Query<AppointmentEntry, void> =
     async (appointment, f_db) => {
         return db_query(
             "Update AppointmentEntry Entry",
-            update(f_db.appointment_entries([appointment.id]), appointment)
+            update(f_db.appointment_date_entries([appointment.date.toString(), appointment.id]), appointment)
         );
     }
 
-export const delete_appointment_entry : Query<{ id: string }, void> =
-    async ({ id }, f_db) => {
+export const delete_appointment_date_entry : Query<{ date: string, id: string }, void> =
+    async ({ id, date }, f_db) => {
         return db_query(
             "Remove appointment entry { ".concat(id, " }"),
-            remove(f_db.appointment_entries([id]))
+            remove(f_db.appointment_date_entries([date, id]))
         )
     }

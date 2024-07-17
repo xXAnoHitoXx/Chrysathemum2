@@ -18,6 +18,7 @@ test("test transaction_entries CRUDs querries", async () => {
         id: "naiesrntearinsteian",
         customer_id: "Banana",
         technician_id: "arstarsnteiano",
+        salon: "5CBL",
         date: 10870,
         time: 5,
         details: "emotional damage",

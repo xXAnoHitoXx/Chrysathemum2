@@ -10,26 +10,26 @@ export function to_transaction(t: unknown): TransactionEntry | DataError {
     if (!("id" in t && "customer_id" in t && "technician_id" in t
         && "date" in t && "time" in t && "details" in t
         && "amount" in t && "tip" in t && "cash" in t
-        && "gift" in t && "discount" in t
+        && "gift" in t && "discount" in t && "salon" in t
     )) {
         return data_error( "Casting to TransactionEntry", "missing field", );
     }
 
     const {
         id, customer_id, technician_id, date, time, details, 
-        amount, tip, cash, gift, discount,
+        amount, tip, cash, gift, discount, salon,
     } = t;
 
     if (!(is_string(id) && is_string(customer_id) && is_string(technician_id)
         && is_number(date) && is_number(time) && is_string(details)
         && is_number(amount) && is_number(tip) && is_number(cash)
-        && is_number(gift) && is_number(discount)
+        && is_number(gift) && is_number(discount) && is_string(salon)
     )) {
         return data_error( "Casting to TransactionEntry", "wrong field type", );
     }
 
     return { id: id, customer_id: customer_id, technician_id: technician_id,
         date: date, time: time, details: details, amount: amount, tip: tip,
-        cash: cash, gift: gift, discount: discount,
+        cash: cash, gift: gift, discount: discount, salon: salon,
     };
 }
