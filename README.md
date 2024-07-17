@@ -18,25 +18,30 @@
             - [x] ~~technician entries~~
             - [x] ~~technician login index~~
             - [x] ~~technician migration index~~
+            - [ ] sale tech
         - [x] ~~location~~
             - [x] ~~location entries~~
             - [x] ~~location's technician~~
-        - [ ] transaction
-            - [ ] transaction entries
+        - [ ] appointment & transactions
+            - [x] ~~appointment entries~~
+            - [x] ~~transaction entries~~
             - [ ] transaction migration index
-        - [ ] accouting
+        - [ ] accounting
+            - [ ] entries
+            - [ ] closing
             
 - salon:
-    - [ ] technician manager
-        - [ ] create technician
-        - [ ] assign technician to salon location
-        - [ ] set technician inactive
+    - [x] ~~technician manager~~
+        - [x] ~~create technician~~
+        - [x] ~~assign technician to salon location~~
+        - [x] ~~set technician inactive~~
     - [ ] migration framework
         - restriction: vercel limited timeout on development
         - [x] ~~runable from dev environment~~
         - [x] ~~migrating customers~~
         - [ ] migrating transactions
     - [ ] appointment viewer
+        - [x] ~~display board~~
     - [ ] booking
     - [ ] view daily breakdown
     - [ ] sumary
