@@ -26,7 +26,7 @@ export function to_appointment(t: unknown): AppointmentEntry | DataError {
         !(
             is_string(id) &&
             is_string(customer_id) &&
-            is_number(date) &&
+            is_string(date) &&
             is_number(time) &&
             is_number(duration) &&
             is_string(details)

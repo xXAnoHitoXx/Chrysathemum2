@@ -35,7 +35,7 @@ test("appointment creation", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: 231231,
+        date: "31 12 2021",
         time: 22,
         details: "",
         duration: 4,
@@ -117,7 +117,7 @@ test("load appointments of date", async () => {
 
     const a1i: AppointmentCreationInfo = {
         customer: customer,
-        date: 231231,
+        date: "31 12 2021",
         time: 22,
         details: "",
         duration: 4,
@@ -125,7 +125,7 @@ test("load appointments of date", async () => {
 
     const a2i: AppointmentCreationInfo = {
         customer: customer,
-        date: 231230,
+        date: "30 12 2022",
         time: 21,
         details: "",
         duration: 3,
@@ -133,7 +133,7 @@ test("load appointments of date", async () => {
 
     const a3i: AppointmentCreationInfo = {
         customer: customer,
-        date: 231231,
+        date: "31 12 2021",
         time: 23,
         details: "",
         duration: 2,

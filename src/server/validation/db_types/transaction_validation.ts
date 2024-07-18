@@ -46,7 +46,7 @@ export function to_transaction(t: unknown): TransactionEntry | DataError {
             is_string(id) &&
             is_string(customer_id) &&
             is_string(technician_id) &&
-            is_number(date) &&
+            is_string(date) &&
             is_number(time) &&
             is_string(details) &&
             is_number(amount) &&

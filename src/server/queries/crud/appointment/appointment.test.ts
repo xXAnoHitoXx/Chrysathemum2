@@ -25,7 +25,7 @@ test("test appointment_entries CRUDs querries", async () => {
     const app_detail = {
         customer_id: "Banana",
         technician_id: null,
-        date: 11160,
+        date: "12 2 2012",
         time: 5,
         duration: 10,
         details: "emotional damage",

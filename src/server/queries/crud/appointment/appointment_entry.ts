@@ -14,7 +14,7 @@ export const create_appointment_entry: Query<
     {
         customer_id: string;
         technician_id: string | null;
-        date: number;
+        date: string;
         time: number;
         duration: number;
         details: string;
