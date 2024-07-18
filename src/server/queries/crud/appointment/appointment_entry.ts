@@ -23,7 +23,7 @@ export const create_appointment_entry: Query<
 > = async (params, f_db) => {
     const context = "Create appointment entry { ".concat(params.details, " }");
     const id_ref = push(
-        f_db.appointment_date_entries([params.date.toString()]),
+        f_db.appointment_date_entries(params.date.toString(), []),
     );
 
     if (id_ref.key == null) {
@@ -55,7 +55,7 @@ export const retrieve_appointment_entries_on_date: Query<
 > = async ({ date }, f_db) => {
     const context = "Retrieving appointments of ".concat(date);
 
-    const ref = f_db.appointment_date_entries([date]);
+    const ref = f_db.appointment_date_entries(date, []);
     const data = await db_query(context, get(ref));
     if (is_data_error(data)) return data;
 
@@ -100,7 +100,7 @@ export const retrieve_appointment_entry: Query<
     const context = "Retrieving appointment entry { ".concat(id, " }");
     const data = await db_query(
         context,
-        get(f_db.appointment_date_entries([date, id])),
+        get(f_db.appointment_date_entries(date, [id])),
     );
     if (is_data_error(data)) return data;
 
@@ -123,8 +123,7 @@ export const update_appointment_entry: Query<AppointmentEntry, void> = async (
     return db_query(
         "Update AppointmentEntry Entry",
         update(
-            f_db.appointment_date_entries([
-                appointment.date.toString(),
+            f_db.appointment_date_entries(appointment.date.toString(), [
                 appointment.id,
             ]),
             appointment,
@@ -138,6 +137,6 @@ export const delete_appointment_entry: Query<
 > = async ({ id, date }, f_db) => {
     return db_query(
         "Remove appointment entry { ".concat(id, " }"),
-        remove(f_db.appointment_date_entries([date, id])),
+        remove(f_db.appointment_date_entries(date, [id])),
     );
 };

@@ -76,5 +76,10 @@ export type TransactionEntry = {
     discount: number;
 };
 
+export type Account = {
+    amount: number;
+    tip: number;
+};
+
 export type Hour = { open: number; close: number };
 export type Schedule = Hour[];

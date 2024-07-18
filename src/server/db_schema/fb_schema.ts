@@ -15,6 +15,7 @@ const technicians_root = "technicians/";
 const locations_root = "locations/";
 const appointments_root = "appointments/";
 const transactions_root = "transactions/";
+const accounting_root = "accounting/";
 
 export async function clear_test_data(
     test_name: string,
@@ -53,59 +54,72 @@ export class FireDB {
         return ref(f_db, this.root_path);
     }
 
-    customer_entries(sub_path: string[] = []): DatabaseReference {
+    customer_entries(sub_path: string[]): DatabaseReference {
         return this.ref(customers_root, "id/", sub_path);
     }
 
-    customers_phone_index(sub_path: string[] = []): DatabaseReference {
+    customers_phone_index(sub_path: string[]): DatabaseReference {
         return this.ref(customers_root, "phone_number/", sub_path);
     }
 
-    customers_transaction_history(sub_path: string[] = []): DatabaseReference {
+    customers_transaction_history(sub_path: string[]): DatabaseReference {
         return this.ref(customers_root, "history/", sub_path);
     }
 
-    customers_appointment_list(sub_path: string[] = []): DatabaseReference {
+    customers_appointment_list(sub_path: string[]): DatabaseReference {
         return this.ref(customers_root, "appointments/", sub_path);
     }
 
-    customers_legacy_id_index(sub_path: string[] = []): DatabaseReference {
+    customers_legacy_id_index(sub_path: string[]): DatabaseReference {
         return this.ref(customers_root, "legacy_id/", sub_path);
     }
 
-    technician_entries(sub_path: string[] = []): DatabaseReference {
+    technician_entries(sub_path: string[]): DatabaseReference {
         return this.ref(technicians_root, "id/", sub_path);
     }
 
-    technician_login(sub_path: string[] = []): DatabaseReference {
+    technician_login(sub_path: string[]): DatabaseReference {
         return this.ref(technicians_root, "login/", sub_path);
     }
 
-    technician_legacy_index(sub_path: string[] = []): DatabaseReference {
+    technician_legacy_index(sub_path: string[]): DatabaseReference {
         return this.ref(technicians_root, "legacy_id/", sub_path);
     }
 
-    location_entries(sub_path: string[] = []): DatabaseReference {
+    location_entries(sub_path: string[]): DatabaseReference {
         return this.ref(locations_root, "id/", sub_path);
     }
 
-    location_roster(sub_path: string[] = []): DatabaseReference {
+    location_roster(sub_path: string[]): DatabaseReference {
         return this.ref(locations_root, "roster/", sub_path);
     }
 
-    location_schedule(sub_path: string[] = []): DatabaseReference {
+    location_schedule(sub_path: string[]): DatabaseReference {
         return this.ref(locations_root, "schedule/", sub_path);
     }
 
-    appointment_date_entries(sub_path: string[] = []): DatabaseReference {
-        return this.ref(appointments_root, "date_entry/", sub_path);
+    appointment_date_entries(
+        date: string,
+        sub_path: string[],
+    ): DatabaseReference {
+        return this.ref(date, appointments_root, sub_path);
     }
 
-    transaction_date_entries(sub_path: string[] = []): DatabaseReference {
-        return this.ref(transactions_root, "date_entry/", sub_path);
+    transaction_date_entries(
+        date: string,
+        sub_path: string[],
+    ): DatabaseReference {
+        return this.ref(date, transactions_root, sub_path);
     }
 
-    old_db(sub_path: string[] = []): DatabaseReference {
+    accounting_date_entries(
+        date: string,
+        sub_path: string[],
+    ): DatabaseReference {
+        return this.ref(date, accounting_root, sub_path);
+    }
+
+    old_db(sub_path: string[]): DatabaseReference {
         let path = "/";
         sub_path.forEach((branch) => {
             path = path.concat(branch, "/");
@@ -123,13 +137,13 @@ export class FireDB {
 }
 
 /*
-export type Transactions = { 
-    id:string, 
-    customer_id:string, 
-    technician_id:string, 
+export type Transactions = {
+    id:string,
+    customer_id:string,
+    technician_id:string,
     location_id:string,
-    date:string, 
-    time: bigint, 
+    date:string,
+    time: bigint,
     duration: bigint,
     amount: bigint,
     tip: bigint,

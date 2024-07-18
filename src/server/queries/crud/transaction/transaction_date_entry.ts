@@ -15,8 +15,7 @@ export const create_trasaction_date_entry: Query<
     void
 > = async (params, f_db) => {
     const context = "Creating TransactionEntry entry";
-    const ref = f_db.transaction_date_entries([
-        params.date.toString(),
+    const ref = f_db.transaction_date_entries(params.date.toString(), [
         params.id,
     ]);
     return db_query(context, set(ref, params));
@@ -28,7 +27,7 @@ export const retrieve_transactions_on_date: Query<
 > = async ({ date }, f_db) => {
     const context = "Retrieving transaction of ".concat(date);
 
-    const ref = f_db.transaction_date_entries([date]);
+    const ref = f_db.transaction_date_entries(date, []);
     const data = await db_query(context, get(ref));
     if (is_data_error(data)) return data;
 
@@ -73,7 +72,7 @@ export const retrieve_transaction_entry: Query<
     const context = "Retrieving transaction entry { ".concat(id, " }");
     const data = await db_query(
         context,
-        get(f_db.transaction_date_entries([date, id])),
+        get(f_db.transaction_date_entries(date, [id])),
     );
     if (is_data_error(data)) return data;
 
@@ -93,8 +92,7 @@ export const update_transaction_date_entry: Query<
     TransactionEntry,
     void
 > = async (transaction, f_db) => {
-    const ref = f_db.transaction_date_entries([
-        transaction.date.toString(),
+    const ref = f_db.transaction_date_entries(transaction.date.toString(), [
         transaction.id,
     ]);
     return db_query("Update TransactionEntry entry", update(ref, transaction));
@@ -104,6 +102,6 @@ export const delete_transaction_date_entry: Query<
     { date: string; id: string },
     void
 > = async ({ date, id }, f_db) => {
-    const ref = f_db.transaction_date_entries([date, id]);
+    const ref = f_db.transaction_date_entries(date, [id]);
     return db_query("Remove TransactionEntry entry", remove(ref));
 };

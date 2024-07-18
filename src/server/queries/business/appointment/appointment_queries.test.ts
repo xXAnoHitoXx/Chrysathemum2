@@ -3,7 +3,6 @@ import { AppointmentCreationInfo } from "~/server/db_schema/type_def";
 import { pack_test } from "../../server_queries_monad";
 import { create_new_customer } from "../customer/customer_queries";
 import { extract_error, is_data_error } from "~/server/data_error";
-import { date } from "~/server/validation/contextual_types/date";
 import { create_new_appointment } from "./appointment_queries";
 import { retrieve_appointment_entry } from "../../crud/appointment/appointment_entry";
 import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
@@ -31,16 +30,9 @@ test("appointment creation", async () => {
         fail();
     }
 
-    const app_date = date({ d: 21, m: 11, y: 23 });
-
-    if (is_data_error(app_date)) {
-        app_date.log();
-        fail();
-    }
-
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: app_date,
+        date: 231231,
         time: 22,
         details: "",
         duration: 4,
