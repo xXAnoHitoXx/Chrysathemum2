@@ -3,7 +3,10 @@ import { AppointmentCreationInfo } from "~/server/db_schema/type_def";
 import { pack_test } from "../../server_queries_monad";
 import { create_new_customer } from "../customer/customer_queries";
 import { extract_error, is_data_error } from "~/server/data_error";
-import { create_new_appointment } from "./appointment_queries";
+import {
+    create_new_appointment,
+    retrieve_appointments_on_date,
+} from "./appointment_queries";
 import { retrieve_appointment_entry } from "../../crud/appointment/appointment_entry";
 import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
 
@@ -95,4 +98,103 @@ test("appointment creation", async () => {
     expect(index.length).toBe(1);
     expect(index[0]?.id).toBe(appointment.id);
     expect(index[0]?.date).toBe(appointment.date.toString());
+});
+
+test("load appointments of date", async () => {
+    const test_name = test_suit.concat("/load_appointments_on_date/");
+
+    const customer = await pack_test(
+        { name: "banana", phone_number: "ananananana" },
+        test_name,
+    )
+        .bind(create_new_customer)
+        .unpack();
+
+    if (is_data_error(customer)) {
+        customer.log();
+        fail();
+    }
+
+    const a1i: AppointmentCreationInfo = {
+        customer: customer,
+        date: 231231,
+        time: 22,
+        details: "",
+        duration: 4,
+    };
+
+    const a2i: AppointmentCreationInfo = {
+        customer: customer,
+        date: 231230,
+        time: 21,
+        details: "",
+        duration: 3,
+    };
+
+    const a3i: AppointmentCreationInfo = {
+        customer: customer,
+        date: 231231,
+        time: 23,
+        details: "",
+        duration: 2,
+    };
+
+    const a1 = await pack_test(a1i, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+    const a2 = await pack_test(a2i, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+    const a3 = await pack_test(a3i, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+
+    if (is_data_error(a1)) {
+        a1.log();
+        fail();
+    }
+    if (is_data_error(a2)) {
+        a2.log();
+        fail();
+    }
+    if (is_data_error(a3)) {
+        a3.log();
+        fail();
+    }
+
+    const list = await pack_test({ date: a1.date.toString() }, test_name)
+        .bind(retrieve_appointments_on_date)
+        .unpack();
+
+    if (is_data_error(list)) {
+        list.log();
+        fail();
+    }
+
+    if (list.error != null) {
+        list.error.log();
+        fail();
+    }
+
+    expect(list.data.length).toBe(2);
+
+    expect(list.data[0]?.id).toBe(a1.id);
+    expect(list.data[0]?.date).toBe(a1.date);
+    expect(list.data[0]?.time).toBe(a1.time);
+    expect(list.data[0]?.details).toBe(a1.details);
+    expect(list.data[0]?.technician).toBeNull();
+    expect(list.data[0]?.customer.id).toBe(a1.customer.id);
+    expect(list.data[0]?.customer.name).toBe(a1.customer.name);
+    expect(list.data[0]?.customer.phone_number).toBe(a1.customer.phone_number);
+    expect(list.data[0]?.customer.notes).toBe(a1.customer.notes);
+
+    expect(list.data[1]?.id).toBe(a3.id);
+    expect(list.data[1]?.date).toBe(a3.date);
+    expect(list.data[1]?.time).toBe(a3.time);
+    expect(list.data[1]?.details).toBe(a3.details);
+    expect(list.data[1]?.technician).toBeNull();
+    expect(list.data[1]?.customer.id).toBe(a3.customer.id);
+    expect(list.data[1]?.customer.name).toBe(a3.customer.name);
+    expect(list.data[1]?.customer.phone_number).toBe(a3.customer.phone_number);
+    expect(list.data[1]?.customer.notes).toBe(a3.customer.notes);
 });
