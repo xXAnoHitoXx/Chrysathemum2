@@ -1,24 +1,33 @@
-import * as Sentry from "@sentry/nextjs"
+import * as Sentry from "@sentry/nextjs";
 import { is_function, is_object } from "./validation/simple_type";
 import { Query } from "./queries/server_queries_monad";
 
 export function is_data_error(t: unknown): t is DataError {
     return (
-           is_object(t) 
-        && ("message" in t) && ("stack" in t) && ("log" in t) && ("report" in t)
-        && is_function(t.message) && is_function(t.stack) 
-        && is_function(t.log) && is_function(t.report)
+        is_object(t) &&
+        "message" in t &&
+        "stack" in t &&
+        "log" in t &&
+        "report" in t &&
+        is_function(t.message) &&
+        is_function(t.stack) &&
+        is_function(t.log) &&
+        is_function(t.report)
     );
 }
 
 export interface DataError {
     message(): string;
-    stack( context: string, detail: string ): DataError;
+    stack(context: string, detail: string): DataError;
     log(): void;
     report(): void;
 }
 
-export function lotta_errors(context: string, detail: string, errors: DataError[]): DataError {
+export function lotta_errors(
+    context: string,
+    detail: string,
+    errors: DataError[],
+): DataError {
     return new LottaError(context, detail, errors);
 }
 
@@ -26,17 +35,21 @@ export function data_error(context: string, detail: string): DataError {
     return new SimpleDataError(context, detail);
 }
 
-export function extract_error<T>(handle: (e: DataError)=>void): Query<PartialResult<T>, T> {
+export function extract_error<T>(
+    handle: (e: DataError) => void,
+): Query<PartialResult<T>, T> {
     return async (partial) => {
-        if(partial.error != null) { handle(partial.error) }
+        if (partial.error != null) {
+            handle(partial.error);
+        }
         return partial.data;
-    }
+    };
 }
 
 export type PartialResult<T> = {
-    data: T,
-    error: DataError | null,
-}
+    data: T;
+    error: DataError | null;
+};
 
 class LottaError implements DataError {
     private stack_detail: DataError;
@@ -49,14 +62,13 @@ class LottaError implements DataError {
     }
 
     message(): string {
-        if(this._message_cache != null) return this._message_cache;
+        if (this._message_cache != null) return this._message_cache;
 
         let m = "-----------------\n";
         this.errors.forEach((error) => {
             m = m.concat(error.message(), "-----------------\n");
         });
 
-        
         const lines = m.split(/\n/);
         this._message_cache = this.stack_detail.message();
         lines.forEach((line) => {
@@ -66,10 +78,10 @@ class LottaError implements DataError {
         return this._message_cache;
     }
 
-    stack( context: string, detail: string ) {
+    stack(context: string, detail: string) {
         return new SimpleDataError(
             context,
-            detail.concat("\n", this.message())
+            detail.concat("\n", this.message()),
         );
     }
 
@@ -88,13 +100,19 @@ class SimpleDataError {
     constructor(context: string, detail: string) {
         this._message = "> ".concat(context, ":\n    - ", detail, "\n");
     }
-    
+
     message() {
         return this._message;
     }
 
-    stack( context: string, detail: string ): DataError {
-        this._message = "> ".concat(context, ":\n    - ", detail, "\n", this._message);
+    stack(context: string, detail: string): DataError {
+        this._message = "> ".concat(
+            context,
+            ":\n    - ",
+            detail,
+            "\n",
+            this._message,
+        );
         return this;
     }
 
@@ -111,4 +129,3 @@ export const NOT_IMPLEMENTED: DataError = new SimpleDataError(
     "Development",
     "not implemented",
 );
-

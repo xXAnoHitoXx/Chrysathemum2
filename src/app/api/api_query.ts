@@ -8,15 +8,24 @@ export enum Method {
     DELETE = "DELETE",
 }
 
-export async function fetch_query<T>({ url, method, params, to }: {
-    url: string, 
-    method: Method, 
-    params: ({ data: unknown } | null),
-    to: ((t: unknown) => T | DataError),
+export async function fetch_query<T>({
+    url,
+    method,
+    params,
+    to,
+}: {
+    url: string;
+    method: Method;
+    params: { data: unknown } | null;
+    to: (t: unknown) => T | DataError;
 }): Promise<T | DataError> {
-    const response = (params == null)? 
-        await fetch(url, { method: method, }) :
-        await fetch(url, { method: method, body: JSON.stringify(params.data), });
+    const response =
+        params == null
+            ? await fetch(url, { method: method })
+            : await fetch(url, {
+                  method: method,
+                  body: JSON.stringify(params.data),
+              });
 
     return parse_response(response, to);
 }

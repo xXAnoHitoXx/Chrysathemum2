@@ -1,14 +1,23 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
-import { create_appointment_entry, delete_appointment_entry, retrieve_appointment_entry, update_appointment_entry } from "./appointment_entry";
+import {
+    create_appointment_entry,
+    delete_appointment_entry,
+    retrieve_appointment_entry,
+    update_appointment_entry,
+} from "./appointment_entry";
 import { pack_test } from "../../server_queries_monad";
 import { is_data_error } from "~/server/data_error";
-import { create_customers_appointments_entry, delete_customers_appointment_entry, retrieve_customer_appointments } from "./customer_appointments";
+import {
+    create_customers_appointments_entry,
+    delete_customers_appointment_entry,
+    retrieve_customer_appointments,
+} from "./customer_appointments";
 
 const test_suit = "appointment_cruds";
 
 afterAll(async () => {
     await clear_test_data(test_suit);
-})
+});
 
 test("test appointment_entries CRUDs querries", async () => {
     const test_name = test_suit.concat("/test_appointment_entries_cruds/");
@@ -20,12 +29,13 @@ test("test appointment_entries CRUDs querries", async () => {
         time: 5,
         duration: 10,
         details: "emotional damage",
-    }
+    };
 
     const appointment = await pack_test(app_detail, test_name)
-        .bind(create_appointment_entry).unpack();
+        .bind(create_appointment_entry)
+        .unpack();
 
-    if(is_data_error(appointment)) {
+    if (is_data_error(appointment)) {
         appointment.log();
         fail();
     }
@@ -37,10 +47,14 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(appointment.duration).toBe(app_detail.duration);
     expect(appointment.details).toBe(app_detail.details);
 
-    const appointment_in_db = await pack_test({ id: appointment.id, date: appointment.date.toString() }, test_name)
-        .bind(retrieve_appointment_entry).unpack();
+    const appointment_in_db = await pack_test(
+        { id: appointment.id, date: appointment.date.toString() },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
 
-    if(is_data_error(appointment_in_db)) {
+    if (is_data_error(appointment_in_db)) {
         appointment_in_db.log();
         fail();
     }
@@ -61,20 +75,25 @@ test("test appointment_entries CRUDs querries", async () => {
         time: 15,
         duration: 5,
         details: "emotional damage++",
-    }
+    };
 
     const update = await pack_test(update_target, test_name)
-        .bind(update_appointment_entry).unpack();
+        .bind(update_appointment_entry)
+        .unpack();
 
-    const updated_appointment = await pack_test({ id: appointment.id, date: appointment.date.toString() }, test_name)
-        .bind(retrieve_appointment_entry).unpack();
+    const updated_appointment = await pack_test(
+        { id: appointment.id, date: appointment.date.toString() },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
 
-    if(is_data_error(update)) {
+    if (is_data_error(update)) {
         update.log();
         fail();
     }
 
-    if(is_data_error(updated_appointment)) {
+    if (is_data_error(updated_appointment)) {
         updated_appointment.log();
         fail();
     }
@@ -86,19 +105,27 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(updated_appointment.duration).toBe(update_target.duration);
     expect(updated_appointment.details).toBe(update_target.details);
 
-    const delete_app = await pack_test({ date: appointment.date.toString(), id: appointment.id }, test_name)
-        .bind(delete_appointment_entry).unpack();
+    const delete_app = await pack_test(
+        { date: appointment.date.toString(), id: appointment.id },
+        test_name,
+    )
+        .bind(delete_appointment_entry)
+        .unpack();
 
-    const not_exist = await pack_test({ id: appointment.id, date: appointment.date.toString() }, test_name)
-        .bind(retrieve_appointment_entry).unpack();
+    const not_exist = await pack_test(
+        { id: appointment.id, date: appointment.date.toString() },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
 
-    if(is_data_error(delete_app)) {
+    if (is_data_error(delete_app)) {
         delete_app.log();
         fail();
     }
 
     expect(is_data_error(not_exist)).toBe(true);
-})
+});
 
 test("test customer appointment list entries CRUDs querries", async () => {
     const test_name = test_suit.concat("/test_customer_appointment_list/");
@@ -106,26 +133,31 @@ test("test customer appointment list entries CRUDs querries", async () => {
     const history = {
         customer_id: "bruh",
         id: "q;wyfupl",
-        date: "20 2 2085"
-    }
+        date: "20 2 2085",
+    };
 
     const create = await pack_test(history, test_name)
-        .bind(create_customers_appointments_entry).unpack();
+        .bind(create_customers_appointments_entry)
+        .unpack();
 
-    if(is_data_error(create)){
+    if (is_data_error(create)) {
         create.log();
         fail();
     }
 
-    let customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
-        .bind(retrieve_customer_appointments).unpack();
+    let customer_history = await pack_test(
+        { customer_id: history.customer_id },
+        test_name,
+    )
+        .bind(retrieve_customer_appointments)
+        .unpack();
 
-    if(is_data_error(customer_history)){
+    if (is_data_error(customer_history)) {
         customer_history.log();
         fail();
     }
 
-    if(is_data_error(customer_history.error)) {
+    if (is_data_error(customer_history.error)) {
         customer_history.error.log();
         fail();
     }
@@ -135,23 +167,31 @@ test("test customer appointment list entries CRUDs querries", async () => {
     expect(customer_history.data[0]?.id).toBe(history.id);
     expect(customer_history.data[0]?.date).toBe(history.date);
 
-    const del = await pack_test({ customer_id: history.customer_id, id: history.id }, test_name)
-        .bind(delete_customers_appointment_entry).unpack();
+    const del = await pack_test(
+        { customer_id: history.customer_id, id: history.id },
+        test_name,
+    )
+        .bind(delete_customers_appointment_entry)
+        .unpack();
 
-    if(is_data_error(del)) {
+    if (is_data_error(del)) {
         del.log();
         fail();
     }
 
-    customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
-        .bind(retrieve_customer_appointments).unpack();
+    customer_history = await pack_test(
+        { customer_id: history.customer_id },
+        test_name,
+    )
+        .bind(retrieve_customer_appointments)
+        .unpack();
 
-    if(is_data_error(customer_history)){
+    if (is_data_error(customer_history)) {
         customer_history.log();
         fail();
     }
 
-    if(is_data_error(customer_history.error)) {
+    if (is_data_error(customer_history.error)) {
         customer_history.error.log();
         fail();
     }

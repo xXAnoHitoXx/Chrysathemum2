@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { Method, fetch_query } from "~/app/api/api_query";
@@ -17,36 +17,41 @@ export default function MigrationStation() {
             method: Method.GET,
             to: to_array(to_old_customer_data),
             params: null,
-        })
+        });
 
-        if(is_data_error(old_customers)) { 
+        if (is_data_error(old_customers)) {
             old_customers.log();
-            return 
+            return;
         }
 
         const batches = ano_iter(old_customers).ichunk(20).collect();
 
-        for (const batch_of_customers of batches){
+        for (const batch_of_customers of batches) {
             console.log(batch_of_customers);
-            await Promise.all(batch_of_customers.map((customer) => (
-                fetch_query({
-                    url: "/api/migration/customer",
-                    method: Method.POST,
-                    params: { data: customer },
-                    to: () => (null),
-                })
-            )));
+            await Promise.all(
+                batch_of_customers.map((customer) =>
+                    fetch_query({
+                        url: "/api/migration/customer",
+                        method: Method.POST,
+                        params: { data: customer },
+                        to: () => null,
+                    }),
+                ),
+            );
         }
     }
 
-    return(
+    return (
         <div>
-            <div className="flex flex-wrap w-full h-fit p-4 gap-2 justify-center">
-                <button onClick={ migration_sequence } disabled={is_loading} className="border-2 border-sky-400 rounded-full w-32 h-20">
+            <div className="flex h-fit w-full flex-wrap justify-center gap-2 p-4">
+                <button
+                    onClick={migration_sequence}
+                    disabled={is_loading}
+                    className="h-20 w-32 rounded-full border-2 border-sky-400"
+                >
                     Initiate Migration Sequence
                 </button>
             </div>
         </div>
     );
 }
-

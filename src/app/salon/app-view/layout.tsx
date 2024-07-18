@@ -4,9 +4,8 @@ import { Board } from "./_component/board";
 export default async function RootLayout({
     children,
 }: {
-    children: React.ReactNode,
+    children: React.ReactNode;
 }) {
-
     const appointments: Appointment[] = [
         {
             id: "Banana",
@@ -21,16 +20,21 @@ export default async function RootLayout({
             duration: 4,
             time: 15,
             details: "alotanothn",
-        }
+        },
     ];
 
     return (
-        <div className="flex flex-wrap p-2 gap-2">
+        <div className="flex flex-wrap gap-2 p-2">
             <a href="/salon/nav/">
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Actions</button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Actions
+                </button>
             </a>
-            <div id="AppointmentEntry View" className="flex flex-nowrap w-full h-fit overflow-x-scroll">
-                <Board appointments={appointments}/>
+            <div
+                id="AppointmentEntry View"
+                className="flex h-fit w-full flex-nowrap overflow-x-scroll"
+            >
+                <Board appointments={appointments} />
             </div>
             {children}
         </div>

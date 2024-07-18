@@ -8,23 +8,32 @@ import { Bisquit } from "~/server/validation/bisquit";
 import { is_data_error } from "~/server/data_error";
 
 export default async function Ass() {
-
     const salon = get_bisquit(Bisquit.salon_selection);
-    if(is_data_error(salon)) {
-        redirect("/")
-    }
-
-    const technicians = await pack(undefined).bind(get_all_technicians).unpack();
-    const roster = await pack({ location_id: salon }).bind(retrieve_roster).unpack();
-
-    if(is_data_error(technicians) || is_data_error(roster)) {
+    if (is_data_error(salon)) {
         redirect("/");
     }
 
-    if(is_data_error(technicians.error)) {
+    const technicians = await pack(undefined)
+        .bind(get_all_technicians)
+        .unpack();
+    const roster = await pack({ location_id: salon })
+        .bind(retrieve_roster)
+        .unpack();
+
+    if (is_data_error(technicians) || is_data_error(roster)) {
+        redirect("/");
+    }
+
+    if (is_data_error(technicians.error)) {
         technicians.error.log();
         technicians.error.report();
     }
 
-    return <ClientSide technicians={technicians.data} roster={roster} salon={salon} />
+    return (
+        <ClientSide
+            technicians={technicians.data}
+            roster={roster}
+            salon={salon}
+        />
+    );
 }

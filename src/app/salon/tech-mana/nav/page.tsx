@@ -1,11 +1,15 @@
 export default async function Nav() {
-    return(
-        <div className="flex flex-wrap w-full h-fit p-4 gap-2 justify-center">
+    return (
+        <div className="flex h-fit w-full flex-wrap justify-center gap-2 p-4">
             <a href="/salon/tech-mana/new/">
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">New Technician</button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    New Technician
+                </button>
             </a>
             <a href="/salon/tech-mana/assignment/">
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Assignment</button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Assignment
+                </button>
             </a>
         </div>
     );

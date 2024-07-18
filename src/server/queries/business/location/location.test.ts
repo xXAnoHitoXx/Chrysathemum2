@@ -1,6 +1,10 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { create_new_location } from "~/server/queries/crud/location/location";
-import { assign_technician_to_location, remove_technician_from_location, retrieve_technicians_at_location } from "./location";
+import {
+    assign_technician_to_location,
+    remove_technician_from_location,
+    retrieve_technicians_at_location,
+} from "./location";
 import { retrieve_technician_entry } from "~/server/queries/crud/technician/technician_entry";
 import { pack_test } from "../../server_queries_monad";
 import { create_technician_entry } from "../../crud/technician/technician_entry";
@@ -10,48 +14,48 @@ const test_suit = "location_business_queries";
 
 afterAll(async () => {
     await clear_test_data(test_suit);
-})
+});
 
 test("technician assignment", async () => {
     const test_name = test_suit.concat("/technician_assignment/");
 
     const salon = {
         id: "5CBL",
-        address: "5 Cumberland"
-    }
+        address: "5 Cumberland",
+    };
 
     const tech1_info = {
         name: "LOLOLOL",
         color: "aoisetnaoiesrt",
         active: true,
-    }
+    };
 
     const tech2_info = {
         name: "LOLlastonaOLOL",
         color: "aoisetnaarsetnloiesrt",
         active: false,
-    }
+    };
 
     const tech3_info = {
         name: "elohel",
         color: "chicken noodle soup",
         active: false,
-    }
+    };
 
     const location_test = await pack_test(salon, test_name)
         .bind(create_new_location)
         .unpack();
     const tech1 = await pack_test(tech1_info, test_name)
         .bind(create_technician_entry)
-        .unpack()
+        .unpack();
     const tech2 = await pack_test(tech2_info, test_name)
         .bind(create_technician_entry)
-        .unpack()
+        .unpack();
     const tech3 = await pack_test(tech3_info, test_name)
         .bind(create_technician_entry)
-        .unpack()
-    
-    if(
+        .unpack();
+
+    if (
         is_data_error(location_test) ||
         is_data_error(tech1) ||
         is_data_error(tech2) ||
@@ -61,17 +65,20 @@ test("technician assignment", async () => {
         fail();
     }
 
-    const q1 = await pack_test({ location_id: salon.id, technician: tech1 }, test_name)
+    const q1 = await pack_test(
+        { location_id: salon.id, technician: tech1 },
+        test_name,
+    )
         .bind(assign_technician_to_location)
         .unpack();
-    const q2 = await pack_test({ location_id: salon.id, technician: tech2 }, test_name)
+    const q2 = await pack_test(
+        { location_id: salon.id, technician: tech2 },
+        test_name,
+    )
         .bind(assign_technician_to_location)
         .unpack();
 
-    if(
-        is_data_error(q1) ||
-        is_data_error(q2)
-    ) {
+    if (is_data_error(q1) || is_data_error(q2)) {
         console.log("setup failed");
         fail();
     }
@@ -85,8 +92,12 @@ test("technician assignment", async () => {
     const technician3 = await pack_test({ id: tech3.id }, test_name)
         .bind(retrieve_technician_entry)
         .unpack();
-    
-    if(is_data_error(technician2) || is_data_error(technician1) || is_data_error(technician3)) {
+
+    if (
+        is_data_error(technician2) ||
+        is_data_error(technician1) ||
+        is_data_error(technician3)
+    ) {
         console.log("setup failed");
         fail();
     }
@@ -98,13 +109,13 @@ test("technician assignment", async () => {
     let technicians = await pack_test({ location_id: salon.id }, test_name)
         .bind(retrieve_technicians_at_location)
         .unpack();
-    
-    if(is_data_error(technicians)){
+
+    if (is_data_error(technicians)) {
         technicians.log();
         fail();
     }
 
-    if(technicians.error != null) {
+    if (technicians.error != null) {
         technicians.error.log();
         fail();
     }
@@ -114,23 +125,27 @@ test("technician assignment", async () => {
     expect(technicians.data).toContainEqual(technician2);
     expect(technicians.data).not.toContainEqual(technician3);
 
-    const removal = await pack_test({ location_id: salon.id, technician_id: technician2.id }, test_name)
-        .bind(remove_technician_from_location).unpack();
-    if(is_data_error(removal)) {
+    const removal = await pack_test(
+        { location_id: salon.id, technician_id: technician2.id },
+        test_name,
+    )
+        .bind(remove_technician_from_location)
+        .unpack();
+    if (is_data_error(removal)) {
         removal.log();
         fail();
     }
 
-     technicians = await pack_test({ location_id: salon.id }, test_name)
+    technicians = await pack_test({ location_id: salon.id }, test_name)
         .bind(retrieve_technicians_at_location)
         .unpack();
 
-    if(is_data_error(technicians)){
+    if (is_data_error(technicians)) {
         technicians.log();
         fail();
     }
 
-    if(technicians.error != null) {
+    if (technicians.error != null) {
         technicians.error.log();
         fail();
     }
@@ -139,7 +154,7 @@ test("technician assignment", async () => {
     expect(technicians.data).toContainEqual(technician1);
     expect(technicians.data).not.toContainEqual(technician2);
     expect(technicians.data).not.toContainEqual(technician3);
-})
+});
 
 /*
 test("location list", async () => {

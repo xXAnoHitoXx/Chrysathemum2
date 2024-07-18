@@ -1,4 +1,4 @@
-import 'server-only';
+import "server-only";
 
 //import { drizzle } from 'drizzle-orm/vercel-postgres';
 //import { sql } from "@vercel/postgres";
@@ -7,8 +7,8 @@ import 'server-only';
 // Use this object to send drizzle queries to your DB
 //export const d_db = drizzle(sql, { schema });
 
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 
 const firebase_config = {
     apiKey: process.env.API_KEY,
@@ -19,6 +19,6 @@ const firebase_config = {
     messagingSenderId: process.env.MESSAGING_SENDER_ID,
     appId: process.env.APP_ID,
     measurementId: process.env.MEASURMENT_ID,
-}
+};
 const app = initializeApp(firebase_config);
 export const f_db = getDatabase(app);

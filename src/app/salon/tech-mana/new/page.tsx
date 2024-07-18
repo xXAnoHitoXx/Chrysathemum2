@@ -7,14 +7,20 @@ import { Bisquit } from "~/server/validation/bisquit";
 import { is_data_error } from "~/server/data_error";
 
 export default async function Page() {
-    const technicians = await pack(undefined).bind(get_active_technicians).unpack();
-    if (is_data_error(technicians)) { redirect("/") }
-
-    const salon = get_bisquit(Bisquit.salon_selection);
-
-    if(is_data_error(salon)) {
+    const technicians = await pack(undefined)
+        .bind(get_active_technicians)
+        .unpack();
+    if (is_data_error(technicians)) {
         redirect("/");
     }
 
-    return <NewTechForm starting_active_technicians={technicians} salon={salon}/>;
+    const salon = get_bisquit(Bisquit.salon_selection);
+
+    if (is_data_error(salon)) {
+        redirect("/");
+    }
+
+    return (
+        <NewTechForm starting_active_technicians={technicians} salon={salon} />
+    );
 }

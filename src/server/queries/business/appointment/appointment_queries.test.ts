@@ -12,23 +12,28 @@ const test_suit = "appointment_queries_tests";
 
 afterAll(async () => {
     await clear_test_data(test_suit);
-})
+});
 
 test("appointment creation", async () => {
-    const test_name = test_suit.concat("/appointment_creation/")
-    const customer = await pack_test({
-        name: "Banana",
-        phone_number: "eggplant",
-    }, test_name).bind(create_new_customer).unpack();
+    const test_name = test_suit.concat("/appointment_creation/");
+    const customer = await pack_test(
+        {
+            name: "Banana",
+            phone_number: "eggplant",
+        },
+        test_name,
+    )
+        .bind(create_new_customer)
+        .unpack();
 
-    if(is_data_error(customer)) {
+    if (is_data_error(customer)) {
         customer.log();
         fail();
     }
 
-    const app_date = date({ d:21, m:11, y:23 });
+    const app_date = date({ d: 21, m: 11, y: 23 });
 
-    if(is_data_error(app_date)) {
+    if (is_data_error(app_date)) {
         app_date.log();
         fail();
     }
@@ -39,12 +44,13 @@ test("appointment creation", async () => {
         time: 22,
         details: "",
         duration: 4,
-    }
+    };
 
     const appointment = await pack_test(appointment_info, test_name)
-        .bind(create_new_appointment).unpack();
+        .bind(create_new_appointment)
+        .unpack();
 
-    if(is_data_error(appointment)){
+    if (is_data_error(appointment)) {
         appointment.log();
         fail();
     }
@@ -59,10 +65,14 @@ test("appointment creation", async () => {
     expect(appointment.time).toBe(appointment_info.time);
     expect(appointment.details).toBe(appointment_info.details);
 
-    const entry = await pack_test({ date: appointment.date.toString(), id: appointment.id }, test_name) 
-        .bind(retrieve_appointment_entry).unpack();
+    const entry = await pack_test(
+        { date: appointment.date.toString(), id: appointment.id },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
 
-    if(is_data_error(entry)){
+    if (is_data_error(entry)) {
         entry.log();
         fail();
     }
@@ -77,13 +87,15 @@ test("appointment creation", async () => {
 
     const index = await pack_test({ customer_id: customer.id }, test_name)
         .bind(retrieve_customer_appointments)
-        .bind(extract_error((error) => {
-            error.log();
-            fail();
-        }))
+        .bind(
+            extract_error((error) => {
+                error.log();
+                fail();
+            }),
+        )
         .unpack();
 
-    if(is_data_error(index)){
+    if (is_data_error(index)) {
         index.log();
         fail();
     }

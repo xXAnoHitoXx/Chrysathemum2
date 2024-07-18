@@ -1,19 +1,29 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
 import { pack_test } from "../../server_queries_monad";
-import { create_trasaction_date_entry, delete_transaction_date_entry, retrieve_transaction_entry, retrieve_transactions_on_date, update_transaction_date_entry } from "./transaction_date_entry";
+import {
+    create_trasaction_date_entry,
+    delete_transaction_date_entry,
+    retrieve_transaction_entry,
+    retrieve_transactions_on_date,
+    update_transaction_date_entry,
+} from "./transaction_date_entry";
 import { extract_error, is_data_error } from "~/server/data_error";
 import { TransactionEntry } from "~/server/db_schema/type_def";
-import { create_customer_trasaction_history_entry, delete_customers_transaction_history_entry, retrieve_customer_transactions_history } from "./customer_transaction_entry";
+import {
+    create_customer_trasaction_history_entry,
+    delete_customers_transaction_history_entry,
+    retrieve_customer_transactions_history,
+} from "./customer_transaction_entry";
 
 const test_suit = "transaction_cruds";
 
 afterAll(async () => {
     await clear_test_data(test_suit);
-})
+});
 
 test("test transaction_entries CRUDs querries", async () => {
     const test_name = test_suit.concat("/test_transaction_date_cruds/");
-    
+
     const template: TransactionEntry = {
         id: "naiesrntearinsteian",
         customer_id: "Banana",
@@ -27,24 +37,28 @@ test("test transaction_entries CRUDs querries", async () => {
         cash: 0,
         gift: 5750,
         discount: 2500,
-    }
+    };
 
-    const transaction = await pack_test(template, test_name
-    ).bind(create_trasaction_date_entry).unpack();
+    const transaction = await pack_test(template, test_name)
+        .bind(create_trasaction_date_entry)
+        .unpack();
 
-    if(is_data_error(transaction)) {
+    if (is_data_error(transaction)) {
         transaction.log();
         fail();
     }
 
-    let db_transaction = await pack_test({ date: template.date.toString(), id: template.id }, test_name)
-        .bind(retrieve_transaction_entry).unpack();
+    let db_transaction = await pack_test(
+        { date: template.date.toString(), id: template.id },
+        test_name,
+    )
+        .bind(retrieve_transaction_entry)
+        .unpack();
 
-    if(is_data_error(db_transaction)) {
+    if (is_data_error(db_transaction)) {
         db_transaction.log();
         fail();
     }
-
 
     expect(db_transaction.id).toBe(template.id);
     expect(db_transaction.customer_id).toBe(template.customer_id);
@@ -63,20 +77,25 @@ test("test transaction_entries CRUDs querries", async () => {
         amount: 10000,
         cash: 2300,
         details: "banana",
-    }
+    };
 
     const update_query = await pack_test(update_target, test_name)
-        .bind(update_transaction_date_entry).unpack();
+        .bind(update_transaction_date_entry)
+        .unpack();
 
-    if(is_data_error(update_query)) {
-        update_query.log()
+    if (is_data_error(update_query)) {
+        update_query.log();
         fail();
     }
 
-    db_transaction = await pack_test({ date: template.date.toString(), id: template.id }, test_name)
-        .bind(retrieve_transaction_entry).unpack();
+    db_transaction = await pack_test(
+        { date: template.date.toString(), id: template.id },
+        test_name,
+    )
+        .bind(retrieve_transaction_entry)
+        .unpack();
 
-    if(is_data_error(db_transaction)) {
+    if (is_data_error(db_transaction)) {
         db_transaction.log();
         fail();
     }
@@ -93,18 +112,26 @@ test("test transaction_entries CRUDs querries", async () => {
     expect(db_transaction.gift).toBe(update_target.gift);
     expect(db_transaction.discount).toBe(update_target.discount);
 
-    const del = await pack_test({ date: db_transaction.date.toString(), id: db_transaction.id }, test_name)
-        .bind(delete_transaction_date_entry).unpack();
+    const del = await pack_test(
+        { date: db_transaction.date.toString(), id: db_transaction.id },
+        test_name,
+    )
+        .bind(delete_transaction_date_entry)
+        .unpack();
 
-    if(is_data_error(del)) {
+    if (is_data_error(del)) {
         del.log();
         fail();
     }
 
-    db_transaction = await pack_test({ date: template.date.toString(), id: template.id }, test_name)
-        .bind(retrieve_transaction_entry).unpack();
+    db_transaction = await pack_test(
+        { date: template.date.toString(), id: template.id },
+        test_name,
+    )
+        .bind(retrieve_transaction_entry)
+        .unpack();
 
-    if(!is_data_error(db_transaction)) {
+    if (!is_data_error(db_transaction)) {
         fail();
     }
 });
@@ -125,7 +152,7 @@ test("test retrieve transactions on date querries", async () => {
         cash: 0,
         gift: 5750,
         discount: 2500,
-    }
+    };
 
     const t2: TransactionEntry = {
         id: "asrontaensr",
@@ -140,7 +167,7 @@ test("test retrieve transactions on date querries", async () => {
         cash: 0,
         gift: 5750,
         discount: 2500,
-    }
+    };
 
     const t3: TransactionEntry = {
         id: "rstoaaoesnt",
@@ -155,41 +182,53 @@ test("test retrieve transactions on date querries", async () => {
         cash: 0,
         gift: 5750,
         discount: 2500,
-    }
+    };
 
-    const blank = await pack_test({date: t1.date.toString()}, test_name)
-        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
-            error.log();
-            fail();
-        })).unpack();
+    const blank = await pack_test({ date: t1.date.toString() }, test_name)
+        .bind(retrieve_transactions_on_date)
+        .bind(
+            extract_error((error) => {
+                error.log();
+                fail();
+            }),
+        )
+        .unpack();
 
-    if(is_data_error(blank)) {
+    if (is_data_error(blank)) {
         blank.log();
         fail();
     }
 
     expect(blank.length).toBe(0);
 
-    const ct1 = await pack_test(t1, test_name).bind(create_trasaction_date_entry).unpack();
-    const ct2 = await pack_test(t2, test_name).bind(create_trasaction_date_entry).unpack();
+    const ct1 = await pack_test(t1, test_name)
+        .bind(create_trasaction_date_entry)
+        .unpack();
+    const ct2 = await pack_test(t2, test_name)
+        .bind(create_trasaction_date_entry)
+        .unpack();
 
-    if(is_data_error(ct1)) {
+    if (is_data_error(ct1)) {
         ct1.log();
         fail();
     }
 
-    if(is_data_error(ct2)) {
+    if (is_data_error(ct2)) {
         ct2.log();
         fail();
     }
 
-    let transactions = await pack_test({date: t1.date.toString()}, test_name)
-        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
-            error.log();
-            fail();
-        })).unpack();
+    let transactions = await pack_test({ date: t1.date.toString() }, test_name)
+        .bind(retrieve_transactions_on_date)
+        .bind(
+            extract_error((error) => {
+                error.log();
+                fail();
+            }),
+        )
+        .unpack();
 
-    if(is_data_error(transactions)) {
+    if (is_data_error(transactions)) {
         transactions.log();
         fail();
     }
@@ -208,20 +247,26 @@ test("test retrieve transactions on date querries", async () => {
     expect(transactions[0]?.gift).toBe(t1.gift);
     expect(transactions[0]?.discount).toBe(t1.discount);
 
-    const ct3 = await pack_test(t3, test_name).bind(create_trasaction_date_entry).unpack();
+    const ct3 = await pack_test(t3, test_name)
+        .bind(create_trasaction_date_entry)
+        .unpack();
 
-    if(is_data_error(ct3)) {
+    if (is_data_error(ct3)) {
         ct3.log();
         fail();
     }
 
-    transactions = await pack_test({date: t1.date.toString()}, test_name)
-        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
-            error.log();
-            fail();
-        })).unpack();
+    transactions = await pack_test({ date: t1.date.toString() }, test_name)
+        .bind(retrieve_transactions_on_date)
+        .bind(
+            extract_error((error) => {
+                error.log();
+                fail();
+            }),
+        )
+        .unpack();
 
-    if(is_data_error(transactions)) {
+    if (is_data_error(transactions)) {
         transactions.log();
         fail();
     }
@@ -253,22 +298,30 @@ test("test retrieve transactions on date querries", async () => {
     expect(transactions[1]?.cash).toBe(t3.cash);
     expect(transactions[1]?.gift).toBe(t3.gift);
     expect(transactions[1]?.discount).toBe(t3.discount);
-    
-    const del = await pack_test({id: t1.id, date: t1.date.toString()}, test_name)
-        .bind(delete_transaction_date_entry).unpack();
-    
-    if(is_data_error(del)) {
+
+    const del = await pack_test(
+        { id: t1.id, date: t1.date.toString() },
+        test_name,
+    )
+        .bind(delete_transaction_date_entry)
+        .unpack();
+
+    if (is_data_error(del)) {
         del.log();
         fail();
     }
 
-    transactions = await pack_test({date: t1.date.toString()}, test_name)
-        .bind(retrieve_transactions_on_date).bind(extract_error((error) => {
-            error.log();
-            fail();
-        })).unpack();
+    transactions = await pack_test({ date: t1.date.toString() }, test_name)
+        .bind(retrieve_transactions_on_date)
+        .bind(
+            extract_error((error) => {
+                error.log();
+                fail();
+            }),
+        )
+        .unpack();
 
-    if(is_data_error(transactions)) {
+    if (is_data_error(transactions)) {
         transactions.log();
         fail();
     }
@@ -295,26 +348,31 @@ test("test customer transaction history entries CRUDs querries", async () => {
     const history = {
         customer_id: "bruh",
         id: "q;wyfupl",
-        date: "20 2 2085"
-    }
+        date: "20 2 2085",
+    };
 
     const create = await pack_test(history, test_name)
-        .bind(create_customer_trasaction_history_entry).unpack();
+        .bind(create_customer_trasaction_history_entry)
+        .unpack();
 
-    if(is_data_error(create)){
+    if (is_data_error(create)) {
         create.log();
         fail();
     }
 
-    let customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
-        .bind(retrieve_customer_transactions_history).unpack();
+    let customer_history = await pack_test(
+        { customer_id: history.customer_id },
+        test_name,
+    )
+        .bind(retrieve_customer_transactions_history)
+        .unpack();
 
-    if(is_data_error(customer_history)){
+    if (is_data_error(customer_history)) {
         customer_history.log();
         fail();
     }
 
-    if(is_data_error(customer_history.error)) {
+    if (is_data_error(customer_history.error)) {
         customer_history.error.log();
         fail();
     }
@@ -324,23 +382,31 @@ test("test customer transaction history entries CRUDs querries", async () => {
     expect(customer_history.data[0]?.id).toBe(history.id);
     expect(customer_history.data[0]?.date).toBe(history.date);
 
-    const del = await pack_test({ customer_id: history.customer_id, id: history.id }, test_name)
-        .bind(delete_customers_transaction_history_entry).unpack();
+    const del = await pack_test(
+        { customer_id: history.customer_id, id: history.id },
+        test_name,
+    )
+        .bind(delete_customers_transaction_history_entry)
+        .unpack();
 
-    if(is_data_error(del)) {
+    if (is_data_error(del)) {
         del.log();
         fail();
     }
 
-    customer_history = await pack_test({ customer_id: history.customer_id }, test_name)
-        .bind(retrieve_customer_transactions_history).unpack();
+    customer_history = await pack_test(
+        { customer_id: history.customer_id },
+        test_name,
+    )
+        .bind(retrieve_customer_transactions_history)
+        .unpack();
 
-    if(is_data_error(customer_history)){
+    if (is_data_error(customer_history)) {
         customer_history.log();
         fail();
     }
 
-    if(is_data_error(customer_history.error)) {
+    if (is_data_error(customer_history.error)) {
         customer_history.error.log();
         fail();
     }
