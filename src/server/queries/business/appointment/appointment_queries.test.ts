@@ -5,6 +5,7 @@ import { create_new_customer } from "../customer/customer_queries";
 import { extract_error, is_data_error } from "~/server/data_error";
 import {
     create_new_appointment,
+    delete_appointment,
     retrieve_appointments_on_date,
 } from "./appointment_queries";
 import { retrieve_appointment_entry } from "../../crud/appointment/appointment_entry";
@@ -162,7 +163,7 @@ test("load appointments of date", async () => {
         fail();
     }
 
-    const list = await pack_test({ date: a1.date.toString() }, test_name)
+    let list = await pack_test({ date: a1.date.toString() }, test_name)
         .bind(retrieve_appointments_on_date)
         .unpack();
 
@@ -197,4 +198,39 @@ test("load appointments of date", async () => {
     expect(list.data[1]?.customer.name).toBe(a3.customer.name);
     expect(list.data[1]?.customer.phone_number).toBe(a3.customer.phone_number);
     expect(list.data[1]?.customer.notes).toBe(a3.customer.notes);
+
+    const del = await pack_test(a3, test_name)
+        .bind(delete_appointment)
+        .unpack();
+
+    if (is_data_error(del)) {
+        del.log();
+        fail();
+    }
+
+    list = await pack_test({ date: a1.date.toString() }, test_name)
+        .bind(retrieve_appointments_on_date)
+        .unpack();
+
+    if (is_data_error(list)) {
+        list.log();
+        fail();
+    }
+
+    if (list.error != null) {
+        list.error.log();
+        fail();
+    }
+
+    expect(list.data.length).toBe(1);
+
+    expect(list.data[0]?.id).toBe(a1.id);
+    expect(list.data[0]?.date).toBe(a1.date);
+    expect(list.data[0]?.time).toBe(a1.time);
+    expect(list.data[0]?.details).toBe(a1.details);
+    expect(list.data[0]?.technician).toBeNull();
+    expect(list.data[0]?.customer.id).toBe(a1.customer.id);
+    expect(list.data[0]?.customer.name).toBe(a1.customer.name);
+    expect(list.data[0]?.customer.phone_number).toBe(a1.customer.phone_number);
+    expect(list.data[0]?.customer.notes).toBe(a1.customer.notes);
 });

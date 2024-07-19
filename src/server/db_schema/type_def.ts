@@ -81,5 +81,11 @@ export type Account = {
     tip: number;
 };
 
+export type Closing = {
+    cash: number;
+    gift: number;
+    discount: number;
+};
+
 export type Hour = { open: number; close: number };
 export type Schedule = Hour[];

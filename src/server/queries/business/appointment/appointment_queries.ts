@@ -12,10 +12,14 @@ import {
 } from "~/server/db_schema/type_def";
 import {
     create_appointment_entry,
+    delete_appointment_entry,
     retrieve_appointment_entries_on_date,
 } from "../../crud/appointment/appointment_entry";
 import { db_query, Query } from "../../server_queries_monad";
-import { create_customers_appointments_entry } from "../../crud/appointment/customer_appointments";
+import {
+    create_customers_appointments_entry,
+    delete_customers_appointment_entry,
+} from "../../crud/appointment/customer_appointments";
 import { get } from "firebase/database";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
@@ -156,4 +160,23 @@ export const retrieve_appointments_on_date: Query<
                 ? null
                 : lotta_errors(context, "encountered errors", errors),
     };
+};
+
+export const delete_appointment: Query<Appointment, void> = async (
+    appointment,
+    f_db,
+) => {
+    const context = `deleting appointment { ${appointment.id} }`;
+
+    const e = await delete_appointment_entry(
+        { date: appointment.date, id: appointment.id },
+        f_db,
+    );
+
+    if (is_data_error(e)) return e.stack(context, "failed to delete entry");
+
+    return delete_customers_appointment_entry(
+        { customer_id: appointment.customer.id, id: appointment.id },
+        f_db,
+    );
 };
