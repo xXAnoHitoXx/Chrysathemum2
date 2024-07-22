@@ -39,6 +39,7 @@ export type AppointmentCreationInfo = {
     time: number;
     duration: number;
     details: string;
+    salon: string;
 };
 
 export type Appointment = {
@@ -49,6 +50,7 @@ export type Appointment = {
     time: number;
     duration: number;
     details: string;
+    salon: string;
 };
 
 export type AppointmentEntry = {

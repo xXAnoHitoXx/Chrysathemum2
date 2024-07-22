@@ -16,18 +16,19 @@ export const create_trasaction_date_entry: Query<
 > = async (params, f_db) => {
     const context = "Creating TransactionEntry entry";
     const ref = f_db.transaction_date_entries(params.date.toString(), [
+        params.salon,
         params.id,
     ]);
     return db_query(context, set(ref, params));
 };
 
 export const retrieve_transactions_on_date: Query<
-    { date: string },
+    { date: string; salon: string },
     PartialResult<TransactionEntry[]>
-> = async ({ date }, f_db) => {
+> = async ({ date, salon }, f_db) => {
     const context = "Retrieving transaction of ".concat(date);
 
-    const ref = f_db.transaction_date_entries(date, []);
+    const ref = f_db.transaction_date_entries(date, [salon]);
     const data = await db_query(context, get(ref));
     if (is_data_error(data)) return data;
 
@@ -66,13 +67,13 @@ export const retrieve_transactions_on_date: Query<
 };
 
 export const retrieve_transaction_entry: Query<
-    { date: string; id: string },
+    { date: string; id: string; salon: string },
     TransactionEntry
-> = async ({ date, id }, f_db) => {
+> = async ({ date, id, salon }, f_db) => {
     const context = "Retrieving transaction entry { ".concat(id, " }");
     const data = await db_query(
         context,
-        get(f_db.transaction_date_entries(date, [id])),
+        get(f_db.transaction_date_entries(date, [salon, id])),
     );
     if (is_data_error(data)) return data;
 
@@ -93,15 +94,16 @@ export const update_transaction_date_entry: Query<
     void
 > = async (transaction, f_db) => {
     const ref = f_db.transaction_date_entries(transaction.date.toString(), [
+        transaction.salon,
         transaction.id,
     ]);
     return db_query("Update TransactionEntry entry", update(ref, transaction));
 };
 
 export const delete_transaction_date_entry: Query<
-    { date: string; id: string },
+    { date: string; id: string; salon: string },
     void
-> = async ({ date, id }, f_db) => {
-    const ref = f_db.transaction_date_entries(date, [id]);
+> = async ({ date, id, salon }, f_db) => {
+    const ref = f_db.transaction_date_entries(date, [salon, id]);
     return db_query("Remove TransactionEntry entry", remove(ref));
 };

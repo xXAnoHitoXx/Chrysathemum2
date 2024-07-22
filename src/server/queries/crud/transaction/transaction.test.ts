@@ -49,7 +49,11 @@ test("test transaction_entries CRUDs querries", async () => {
     }
 
     let db_transaction = await pack_test(
-        { date: template.date.toString(), id: template.id },
+        {
+            date: template.date,
+            id: template.id,
+            salon: template.salon,
+        },
         test_name,
     )
         .bind(retrieve_transaction_entry)
@@ -89,7 +93,11 @@ test("test transaction_entries CRUDs querries", async () => {
     }
 
     db_transaction = await pack_test(
-        { date: template.date.toString(), id: template.id },
+        {
+            date: template.date,
+            id: template.id,
+            salon: template.salon,
+        },
         test_name,
     )
         .bind(retrieve_transaction_entry)
@@ -113,7 +121,11 @@ test("test transaction_entries CRUDs querries", async () => {
     expect(db_transaction.discount).toBe(update_target.discount);
 
     const del = await pack_test(
-        { date: db_transaction.date.toString(), id: db_transaction.id },
+        {
+            date: db_transaction.date,
+            id: db_transaction.id,
+            salon: db_transaction.salon,
+        },
         test_name,
     )
         .bind(delete_transaction_date_entry)
@@ -125,7 +137,11 @@ test("test transaction_entries CRUDs querries", async () => {
     }
 
     db_transaction = await pack_test(
-        { date: template.date.toString(), id: template.id },
+        {
+            date: template.date,
+            id: template.id,
+            salon: template.salon,
+        },
         test_name,
     )
         .bind(retrieve_transaction_entry)
@@ -184,7 +200,7 @@ test("test retrieve transactions on date querries", async () => {
         discount: 2500,
     };
 
-    const blank = await pack_test({ date: t1.date.toString() }, test_name)
+    const blank = await pack_test({ date: t1.date, salon: t1.salon }, test_name)
         .bind(retrieve_transactions_on_date)
         .bind(
             extract_error((error) => {
@@ -218,7 +234,10 @@ test("test retrieve transactions on date querries", async () => {
         fail();
     }
 
-    let transactions = await pack_test({ date: t1.date.toString() }, test_name)
+    let transactions = await pack_test(
+        { date: t1.date, salon: t1.salon },
+        test_name,
+    )
         .bind(retrieve_transactions_on_date)
         .bind(
             extract_error((error) => {
@@ -256,7 +275,10 @@ test("test retrieve transactions on date querries", async () => {
         fail();
     }
 
-    transactions = await pack_test({ date: t1.date.toString() }, test_name)
+    transactions = await pack_test(
+        { date: t1.date, salon: t1.salon },
+        test_name,
+    )
         .bind(retrieve_transactions_on_date)
         .bind(
             extract_error((error) => {
@@ -300,7 +322,7 @@ test("test retrieve transactions on date querries", async () => {
     expect(transactions[1]?.discount).toBe(t3.discount);
 
     const del = await pack_test(
-        { id: t1.id, date: t1.date.toString() },
+        { id: t1.id, date: t1.date, salon: t1.salon },
         test_name,
     )
         .bind(delete_transaction_date_entry)
@@ -311,7 +333,10 @@ test("test retrieve transactions on date querries", async () => {
         fail();
     }
 
-    transactions = await pack_test({ date: t1.date.toString() }, test_name)
+    transactions = await pack_test(
+        { date: t1.date, salon: t1.salon },
+        test_name,
+    )
         .bind(retrieve_transactions_on_date)
         .bind(
             extract_error((error) => {
