@@ -61,6 +61,7 @@ export type AppointmentEntry = {
     time: number;
     duration: number;
     details: string;
+    salon: string;
 };
 
 export type TransactionEntry = {

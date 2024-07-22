@@ -40,6 +40,7 @@ test("appointment creation", async () => {
         time: 22,
         details: "",
         duration: 4,
+        salon: "5CBL",
     };
 
     const appointment = await pack_test(appointment_info, test_name)
@@ -122,6 +123,7 @@ test("load appointments of date", async () => {
         time: 22,
         details: "",
         duration: 4,
+        salon: "5CBL",
     };
 
     const a2i: AppointmentCreationInfo = {
@@ -130,6 +132,7 @@ test("load appointments of date", async () => {
         time: 21,
         details: "",
         duration: 3,
+        salon: "5CBL",
     };
 
     const a3i: AppointmentCreationInfo = {
@@ -138,6 +141,7 @@ test("load appointments of date", async () => {
         time: 23,
         details: "",
         duration: 2,
+        salon: "5CBL",
     };
 
     const a1 = await pack_test(a1i, test_name)

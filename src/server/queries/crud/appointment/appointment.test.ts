@@ -29,6 +29,7 @@ test("test appointment_entries CRUDs querries", async () => {
         time: 5,
         duration: 10,
         details: "emotional damage",
+        salon: "5CBL",
     };
 
     const appointment = await pack_test(app_detail, test_name)
@@ -75,6 +76,7 @@ test("test appointment_entries CRUDs querries", async () => {
         time: 15,
         duration: 5,
         details: "emotional damage++",
+        salon: "5CBL",
     };
 
     const update = await pack_test(update_target, test_name)
@@ -134,6 +136,7 @@ test("test customer appointment list entries CRUDs querries", async () => {
         customer_id: "bruh",
         id: "q;wyfupl",
         date: "20 2 2085",
+        salon: "5CBL",
     };
 
     const create = await pack_test(history, test_name)

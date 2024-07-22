@@ -18,6 +18,7 @@ export const create_appointment_entry: Query<
         time: number;
         duration: number;
         details: string;
+        salon: string;
     },
     AppointmentEntry
 > = async (params, f_db) => {
@@ -41,6 +42,7 @@ export const create_appointment_entry: Query<
         time: params.time,
         duration: params.duration,
         details: params.details,
+        salon: params.salon,
     };
 
     const res = await db_query(context, set(id_ref, appointment));

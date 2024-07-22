@@ -47,6 +47,7 @@ export const create_new_appointment: Query<
             customer_id: entry.customer_id,
             id: entry.id,
             date: entry.date.toString(),
+            salon: entry.salon,
         },
         f_db,
     );
@@ -150,6 +151,7 @@ export const retrieve_appointments_on_date: Query<
             time: entry.time,
             technician: null,
             customer: customer,
+            salon: entry.salon,
         });
     }
 
