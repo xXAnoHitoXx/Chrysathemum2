@@ -74,7 +74,7 @@ export const migrate_customer_data: Query<OldCustomerData, Customer> = async (
             update: {
                 name: data.name,
                 phone_number: data.phoneNumber,
-                notes: null,
+                notes: customer.notes,
             },
         },
         f_db,

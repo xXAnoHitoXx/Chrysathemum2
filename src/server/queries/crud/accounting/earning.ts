@@ -8,15 +8,16 @@ export const shop_earnings = "shop";
 
 export const register_earnings: Query<
     {
+        salon: string;
         entity: string;
         date: string;
         account: Account;
     },
     void
-> = async ({ entity, date, account: { amount, tip } }, f_db) => {
+> = async ({ salon, entity, date, account: { amount, tip } }, f_db) => {
     const context = `register earnings for { ${entity} } on { ${date} } of { ${amount}(${tip}) }`;
 
-    const ref = f_db.accounting_date_entries(date, []);
+    const ref = f_db.accounting_date_entries(date, [salon]);
 
     const updates: { [index: string]: unknown } = {};
 
@@ -28,12 +29,12 @@ export const register_earnings: Query<
 };
 
 export const retrieve_earnings: Query<
-    { date: string; entity: string },
+    { salon: string; date: string; entity: string },
     Account
-> = async ({ date, entity }, f_db) => {
+> = async ({ salon, date, entity }, f_db) => {
     const context = `Retrieving Earnings of { ${entity} } on { ${date} }`;
 
-    const ref = f_db.accounting_date_entries(date, [entity]);
+    const ref = f_db.accounting_date_entries(date, [salon, entity]);
 
     const data = await db_query(context, get(ref));
     if (is_data_error(data)) return data;

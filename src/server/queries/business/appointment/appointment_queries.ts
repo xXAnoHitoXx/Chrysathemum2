@@ -8,12 +8,15 @@ import {
 import {
     Appointment,
     AppointmentCreationInfo,
+    AppointmentEntry,
+    AppointmentUpdateInfo,
     Technician,
 } from "~/server/db_schema/type_def";
 import {
     create_appointment_entry,
     delete_appointment_entry,
     retrieve_appointment_entries_on_date,
+    update_appointment_entry,
 } from "../../crud/appointment/appointment_entry";
 import { db_query, Query } from "../../server_queries_monad";
 import {
@@ -164,21 +167,46 @@ export const retrieve_appointments_on_date: Query<
     };
 };
 
+export const update_appointment: Query<
+    { appointment: Appointment; update: AppointmentUpdateInfo },
+    void
+> = async ({ appointment, update }, f_db) => {
+    const context = `update technician { ${appointment.technician == null ? "NO TECH" : appointment.technician.name} } to appointment { ${appointment.details} }`;
+
+    const entry: AppointmentEntry = {
+        id: appointment.id,
+        customer_id: appointment.customer.id,
+        salon: appointment.salon,
+        date: appointment.date,
+
+        technician_id: update.technician_id,
+        time: update.time,
+        duration: update.duration,
+        details: update.details,
+    };
+
+    const entry_update = await update_appointment_entry(entry, f_db);
+    if (is_data_error(entry_update)) return entry_update.stack(context, "...");
+};
+
 export const delete_appointment: Query<Appointment, void> = async (
     appointment,
     f_db,
 ) => {
     const context = `deleting appointment { ${appointment.id} }`;
 
-    const e = await delete_appointment_entry(
+    const del_entry = delete_appointment_entry(
         { date: appointment.date, id: appointment.id },
         f_db,
     );
 
-    if (is_data_error(e)) return e.stack(context, "failed to delete entry");
-
-    return delete_customers_appointment_entry(
+    const delete_index = delete_customers_appointment_entry(
         { customer_id: appointment.customer.id, id: appointment.id },
         f_db,
     );
+
+    const e = await del_entry;
+    if (is_data_error(e)) return e.stack(context, "failed to delete entry");
+
+    return delete_index;
 };

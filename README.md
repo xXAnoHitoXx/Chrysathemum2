@@ -2,50 +2,51 @@
 
 ## Todo
 
--   [x] ~~make it deploy~~
--   [x] ~~set up db~~
--   [x] ~~add auth~~
--   [x] ~~error management~~
--   [x] ~~data layout~~
+-   [x] ~make it deploy~
+-   [x] ~set up db~
+-   [x] ~add auth~
+-   [x] ~error management~
+-   [x] ~data layout~
 -   back end:
     -   [ ] cruds
-        -   [x] ~~customer~~
-            -   [x] ~~customer data type~~
-            -   [x] ~~customer entries~~
-            -   [x] ~~customer phone index~~
-            -   [x] ~~customer migration index~~
-        -   [x] ~~technician~~
-            -   [x] ~~technician entries~~
-            -   [x] ~~technician login index~~
-            -   [x] ~~technician migration index~~
+        -   [x] ~customer~
+            -   [x] ~customer data type~
+            -   [x] ~customer entries~
+            -   [x] ~customer phone index~
+            -   [x] ~customer migration index~
+        -   [x] ~technician~
+            -   [x] ~technician entries~
+            -   [x] ~technician login index~
+            -   [x] ~technician migration index~
             -   [ ] sale tech
-        -   [x] ~~location~~
-            -   [x] ~~location entries~~
-            -   [x] ~~location's technician~~
+        -   [x] ~location~
+            -   [x] ~location entries~
+            -   [x] ~location's technician~
         -   [ ] appointment & transactions
-            -   [x] ~~appointment entries~~
-            -   [x] ~~transaction entries~~
+            -   [x] ~appointment entries~
+            -   [x] ~transaction entries~
             -   [ ] transaction migration index
         -   [ ] accounting
-            -   [ ] entries
-            -   [ ] closing
--   salon:
-    -   [x] ~~technician manager~~
-        -   [x] ~~create technician~~
-        -   [x] ~~assign technician to salon location~~
-        -   [x] ~~set technician inactive~~
+            -   [x] ~entries~
+            -   [x] ~closing~
+            -   [ ] migration
+-   [ ] salon:
+    -   [x] ~technician manager~
+        -   [x] ~create technician~
+        -   [x] ~assign technician to salon location~
+        -   [x] ~set technician inactive~
     -   [ ] migration framework
         -   restriction: vercel limited timeout on development
-        -   [x] ~~runable from dev environment~~
-        -   [x] ~~migrating customers~~
+        -   [x] ~runable from dev environment~
+        -   [x] ~migrating customers~
         -   [ ] migrating transactions
     -   [ ] appointment viewer
-        -   [x] ~~display board~~
+        -   [x] ~display board~
     -   [ ] booking
     -   [ ] view daily breakdown
     -   [ ] sumary
     -   [ ] month tally
--   technician:
+-   [ ] technician:
     -   [ ] daily break down
     -   [ ] sumary
 -   [ ] curtomer booking

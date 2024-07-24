@@ -1,5 +1,8 @@
 import { clear_test_data } from "~/server/db_schema/fb_schema";
-import { AppointmentCreationInfo } from "~/server/db_schema/type_def";
+import {
+    AppointmentCreationInfo,
+    AppointmentUpdateInfo,
+} from "~/server/db_schema/type_def";
 import { pack_test } from "../../server_queries_monad";
 import { create_new_customer } from "../customer/customer_queries";
 import { extract_error, is_data_error } from "~/server/data_error";
@@ -7,9 +10,12 @@ import {
     create_new_appointment,
     delete_appointment,
     retrieve_appointments_on_date,
+    update_appointment,
 } from "./appointment_queries";
 import { retrieve_appointment_entry } from "../../crud/appointment/appointment_entry";
 import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
+import { TechnicianCreationInfo } from "~/app/api/technician/create/validation";
+import { create_new_technician } from "../technician/technician_queries";
 
 const test_suit = "appointment_queries_tests";
 
@@ -100,6 +106,192 @@ test("appointment creation", async () => {
     expect(index.length).toBe(1);
     expect(index[0]?.id).toBe(appointment.id);
     expect(index[0]?.date).toBe(appointment.date.toString());
+});
+
+test("appointment update", async () => {
+    const test_name = test_suit.concat("/appointment_update/");
+
+    const customer = await pack_test(
+        {
+            name: "Banana",
+            phone_number: "eggplant",
+        },
+        test_name,
+    )
+        .bind(create_new_customer)
+        .unpack();
+
+    if (is_data_error(customer)) {
+        customer.log();
+        fail();
+    }
+
+    const appointment_info: AppointmentCreationInfo = {
+        customer: customer,
+        date: "31 12 2021",
+        time: 22,
+        details: "",
+        duration: 4,
+        salon: "5CBL",
+    };
+
+    const appointment = await pack_test(appointment_info, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+
+    if (is_data_error(appointment)) {
+        appointment.log();
+        fail();
+    }
+
+    expect(appointment.customer.name).toBe(customer.name);
+    expect(appointment.customer.phone_number).toBe(customer.phone_number);
+    expect(appointment.customer.id).toBe(customer.id);
+    expect(appointment.customer.notes).toBe(customer.notes);
+
+    expect(appointment.date).toBe(appointment_info.date);
+    expect(appointment.duration).toBe(appointment_info.duration);
+    expect(appointment.time).toBe(appointment_info.time);
+    expect(appointment.details).toBe(appointment_info.details);
+
+    const update: AppointmentUpdateInfo = {
+        technician_id:
+            appointment.technician == null ? null : appointment.technician.id,
+        time: 11,
+        details: "lol",
+        duration: 3,
+    };
+
+    const updated = await pack_test(
+        { appointment: appointment, update: update },
+        test_name,
+    )
+        .bind(update_appointment)
+        .unpack();
+
+    if (is_data_error(updated)) {
+        updated.log();
+        fail();
+    }
+
+    const entry = await pack_test(
+        { date: appointment.date.toString(), id: appointment.id },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
+
+    if (is_data_error(entry)) {
+        entry.log();
+        fail();
+    }
+
+    expect(entry.id).toBe(appointment.id);
+    expect(entry.customer_id).toBe(appointment.customer.id);
+    expect(entry.date).toBe(appointment.date);
+    expect(entry.time).toBe(update.time);
+    expect(entry.duration).toBe(update.duration);
+    expect(entry.details).toBe(update.details);
+    expect(entry.technician_id).toBe(null);
+});
+
+test("tech assignment", async () => {
+    const test_name = test_suit.concat("/tech_assignment/");
+
+    const customer = await pack_test(
+        {
+            name: "Banana",
+            phone_number: "eggplant",
+        },
+        test_name,
+    )
+        .bind(create_new_customer)
+        .unpack();
+
+    if (is_data_error(customer)) {
+        customer.log();
+        fail();
+    }
+
+    const appointment_info: AppointmentCreationInfo = {
+        customer: customer,
+        date: "31 12 2021",
+        time: 22,
+        details: "",
+        duration: 4,
+        salon: "5CBL",
+    };
+
+    const appointment = await pack_test(appointment_info, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+
+    if (is_data_error(appointment)) {
+        appointment.log();
+        fail();
+    }
+
+    const techless_entry = await pack_test(
+        { date: appointment.date.toString(), id: appointment.id },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
+
+    if (is_data_error(techless_entry)) {
+        techless_entry.log();
+        fail();
+    }
+
+    expect(techless_entry.technician_id).toBeNull();
+
+    const tech_info: TechnicianCreationInfo = {
+        name: "UwU",
+        color: "FaQ",
+        active_salon: "5CBL",
+    };
+
+    const tech = await pack_test(tech_info, test_name)
+        .bind(create_new_technician)
+        .unpack();
+
+    if (is_data_error(tech)) {
+        tech.log();
+        fail();
+    }
+
+    const update: AppointmentUpdateInfo = {
+        technician_id: tech.id,
+        time: appointment.time,
+        duration: appointment.duration,
+        details: appointment.details,
+    };
+
+    const assignment = await pack_test(
+        { appointment: appointment, update: update },
+        test_name,
+    )
+        .bind(update_appointment)
+        .unpack();
+
+    if (is_data_error(assignment)) {
+        assignment.log();
+        fail();
+    }
+
+    const entry = await pack_test(
+        { date: appointment.date.toString(), id: appointment.id },
+        test_name,
+    )
+        .bind(retrieve_appointment_entry)
+        .unpack();
+
+    if (is_data_error(entry)) {
+        entry.log();
+        fail();
+    }
+
+    expect(entry.technician_id).toBe(tech.id);
 });
 
 test("load appointments of date", async () => {

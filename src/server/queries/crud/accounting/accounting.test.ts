@@ -19,6 +19,7 @@ test("test accounting cruds CRUDs querries", async () => {
     };
 
     const target = {
+        salon: "5CBL",
         entity: "your mom",
         date: "today",
     };
@@ -36,7 +37,7 @@ test("test accounting cruds CRUDs querries", async () => {
     expect(blank.tip).toBe(0);
 
     const blank_shop = await pack_test(
-        { entity: shop_earnings, date: target.date },
+        { salon: "5CBL", entity: shop_earnings, date: target.date },
         test_name,
     )
         .bind(retrieve_earnings)
@@ -72,7 +73,7 @@ test("test accounting cruds CRUDs querries", async () => {
     expect(tarjet.tip).toBe(account.tip);
 
     const tarjet_shop = await pack_test(
-        { entity: shop_earnings, date: target.date },
+        { salon: "5CBL", entity: shop_earnings, date: target.date },
         test_name,
     )
         .bind(retrieve_earnings)
@@ -100,6 +101,7 @@ test("test concurrent accounting cruds CRUDs querries", async () => {
         tip: 100,
     };
     const target = {
+        salon: "5CBL",
         entity: "your mom",
         date: "today",
     };
@@ -136,7 +138,7 @@ test("test concurrent accounting cruds CRUDs querries", async () => {
     expect(tarjet.tip).toBe(expected.tip);
 
     const tarjet_shop = await pack_test(
-        { entity: shop_earnings, date: target.date },
+        { salon: "5CBL", entity: shop_earnings, date: target.date },
         test_name,
     )
         .bind(retrieve_earnings)

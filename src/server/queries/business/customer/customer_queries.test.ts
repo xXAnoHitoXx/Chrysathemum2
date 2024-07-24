@@ -84,8 +84,8 @@ test("update customer name", async () => {
 
     const name_change_info: CustomerUpdateData = {
         name: "Justin Wong",
-        phone_number: null,
-        notes: null,
+        phone_number: starting_customer.phone_number,
+        notes: starting_customer.notes,
     };
 
     const name_changed = await pack_test(
@@ -138,9 +138,9 @@ test("update customer phone_number", async () => {
     }
 
     const phone_change_info: CustomerUpdateData = {
-        name: null,
+        name: starting_customer.name,
         phone_number: "Evo Monent 37",
-        notes: null,
+        notes: starting_customer.notes,
     };
 
     const phone_changed = await pack_test(
@@ -193,8 +193,8 @@ test("update customer notes", async () => {
     }
 
     const notes_change_info: CustomerUpdateData = {
-        name: null,
-        phone_number: null,
+        name: starting_customer.name,
+        phone_number: starting_customer.phone_number,
         notes: "Justin Wong",
     };
 

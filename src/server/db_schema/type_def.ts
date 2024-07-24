@@ -9,9 +9,9 @@ export type CustomerCreationInfo = {
 };
 
 export type CustomerUpdateData = {
-    name: string | null;
-    phone_number: string | null;
-    notes: string | null;
+    name: string;
+    phone_number: string;
+    notes: string;
 };
 
 export type Customer = {
@@ -40,6 +40,13 @@ export type AppointmentCreationInfo = {
     duration: number;
     details: string;
     salon: string;
+};
+
+export type AppointmentUpdateInfo = {
+    technician_id: string | null;
+    time: number;
+    duration: number;
+    details: string;
 };
 
 export type Appointment = {
@@ -85,6 +92,7 @@ export type Account = {
 };
 
 export type Closing = {
+    machine: number;
     cash: number;
     gift: number;
     discount: number;
