@@ -46,6 +46,19 @@ export class FireDB {
         );
     }
 
+    prod(): FireDB {
+        const prod_db = new FireDB();
+        const mode: string = this.is_in_test_mode() ? test : operarion;
+        prod_db.root_path = process.env.PROJECT_NAME!.concat(
+            "/",
+            prod,
+            "/",
+            mode,
+            "/"
+        )
+        return prod_db;
+    }
+
     is_in_test_mode(): boolean {
         return process.env.NODE_ENV === test;
     }

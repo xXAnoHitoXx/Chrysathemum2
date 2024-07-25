@@ -14,18 +14,20 @@ export function to_appointment(t: unknown): AppointmentEntry | DataError {
             "date" in t &&
             "time" in t &&
             "duration" in t &&
+            "salon" in t &&
             "details" in t
         )
     ) {
         return data_error("Casting to AppointmentEntry", "missing field");
     }
 
-    const { id, customer_id, date, time, duration, details } = t;
+    const { id, customer_id, date, time, salon, duration, details } = t;
 
     if (
         !(
             is_string(id) &&
             is_string(customer_id) &&
+                is_string(salon) &&
             is_string(date) &&
             is_number(time) &&
             is_number(duration) &&
@@ -48,6 +50,7 @@ export function to_appointment(t: unknown): AppointmentEntry | DataError {
             customer_id: customer_id,
             technician_id: null,
             date: date,
+            salon: salon,
             time: time,
             duration: duration,
             details: details,
@@ -67,6 +70,7 @@ export function to_appointment(t: unknown): AppointmentEntry | DataError {
         id: id,
         customer_id: customer_id,
         technician_id: technician_id,
+        salon: salon,
         date: date,
         time: time,
         duration: duration,
