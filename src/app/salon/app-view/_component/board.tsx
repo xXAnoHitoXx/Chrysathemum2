@@ -29,9 +29,9 @@ function timestamp(time: number, hours: Hour) {
             key={"time_".concat(time.toString())}
             draggable="false"
             className={"row-start-1 h-10".concat(
-                "col-start-",
+                " col-start-",
                 ((time - 8) * 4 + 1).toString(),
-                "col-span-4",
+                " col-span-4 ",
                 color,
             )}
         >
@@ -63,13 +63,13 @@ export function Board(props: { appointments: Appointment[] }) {
 
                 return (
                     <li
-                        className={"border-2".concat(
+                        className={"border-2 ".concat(
                             app_color,
                             " ",
                             app_col,
                             " ",
                             app_span,
-                            "row-span-2 m-1 rounded",
+                            " row-span-2 m-1 rounded",
                         )}
                     >
                         <button className="ml-1 h-full w-full text-ellipsis text-left">

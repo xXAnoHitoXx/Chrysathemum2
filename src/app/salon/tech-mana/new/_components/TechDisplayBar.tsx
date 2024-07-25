@@ -32,9 +32,9 @@ export function TechnicianButton({
     if (link == null) {
         return (
             <button
-                className={"border-2".concat(
+                className={"border-2 ".concat(
                     technician.color,
-                    "h-20 w-32 rounded-3xl",
+                    " h-20 w-32 rounded-3xl",
                 )}
             >
                 {technician.name}
@@ -45,9 +45,9 @@ export function TechnicianButton({
     return (
         <a href={link}>
             <button
-                className={"border-2".concat(
+                className={"border-2 ".concat(
                     technician.color,
-                    "h-20 w-32 rounded-3xl",
+                    " h-20 w-32 rounded-3xl",
                 )}
             >
                 {technician.name}
