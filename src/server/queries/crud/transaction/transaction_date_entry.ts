@@ -15,7 +15,7 @@ export const create_trasaction_date_entry: Query<
     void
 > = async (params, f_db) => {
     const context = "Creating TransactionEntry entry";
-    const ref = f_db.transaction_date_entries(params.date.toString(), [
+    const ref = f_db.transaction_date_entries(params.date, [
         params.salon,
         params.id,
     ]);
@@ -93,7 +93,7 @@ export const update_transaction_date_entry: Query<
     TransactionEntry,
     void
 > = async (transaction, f_db) => {
-    const ref = f_db.transaction_date_entries(transaction.date.toString(), [
+    const ref = f_db.transaction_date_entries(transaction.date, [
         transaction.salon,
         transaction.id,
     ]);
