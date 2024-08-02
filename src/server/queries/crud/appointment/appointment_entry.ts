@@ -23,9 +23,7 @@ export const create_appointment_entry: Query<
     AppointmentEntry
 > = async (params, f_db) => {
     const context = "Create appointment entry { ".concat(params.details, " }");
-    const id_ref = push(
-        f_db.appointment_date_entries(params.date, []),
-    );
+    const id_ref = push(f_db.appointment_date_entries(params.date, []));
 
     if (id_ref.key == null) {
         return data_error(
@@ -125,9 +123,7 @@ export const update_appointment_entry: Query<AppointmentEntry, void> = async (
     return db_query(
         "Update AppointmentEntry Entry",
         update(
-            f_db.appointment_date_entries(appointment.date, [
-                appointment.id,
-            ]),
+            f_db.appointment_date_entries(appointment.date, [appointment.id]),
             appointment,
         ),
     );
