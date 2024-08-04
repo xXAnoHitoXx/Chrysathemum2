@@ -18,12 +18,11 @@ import {
     retrieve_appointment_entries_on_date,
     update_appointment_entry,
 } from "../../crud/appointment/appointment_entry";
-import { db_query, Query } from "../../server_queries_monad";
+import { Query } from "../../server_queries_monad";
 import {
     create_customers_appointments_entry,
     delete_customers_appointment_entry,
 } from "../../crud/appointment/customer_appointments";
-import { get } from "firebase/database";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
 
@@ -71,12 +70,6 @@ export const retrieve_appointments_on_date: Query<
     PartialResult<Appointment[]>
 > = async ({ date }, f_db) => {
     const context = `retriving appointments of { ${date} }`;
-    const data = await db_query(
-        context,
-        get(f_db.appointment_date_entries(date, [])),
-    );
-    if (is_data_error(data)) return data;
-
     const appointment_entries = await retrieve_appointment_entries_on_date(
         { date: date },
         f_db,

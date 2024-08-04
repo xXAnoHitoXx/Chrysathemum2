@@ -5,6 +5,13 @@ import { ano_iter } from "~/util/anoiter/anoiter";
 import { data_error, DataError } from "../data_error";
 import { db_query } from "../queries/server_queries_monad";
 
+export const PATH_ENTRIES = "id/";
+
+export const PATH_DATES = "dates/";
+
+export const PATH_APPOINTMENTS = "appointments/";
+export const PATH_UPDATE_COUNT = "update_count";
+
 const prod = "production";
 const dev = "development";
 const test = "test";
@@ -13,7 +20,6 @@ const operarion = "operarion";
 const customers_root = "customers/";
 const technicians_root = "technicians/";
 const locations_root = "locations/";
-const appointments_root = "appointments/";
 const transactions_root = "transactions/";
 const accounting_root = "accounting/";
 
@@ -54,8 +60,8 @@ export class FireDB {
             prod,
             "/",
             mode,
-            "/"
-        )
+            "/",
+        );
         return prod_db;
     }
 
@@ -111,13 +117,6 @@ export class FireDB {
         return this.ref(locations_root, "schedule/", sub_path);
     }
 
-    appointment_date_entries(
-        date: string,
-        sub_path: string[],
-    ): DatabaseReference {
-        return this.ref(date, appointments_root, sub_path);
-    }
-
     transaction_date_entries(
         date: string,
         sub_path: string[],
@@ -138,6 +137,14 @@ export class FireDB {
             path = path.concat(branch, "/");
         });
         return ref(f_db, path);
+    }
+
+    access(sub_path: string[]): DatabaseReference {
+        let path = "/";
+        sub_path.forEach((branch) => {
+            path = path + branch + "/";
+        });
+        return ref(f_db, this.root_path + path);
     }
 
     private ref(root: string, branch: string, sub_path: string[]) {
