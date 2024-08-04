@@ -16,6 +16,8 @@ import { retrieve_appointment_entry } from "../../crud/appointment/appointment_e
 import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
 import { TechnicianCreationInfo } from "~/app/api/technician/create/validation";
 import { create_new_technician } from "../technician/technician_queries";
+import { date_to_db_string } from "~/server/validation/semantic/date";
+import { retrieve_appointment_update_count_of_date } from "../../crud/appointment/update_count";
 
 const test_suit = "appointment_queries_tests";
 
@@ -42,7 +44,7 @@ test("appointment creation", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31 12 2021",
+        date: "31-12-2021",
         time: 22,
         details: "",
         duration: 4,
@@ -128,7 +130,7 @@ test("appointment update", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31 12 2021",
+        date: "31-12-2021",
         time: 22,
         details: "",
         duration: 4,
@@ -215,7 +217,7 @@ test("tech assignment", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31 12 2021",
+        date: "31-12-2021",
         time: 22,
         details: "",
         duration: 4,
@@ -311,7 +313,7 @@ test("load appointments of date", async () => {
 
     const a1i: AppointmentCreationInfo = {
         customer: customer,
-        date: "31 12 2021",
+        date: "31-12-2021",
         time: 22,
         details: "",
         duration: 4,
@@ -320,7 +322,7 @@ test("load appointments of date", async () => {
 
     const a2i: AppointmentCreationInfo = {
         customer: customer,
-        date: "30 12 2022",
+        date: "30-12-2022",
         time: 21,
         details: "",
         duration: 3,
@@ -329,7 +331,7 @@ test("load appointments of date", async () => {
 
     const a3i: AppointmentCreationInfo = {
         customer: customer,
-        date: "31 12 2021",
+        date: "31-12-2021",
         time: 23,
         details: "",
         duration: 2,
@@ -429,4 +431,174 @@ test("load appointments of date", async () => {
     expect(list.data[0]?.customer.name).toBe(a1.customer.name);
     expect(list.data[0]?.customer.phone_number).toBe(a1.customer.phone_number);
     expect(list.data[0]?.customer.notes).toBe(a1.customer.notes);
+});
+
+test("appointment update count", async () => {
+    const test_name = test_suit.concat("/appointment_update_count/");
+
+    const customer = await pack_test(
+        {
+            name: "Banana",
+            phone_number: "eggplant",
+        },
+        test_name,
+    )
+        .bind(create_new_customer)
+        .unpack();
+
+    if (is_data_error(customer)) {
+        customer.log();
+        fail();
+    }
+
+    const a1i: AppointmentCreationInfo = {
+        customer: customer,
+        date: "31-12-2021",
+        time: 22,
+        details: "",
+        duration: 4,
+        salon: "5CBL",
+    };
+
+    const a2i: AppointmentCreationInfo = {
+        customer: customer,
+        date: date_to_db_string(new Date()),
+        time: 21,
+        details: "",
+        duration: 3,
+        salon: "5CBL",
+    };
+
+    const a1 = await pack_test(a1i, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+
+    if (is_data_error(a1)) {
+        a1.log();
+        fail();
+    }
+
+    let u = await pack_test(a1.date, test_name)
+        .bind(retrieve_appointment_update_count_of_date)
+        .unpack();
+
+    if (is_data_error(u)) {
+        u.log();
+        fail();
+    }
+
+    expect(u).toBe(0);
+
+    const a2 = await pack_test(a2i, test_name)
+        .bind(create_new_appointment)
+        .unpack();
+
+    if (is_data_error(a2)) {
+        a2.log();
+        fail();
+    }
+
+    u = await pack_test(a2.date, test_name)
+        .bind(retrieve_appointment_update_count_of_date)
+        .unpack();
+
+    if (is_data_error(u)) {
+        u.log();
+        fail();
+    }
+
+    expect(u).toBe(1);
+
+    const update: AppointmentUpdateInfo = {
+        technician_id: null,
+        time: a1.time,
+        duration: a2.duration,
+        details: "bruh",
+    };
+
+    const a1_updated = await pack_test(
+        { appointment: a1, update: update },
+        test_name,
+    )
+        .bind(update_appointment)
+        .unpack();
+
+    if (is_data_error(a1_updated)) {
+        a1_updated.log();
+        fail();
+    }
+
+    u = await pack_test(a1.date, test_name)
+        .bind(retrieve_appointment_update_count_of_date)
+        .unpack();
+
+    if (is_data_error(u)) {
+        u.log();
+        fail();
+    }
+
+    expect(u).toBe(0);
+
+    const a2_updated = await pack_test(
+        { appointment: a2, update: update },
+        test_name,
+    )
+        .bind(update_appointment)
+        .unpack();
+
+    if (is_data_error(a2_updated)) {
+        a2_updated.log();
+        fail();
+    }
+
+    u = await pack_test(a2.date, test_name)
+        .bind(retrieve_appointment_update_count_of_date)
+        .unpack();
+
+    if (is_data_error(u)) {
+        u.log();
+        fail();
+    }
+
+    expect(u).toBe(2);
+
+    const a1_del = await pack_test(a1, test_name)
+        .bind(delete_appointment)
+        .unpack();
+
+    if (is_data_error(a1_del)) {
+        a1_del.log();
+        fail();
+    }
+
+    u = await pack_test(a1.date, test_name)
+        .bind(retrieve_appointment_update_count_of_date)
+        .unpack();
+
+    if (is_data_error(u)) {
+        u.log();
+        fail();
+    }
+
+    expect(u).toBe(0);
+
+    const a2_del = await pack_test(a2, test_name)
+        .bind(delete_appointment)
+        .unpack();
+
+    if (is_data_error(a2_del)) {
+        a2_del.log();
+        fail();
+    }
+
+    u = await pack_test(a2.date, test_name)
+        .bind(retrieve_appointment_update_count_of_date)
+        .unpack();
+
+    if (is_data_error(u)) {
+        u.log();
+        fail();
+    }
+
+    expect(u).toBe(3);
 });

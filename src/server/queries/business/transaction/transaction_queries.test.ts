@@ -38,7 +38,7 @@ test("transaction creation", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31 12 2021",
+        date: "31-12-2021",
         time: 22,
         details: "",
         duration: 4,

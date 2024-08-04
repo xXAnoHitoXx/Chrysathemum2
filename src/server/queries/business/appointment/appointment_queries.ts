@@ -8,7 +8,6 @@ import {
 import {
     Appointment,
     AppointmentCreationInfo,
-    AppointmentEntry,
     AppointmentUpdateInfo,
     Technician,
 } from "~/server/db_schema/type_def";
@@ -25,12 +24,18 @@ import {
 } from "../../crud/appointment/customer_appointments";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
+import { date_to_db_string, valiDate } from "~/server/validation/semantic/date";
+import { appointment_update_count_increment } from "../../crud/appointment/update_count";
 
 export const create_new_appointment: Query<
     AppointmentCreationInfo,
     Appointment
 > = async (params, f_db) => {
     const context = "Create New Appointment";
+    if (!valiDate(params.date)) {
+        return data_error(context, `invalid date {${params.date}}`);
+    }
+
     const entry = await create_appointment_entry(
         {
             ...params,
@@ -56,6 +61,10 @@ export const create_new_appointment: Query<
 
     if (is_data_error(list)) {
         return list.stack(context, "creating customer appointment index");
+    }
+
+    if (date_to_db_string(new Date()) === entry.date) {
+        await appointment_update_count_increment(entry.date, f_db);
     }
 
     return {
@@ -166,19 +175,26 @@ export const update_appointment: Query<
 > = async ({ appointment, update }, f_db) => {
     const context = `update technician { ${appointment.technician == null ? "NO TECH" : appointment.technician.name} } to appointment { ${appointment.details} }`;
 
-    const entry: AppointmentEntry = {
-        id: appointment.id,
-        customer_id: appointment.customer.id,
-        salon: appointment.salon,
-        date: appointment.date,
+    const updates: Record<string, unknown> = {};
 
-        technician_id: update.technician_id,
-        time: update.time,
-        duration: update.duration,
-        details: update.details,
-    };
+    updates["technician_id"] = update.technician_id;
+    updates["time"] = update.time;
+    updates["details"] = update.details;
+    updates["duration"] = update.duration;
 
-    const entry_update = await update_appointment_entry(entry, f_db);
+    const entry_update = await update_appointment_entry(
+        {
+            date: appointment.date,
+            id: appointment.id,
+            record: update,
+        },
+        f_db,
+    );
+
+    if (date_to_db_string(new Date()) === appointment.date) {
+        await appointment_update_count_increment(appointment.date, f_db);
+    }
+
     if (is_data_error(entry_update)) return entry_update.stack(context, "...");
 };
 
@@ -197,6 +213,10 @@ export const delete_appointment: Query<Appointment, void> = async (
         { customer_id: appointment.customer.id, id: appointment.id },
         f_db,
     );
+
+    if (date_to_db_string(new Date()) === appointment.date) {
+        await appointment_update_count_increment(appointment.date, f_db);
+    }
 
     const e = await del_entry;
     if (is_data_error(e)) return e.stack(context, "failed to delete entry");

@@ -33,10 +33,10 @@ export const appointment_update_count_increment: Query<string, void> = async (
     );
 };
 
-export const retrieve_appointment_update_count: Query<string, number> = async (
-    date,
-    f_db,
-) => {
+export const retrieve_appointment_update_count_of_date: Query<
+    string,
+    number
+> = async (date, f_db) => {
     const context = `Retrieve appointment update count of date {${date}}`;
     const data = await db_query(context, get(f_db.access(update_count(date))));
 

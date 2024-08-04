@@ -127,16 +127,13 @@ export const retrieve_appointment_entry: Query<
     return e;
 };
 
-export const update_appointment_entry: Query<AppointmentEntry, void> = async (
-    appointment,
-    f_db,
-) => {
+export const update_appointment_entry: Query<
+    { date: string; id: string; record: Record<string, unknown> },
+    void
+> = async ({ date, id, record }, f_db) => {
     return db_query(
         "Update AppointmentEntry Entry",
-        update(
-            f_db.access(appointment_entry(appointment.date, appointment.id)),
-            appointment,
-        ),
+        update(f_db.access(appointment_entry(date, id)), record),
     );
 };
 
