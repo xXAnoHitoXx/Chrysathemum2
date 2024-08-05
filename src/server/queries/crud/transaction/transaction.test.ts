@@ -7,7 +7,7 @@ import {
     retrieve_transactions_on_date,
     update_transaction_date_entry,
 } from "./transaction_date_entry";
-import { extract_error, is_data_error } from "~/server/data_error";
+import { is_data_error } from "~/server/data_error";
 import { TransactionEntry } from "~/server/db_schema/type_def";
 import {
     create_customer_trasaction_history_entry,
@@ -202,12 +202,13 @@ test("test retrieve transactions on date querries", async () => {
 
     const blank = await pack_test({ date: t1.date, salon: t1.salon }, test_name)
         .bind(retrieve_transactions_on_date)
-        .bind(
-            extract_error((error) => {
-                error.log();
+        .bind((res) => {
+            if (res.error != null) {
+                res.error.log();
                 fail();
-            }),
-        )
+            }
+            return res.data;
+        })
         .unpack();
 
     if (is_data_error(blank)) {
@@ -239,12 +240,13 @@ test("test retrieve transactions on date querries", async () => {
         test_name,
     )
         .bind(retrieve_transactions_on_date)
-        .bind(
-            extract_error((error) => {
-                error.log();
+        .bind((res) => {
+            if (res.error != null) {
+                res.error.log();
                 fail();
-            }),
-        )
+            }
+            return res.data;
+        })
         .unpack();
 
     if (is_data_error(transactions)) {
@@ -280,12 +282,13 @@ test("test retrieve transactions on date querries", async () => {
         test_name,
     )
         .bind(retrieve_transactions_on_date)
-        .bind(
-            extract_error((error) => {
-                error.log();
+        .bind((res) => {
+            if (res.error != null) {
+                res.error.log();
                 fail();
-            }),
-        )
+            }
+            return res.data;
+        })
         .unpack();
 
     if (is_data_error(transactions)) {
@@ -338,12 +341,13 @@ test("test retrieve transactions on date querries", async () => {
         test_name,
     )
         .bind(retrieve_transactions_on_date)
-        .bind(
-            extract_error((error) => {
-                error.log();
+        .bind((res) => {
+            if (res.error != null) {
+                res.error.log();
                 fail();
-            }),
-        )
+            }
+            return res.data;
+        })
         .unpack();
 
     if (is_data_error(transactions)) {

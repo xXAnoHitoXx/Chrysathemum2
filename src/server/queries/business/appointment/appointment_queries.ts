@@ -32,8 +32,9 @@ export const create_new_appointment: Query<
     Appointment
 > = async (params, f_db) => {
     const context = "Create New Appointment";
-    if (!valiDate(params.date)) {
-        return data_error(context, `invalid date {${params.date}}`);
+    const vali = valiDate(params.date);
+    if (is_data_error(vali)) {
+        return vali.stack(context, `in valid date {${params.date}}`);
     }
 
     const entry = await create_appointment_entry(

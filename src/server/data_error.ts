@@ -1,6 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
 import { is_function, is_object } from "./validation/simple_type";
-import { Query } from "./queries/server_queries_monad";
 
 export function is_data_error(t: unknown): t is DataError {
     return (
@@ -35,15 +34,13 @@ export function data_error(context: string, detail: string): DataError {
     return new SimpleDataError(context, detail);
 }
 
-export function extract_error<T>(
-    handle: (e: DataError) => void,
-): Query<PartialResult<T>, T> {
-    return async (partial) => {
-        if (partial.error != null) {
-            handle(partial.error);
-        }
-        return partial.data;
-    };
+export function log_error<T>(res: PartialResult<T>): T {
+    res.error?.log();
+    return res.data;
+}
+export function report_error<T>(res: PartialResult<T>): T {
+    res.error?.report();
+    return res.data;
 }
 
 export type PartialResult<T> = {

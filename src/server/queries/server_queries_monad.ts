@@ -6,10 +6,24 @@ export type Query<T, U> = (
     fire_db: FireDB,
 ) => Promise<U | DataError> | U | DataError;
 
-export interface ServerQueryData<T> {
-    unpack(): Promise<T | DataError>;
-    bind<U>(query: Query<T, U>): ServerQueryData<U>;
-    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U>;
+export abstract class ServerQueryData<T> {
+    protected fire_db: FireDB;
+    protected is_test: boolean;
+
+    abstract unpack(): Promise<T | DataError>;
+
+    constructor(fire_db: FireDB, is_test: boolean) {
+        this.fire_db = fire_db;
+        this.is_test = is_test;
+    }
+
+    bind<U>(query: Query<T, U>): ServerQueryData<U> {
+        return new ChainedQueryData(this, query, this.fire_db, this.is_test);
+    }
+
+    err_bind<U>(query: Query<DataError, U>): ServerQueryData<T | U> {
+        return new ErrQueryData(this, query, this.fire_db, this.is_test);
+    }
 }
 
 export function pack<T>(data: T): ServerQueryData<T> {
@@ -33,12 +47,11 @@ export function map<T, U>(mapper: (t: T) => U): Query<T, U> {
     };
 }
 
-class SimpleQueryData<T> implements ServerQueryData<T> {
+class SimpleQueryData<T> extends ServerQueryData<T> {
     private data: T | DataError;
-    private fire_db: FireDB;
-    private is_test: boolean;
 
     constructor(data: T | DataError, fire_db: FireDB, is_test: boolean) {
+        super(fire_db, is_test);
         this.data = data;
         this.fire_db = fire_db;
         this.is_test = is_test;
@@ -47,33 +60,13 @@ class SimpleQueryData<T> implements ServerQueryData<T> {
     async unpack(): Promise<T | DataError> {
         return this.data;
     }
-
-    bind<U>(query: Query<T, U>): ServerQueryData<U> {
-        return new ChainedQueryData<T, U>(
-            this,
-            query,
-            this.fire_db,
-            this.is_test,
-        );
-    }
-
-    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U> {
-        const packed_data = new SimpleQueryData(
-            this,
-            this.fire_db,
-            this.is_test,
-        );
-        return packed_data.bind(query);
-    }
 }
 
 class NOTHING {}
 
-class ChainedQueryData<S, T> implements ServerQueryData<T> {
+class ChainedQueryData<S, T> extends ServerQueryData<T> {
     private data: ServerQueryData<S>;
     private query: Query<S, T>;
-    private fire_db: FireDB;
-    private is_test: boolean;
     private output: T | DataError | NOTHING;
 
     constructor(
@@ -82,6 +75,7 @@ class ChainedQueryData<S, T> implements ServerQueryData<T> {
         fire_db: FireDB,
         is_test: boolean,
     ) {
+        super(fire_db, is_test);
         this.data = data;
         this.query = query;
         this.fire_db = fire_db;
@@ -104,22 +98,38 @@ class ChainedQueryData<S, T> implements ServerQueryData<T> {
 
         return this.output;
     }
+}
 
-    bind<U>(query: Query<T, U>): ServerQueryData<U> {
-        return new ChainedQueryData<T, U>(
-            this,
-            query,
-            this.fire_db,
-            this.is_test,
-        );
+class ErrQueryData<S, T> extends ServerQueryData<T | S> {
+    private data: ServerQueryData<T>;
+    private query: Query<DataError, S>;
+    private output: T | S | DataError | NOTHING;
+
+    constructor(
+        data: ServerQueryData<T>,
+        query: Query<DataError, S>,
+        f_db: FireDB,
+        is_test: boolean,
+    ) {
+        super(f_db, is_test);
+        this.data = data;
+        this.query = query;
+        this.output = new NOTHING();
     }
 
-    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U> {
-        const packed_data = new SimpleQueryData(
-            this,
-            this.fire_db,
-            this.is_test,
-        );
-        return packed_data.bind(query);
+    async unpack(): Promise<T | S | DataError> {
+        if (this.output instanceof NOTHING) {
+            const data: T | DataError = await this.data.unpack();
+
+            if (!is_data_error(data)) {
+                return data;
+            }
+
+            const ret: S | DataError = await this.query(data, this.fire_db);
+            this.output = ret;
+            return ret;
+        }
+
+        return this.output;
     }
 }

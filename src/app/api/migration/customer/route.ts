@@ -5,7 +5,7 @@ import {
     migrate_customer_data,
 } from "~/server/queries/business/migration/customer";
 import { parse_request, unpack_response } from "../../server_parser";
-import { extract_error } from "~/server/data_error";
+import { report_error } from "~/server/data_error";
 
 export async function POST(request: Request): Promise<Response> {
     const query = pack(request)
@@ -17,10 +17,6 @@ export async function POST(request: Request): Promise<Response> {
 export async function GET(): Promise<Response> {
     const query = pack(undefined)
         .bind(import_customer_from_old_db)
-        .bind(
-            extract_error((error) => {
-                error.report();
-            }),
-        );
+        .bind(report_error);
     return unpack_response(query);
 }

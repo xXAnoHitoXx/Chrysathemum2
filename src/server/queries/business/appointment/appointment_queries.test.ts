@@ -5,7 +5,7 @@ import {
 } from "~/server/db_schema/type_def";
 import { pack_test } from "../../server_queries_monad";
 import { create_new_customer } from "../customer/customer_queries";
-import { extract_error, is_data_error } from "~/server/data_error";
+import { is_data_error } from "~/server/data_error";
 import {
     create_new_appointment,
     delete_appointment,
@@ -92,12 +92,13 @@ test("appointment creation", async () => {
 
     const index = await pack_test({ customer_id: customer.id }, test_name)
         .bind(retrieve_customer_appointments)
-        .bind(
-            extract_error((error) => {
-                error.log();
+        .bind((res) => {
+            if (res.error != null) {
+                res.error?.log();
                 fail();
-            }),
-        )
+            }
+            return res.data;
+        })
         .unpack();
 
     if (is_data_error(index)) {

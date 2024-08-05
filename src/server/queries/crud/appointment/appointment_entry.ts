@@ -1,6 +1,6 @@
 import { AppointmentEntry } from "~/server/db_schema/type_def";
 import { db_query, Query } from "../../server_queries_monad";
-import { to_appointment } from "~/server/validation/db_types/appointment_validation";
+import { to_appointment_entry } from "~/server/validation/db_types/appointment_validation";
 import {
     data_error,
     DataError,
@@ -78,7 +78,7 @@ export const retrieve_appointment_entries_on_date: Query<
     const error: DataError[] = [];
 
     data.forEach((child) => {
-        const appointment = to_appointment(child.val());
+        const appointment = to_appointment_entry(child.val());
         if (is_data_error(appointment)) {
             error.push(
                 appointment.stack(
@@ -122,7 +122,7 @@ export const retrieve_appointment_entry: Query<
         );
     }
 
-    const e = to_appointment(data.val());
+    const e = to_appointment_entry(data.val());
     if (is_data_error(e)) return e.stack(context, "corrupted entry");
     return e;
 };

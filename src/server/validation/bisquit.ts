@@ -3,6 +3,7 @@ import { is_object, is_string } from "./simple_type";
 
 export enum Bisquit {
     salon_selection = "salon_selection",
+    appointment_cache = "appache",
 }
 
 function is_bisquit(s: string): s is keyof typeof Bisquit {
