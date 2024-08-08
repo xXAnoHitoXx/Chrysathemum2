@@ -53,7 +53,11 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(appointment.details).toBe(app_detail.details);
 
     const appointment_in_db = await pack_test(
-        { id: appointment.id, date: appointment.date.toString() },
+        {
+            id: appointment.id,
+            salon: appointment.salon,
+            date: appointment.date.toString(),
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)
@@ -82,6 +86,7 @@ test("test appointment_entries CRUDs querries", async () => {
     const update = await pack_test(
         {
             date: appointment_in_db.date,
+            salon: "5CBL",
             id: appointment_in_db.id,
             record: update_target,
         },
@@ -91,7 +96,11 @@ test("test appointment_entries CRUDs querries", async () => {
         .unpack();
 
     const updated_appointment = await pack_test(
-        { id: appointment.id, date: appointment.date.toString() },
+        {
+            id: appointment.id,
+            salon: appointment.salon,
+            date: appointment.date.toString(),
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)
@@ -114,14 +123,22 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(updated_appointment.details).toBe(update_target.details);
 
     const delete_app = await pack_test(
-        { date: appointment.date.toString(), id: appointment.id },
+        {
+            date: appointment.date.toString(),
+            salon: "5CBL",
+            id: appointment.id,
+        },
         test_name,
     )
         .bind(delete_appointment_entry)
         .unpack();
 
     const not_exist = await pack_test(
-        { id: appointment.id, date: appointment.date.toString() },
+        {
+            id: appointment.id,
+            salon: appointment.salon,
+            date: appointment.date.toString(),
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)

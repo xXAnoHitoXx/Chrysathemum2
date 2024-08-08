@@ -15,8 +15,12 @@ import {
     PATH_ENTRIES,
 } from "~/server/db_schema/fb_schema";
 
-function appointment_entry(date: string, id: string | null = null): string[] {
-    const a = [PATH_DATES, date, PATH_APPOINTMENTS, PATH_ENTRIES];
+function appointment_entry(
+    date: string,
+    salon: string,
+    id: string | null = null,
+): string[] {
+    const a = [PATH_DATES, date, PATH_APPOINTMENTS, salon, PATH_ENTRIES];
     if (id != null) a.push(id);
     return a;
 }
@@ -34,7 +38,9 @@ export const create_appointment_entry: Query<
     AppointmentEntry
 > = async (params, f_db) => {
     const context = "Create appointment entry { ".concat(params.details, " }");
-    const id_ref = push(f_db.access(appointment_entry(params.date)));
+    const id_ref = push(
+        f_db.access(appointment_entry(params.date, params.salon)),
+    );
 
     if (id_ref.key == null) {
         return data_error(
@@ -61,12 +67,12 @@ export const create_appointment_entry: Query<
 };
 
 export const retrieve_appointment_entries_on_date: Query<
-    { date: string },
+    { date: string; salon: string },
     PartialResult<AppointmentEntry[]>
-> = async ({ date }, f_db) => {
+> = async ({ date, salon }, f_db) => {
     const context = "Retrieving appointments of ".concat(date);
 
-    const ref = f_db.access(appointment_entry(date));
+    const ref = f_db.access(appointment_entry(date, salon));
     const data = await db_query(context, get(ref));
     if (is_data_error(data)) return data;
 
@@ -105,13 +111,13 @@ export const retrieve_appointment_entries_on_date: Query<
 };
 
 export const retrieve_appointment_entry: Query<
-    { id: string; date: string },
+    { id: string; salon: string; date: string },
     AppointmentEntry
-> = async ({ id, date }, f_db) => {
+> = async ({ id, salon, date }, f_db) => {
     const context = "Retrieving appointment entry { ".concat(id, " }");
     const data = await db_query(
         context,
-        get(f_db.access(appointment_entry(date, id))),
+        get(f_db.access(appointment_entry(date, salon, id))),
     );
     if (is_data_error(data)) return data;
 
@@ -128,21 +134,26 @@ export const retrieve_appointment_entry: Query<
 };
 
 export const update_appointment_entry: Query<
-    { date: string; id: string; record: Record<string, unknown> },
+    {
+        date: string;
+        salon: string;
+        id: string;
+        record: Record<string, unknown>;
+    },
     void
-> = async ({ date, id, record }, f_db) => {
+> = async ({ date, salon, id, record }, f_db) => {
     return db_query(
         "Update AppointmentEntry Entry",
-        update(f_db.access(appointment_entry(date, id)), record),
+        update(f_db.access(appointment_entry(date, salon, id)), record),
     );
 };
 
 export const delete_appointment_entry: Query<
-    { date: string; id: string },
+    { date: string; salon: string; id: string },
     void
-> = async ({ id, date }, f_db) => {
+> = async ({ id, salon, date }, f_db) => {
     return db_query(
         "Remove appointment entry { ".concat(id, " }"),
-        remove(f_db.access(appointment_entry(date, id))),
+        remove(f_db.access(appointment_entry(date, salon, id))),
     );
 };

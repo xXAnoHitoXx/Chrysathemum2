@@ -76,12 +76,12 @@ export const create_new_appointment: Query<
 };
 
 export const retrieve_appointments_on_date: Query<
-    { date: string },
+    { date: string; salon: string },
     PartialResult<Appointment[]>
-> = async ({ date }, f_db) => {
+> = async ({ date, salon }, f_db) => {
     const context = `retriving appointments of { ${date} }`;
     const appointment_entries = await retrieve_appointment_entries_on_date(
-        { date: date },
+        { date: date, salon: salon },
         f_db,
     );
 
@@ -186,6 +186,7 @@ export const update_appointment: Query<
     const entry_update = await update_appointment_entry(
         {
             date: appointment.date,
+            salon: appointment.salon,
             id: appointment.id,
             record: update,
         },
@@ -206,7 +207,11 @@ export const delete_appointment: Query<Appointment, void> = async (
     const context = `deleting appointment { ${appointment.id} }`;
 
     const del_entry = delete_appointment_entry(
-        { date: appointment.date, id: appointment.id },
+        {
+            date: appointment.date,
+            salon: appointment.salon,
+            id: appointment.id,
+        },
         f_db,
     );
 

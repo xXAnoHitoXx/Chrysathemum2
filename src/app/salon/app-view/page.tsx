@@ -11,6 +11,7 @@ import { current_date } from "~/server/validation/semantic/date";
 import { quick_sort } from "~/util/ano_quick_sort";
 import { BoardDatePicker } from "./_components/date_picker";
 import { Board } from "./_components/board";
+import { Booking } from "./_components/booking_form";
 
 export enum State {
     Default,
@@ -23,12 +24,18 @@ export default function Page() {
     const [date, set_date] = useState(current_date());
     const [appointments, set_appointments] = useState<Appointment[]>([]);
     const [phantoms, set_phantoms] = useState<Appointment[]>([]);
+    const [on_board_select, set_on_board_select] = useState<
+        (appointment: Appointment) => void
+    >((_) => {});
 
     useEffect(() => {
         async function load_appointments() {
-            const response = await fetch("/api/app_view/" + date.toString(), {
-                method: Method.GET,
-            });
+            const response = await fetch(
+                "/api/app_view/load/" + date.toString(),
+                {
+                    method: Method.GET,
+                },
+            );
 
             const apps = await parse_response(
                 response,
@@ -50,6 +57,16 @@ export default function Page() {
         }
         void load_appointments();
     }, [date]);
+
+    useEffect(() => {
+        if (current_state === State.Default) {
+            set_on_board_select(() => {});
+        }
+    }, [current_state]);
+
+    async function book_appointments() {
+        set_state(State.Default);
+    }
 
     return (
         <div className="flex flex-wrap gap-2 p-2">
@@ -74,8 +91,15 @@ export default function Page() {
             <BoardDatePicker date={date} set_date={set_date} />
             <Board
                 appointments={[...appointments, ...phantoms]}
-                on_select={(_) => {}}
+                on_select={on_board_select}
             />
+            {current_state === State.Booking ? (
+                <Booking
+                    set_phantom_appointments={set_phantoms}
+                    set_board_onclick={set_on_board_select}
+                    on_complete={book_appointments}
+                />
+            ) : null}
         </div>
     );
 }

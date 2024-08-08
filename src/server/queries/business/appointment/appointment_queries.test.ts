@@ -71,7 +71,11 @@ test("appointment creation", async () => {
     expect(appointment.details).toBe(appointment_info.details);
 
     const entry = await pack_test(
-        { date: appointment.date.toString(), id: appointment.id },
+        {
+            date: appointment.date.toString(),
+            salon: appointment.salon,
+            id: appointment.id,
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)
@@ -178,7 +182,11 @@ test("appointment update", async () => {
     }
 
     const entry = await pack_test(
-        { date: appointment.date.toString(), id: appointment.id },
+        {
+            date: appointment.date.toString(),
+            salon: appointment.salon,
+            id: appointment.id,
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)
@@ -235,7 +243,11 @@ test("tech assignment", async () => {
     }
 
     const techless_entry = await pack_test(
-        { date: appointment.date.toString(), id: appointment.id },
+        {
+            date: appointment.date.toString(),
+            salon: appointment.salon,
+            id: appointment.id,
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)
@@ -283,7 +295,11 @@ test("tech assignment", async () => {
     }
 
     const entry = await pack_test(
-        { date: appointment.date.toString(), id: appointment.id },
+        {
+            date: appointment.date.toString(),
+            salon: appointment.salon,
+            id: appointment.id,
+        },
         test_name,
     )
         .bind(retrieve_appointment_entry)
@@ -362,7 +378,10 @@ test("load appointments of date", async () => {
         fail();
     }
 
-    let list = await pack_test({ date: a1.date.toString() }, test_name)
+    let list = await pack_test(
+        { date: a1.date.toString(), salon: a1.salon },
+        test_name,
+    )
         .bind(retrieve_appointments_on_date)
         .unpack();
 
@@ -407,7 +426,10 @@ test("load appointments of date", async () => {
         fail();
     }
 
-    list = await pack_test({ date: a1.date.toString() }, test_name)
+    list = await pack_test(
+        { date: a1.date.toString(), salon: a1.salon },
+        test_name,
+    )
         .bind(retrieve_appointments_on_date)
         .unpack();
 
