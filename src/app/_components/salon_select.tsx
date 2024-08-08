@@ -4,10 +4,9 @@ import { Bisquit } from "~/server/validation/bisquit";
 import { fetch_query, Method } from "../api/api_query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { date_to_db_string } from "~/server/validation/semantic/date";
 
 export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
-    const next_page: string = is_admin ? "/salon/app-view/" + date_to_db_string(new Date()) : "/booking";
+    const next_page: string = is_admin ? "/salon/app-view/" : "/booking";
     const router = useRouter();
     const [is_loading, set_loading] = useState(false);
 

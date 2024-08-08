@@ -1,6 +1,26 @@
-import { Customer } from "~/server/db_schema/type_def";
+import { Customer, CustomerCreationInfo } from "~/server/db_schema/type_def";
 import { is_object, is_string } from "../simple_type";
 import { data_error, DataError } from "~/server/data_error";
+
+export function to_customer_creation_info(
+    t: unknown,
+): CustomerCreationInfo | DataError {
+    if (!is_object(t)) {
+        return data_error("Casting to Customer", "not an object");
+    }
+
+    if (!("name" in t && "phone_number" in t)) {
+        return data_error("Casting to Customer", "missing field");
+    }
+
+    const { name, phone_number } = t;
+
+    if (!(is_string(name) && is_string(phone_number))) {
+        return data_error("Casting to Customer", "wrong field type");
+    }
+
+    return { name: name, phone_number: phone_number };
+}
 
 export function to_customer(t: unknown): Customer | DataError {
     if (!is_object(t)) {

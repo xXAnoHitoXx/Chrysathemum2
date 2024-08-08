@@ -1,5 +1,12 @@
-import { data_error, DataError } from "~/server/data_error";
+import { today } from "@internationalized/date";
 import { is_string } from "../simple_type";
+import { data_error, DataError } from "~/server/data_error";
+
+const Chrysanthemum_Time_Zone = "America/Halifax";
+
+export function current_date() {
+    return today(Chrysanthemum_Time_Zone);
+}
 
 export function valiDate(date: unknown): string | DataError {
     const context = "Casting to Date";
@@ -9,9 +16,9 @@ export function valiDate(date: unknown): string | DataError {
 
     if (split.length != 3) return data_error(context, "must have 3 fields");
 
-    const day = Number(split[0]);
+    const year = Number(split[0]);
     const month = Number(split[1]);
-    const year = Number(split[2]);
+    const day = Number(split[2]);
 
     if (year < 2000 || year > 2100)
         return data_error(context, "year out of range (2k - 2.1k)");
@@ -33,19 +40,4 @@ export function valiDate(date: unknown): string | DataError {
     if (day > 31) return data_error(context, "have 32+ days");
 
     return date;
-}
-
-export function date_to_db_string(date: Date) {
-    return (
-        date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear()
-    );
-}
-
-export function db_string_to_date(db_date: string): Date | DataError {
-    const split = db_date.split("-");
-
-    if (split.length != 3)
-        return data_error("convert db_date", `corrupted value {${db_date}}`);
-
-    return new Date(Number(split[2]), Number(split[1]) - 1, Number(split[0]));
 }

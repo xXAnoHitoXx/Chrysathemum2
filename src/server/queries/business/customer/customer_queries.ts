@@ -12,7 +12,14 @@ import {
     create_customer_phone_index,
     delete_customer_phone_index,
 } from "../../crud/customer/customer_phone_index";
-import { is_data_error } from "~/server/data_error";
+import {
+    DataError,
+    is_data_error,
+    lotta_errors,
+    PartialResult,
+} from "~/server/data_error";
+import { endAt, get, orderByChild, query, startAt } from "firebase/database";
+import { to_customer } from "~/server/validation/db_types/customer_validation";
 
 export const create_new_customer: Query<
     CustomerCreationInfo,
@@ -27,6 +34,41 @@ export const create_new_customer: Query<
     if (is_data_error(index)) return index.stack(context, "...");
 
     return customer;
+};
+
+export const customer_name_search: Query<
+    string,
+    PartialResult<Customer[]>
+> = async (customer_name_query, f_db) => {
+    const ref = query(
+        f_db.customer_entries([]),
+        orderByChild("name"),
+        startAt(customer_name_query),
+        endAt(customer_name_query + "zzzzzzzz"),
+    );
+
+    const data = await get(ref);
+
+    if (!data.exists()) return { error: null, data: [] };
+
+    const customers: Customer[] = [];
+    const errors: DataError[] = [];
+
+    data.forEach((child) => {
+        const customer = to_customer(child.val());
+
+        if (is_data_error(customer)) errors.push(customer);
+        else customers.push(customer);
+    });
+
+    return {
+        error: lotta_errors(
+            `Name search {${customer_name_query}}`,
+            "encountered corrupted entries",
+            errors,
+        ),
+        data: customers,
+    };
 };
 
 export const update_customer_info: Query<

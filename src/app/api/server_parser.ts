@@ -7,7 +7,8 @@ export function parse_request<T>(
     into: (t: unknown) => T | DataError,
 ): Query<Request, T> {
     return async (request: Request) => {
-        return into(await request.json());
+        const u: unknown = await request.json();
+        return into(u);
     };
 }
 

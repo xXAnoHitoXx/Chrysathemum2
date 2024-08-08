@@ -24,7 +24,7 @@ import {
 } from "../../crud/appointment/customer_appointments";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
-import { date_to_db_string, valiDate } from "~/server/validation/semantic/date";
+import { current_date, valiDate } from "~/server/validation/semantic/date";
 import { appointment_update_count_increment } from "../../crud/appointment/update_count";
 
 export const create_new_appointment: Query<
@@ -64,7 +64,7 @@ export const create_new_appointment: Query<
         return list.stack(context, "creating customer appointment index");
     }
 
-    if (date_to_db_string(new Date()) === entry.date) {
+    if (current_date().toString() === entry.date) {
         await appointment_update_count_increment(entry.date, f_db);
     }
 
@@ -192,7 +192,7 @@ export const update_appointment: Query<
         f_db,
     );
 
-    if (date_to_db_string(new Date()) === appointment.date) {
+    if (current_date().toString() === appointment.date) {
         await appointment_update_count_increment(appointment.date, f_db);
     }
 
@@ -215,7 +215,7 @@ export const delete_appointment: Query<Appointment, void> = async (
         f_db,
     );
 
-    if (date_to_db_string(new Date()) === appointment.date) {
+    if (current_date().toString() === appointment.date) {
         await appointment_update_count_increment(appointment.date, f_db);
     }
 

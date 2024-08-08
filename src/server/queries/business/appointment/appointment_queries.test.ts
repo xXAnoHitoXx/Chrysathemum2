@@ -16,8 +16,8 @@ import { retrieve_appointment_entry } from "../../crud/appointment/appointment_e
 import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
 import { TechnicianCreationInfo } from "~/app/api/technician/create/validation";
 import { create_new_technician } from "../technician/technician_queries";
-import { date_to_db_string } from "~/server/validation/semantic/date";
 import { retrieve_appointment_update_count_of_date } from "../../crud/appointment/update_count";
+import { current_date } from "~/server/validation/semantic/date";
 
 const test_suit = "appointment_queries_tests";
 
@@ -44,7 +44,7 @@ test("appointment creation", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31-12-2021",
+        date: "2021-12-31",
         time: 22,
         details: "",
         duration: 4,
@@ -131,7 +131,7 @@ test("appointment update", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31-12-2021",
+        date: "2021-12-31",
         time: 22,
         details: "",
         duration: 4,
@@ -218,7 +218,7 @@ test("tech assignment", async () => {
 
     const appointment_info: AppointmentCreationInfo = {
         customer: customer,
-        date: "31-12-2021",
+        date: "2021-12-31",
         time: 22,
         details: "",
         duration: 4,
@@ -314,7 +314,7 @@ test("load appointments of date", async () => {
 
     const a1i: AppointmentCreationInfo = {
         customer: customer,
-        date: "31-12-2021",
+        date: "2021-12-31",
         time: 22,
         details: "",
         duration: 4,
@@ -323,7 +323,7 @@ test("load appointments of date", async () => {
 
     const a2i: AppointmentCreationInfo = {
         customer: customer,
-        date: "30-12-2022",
+        date: "2022-12-30",
         time: 21,
         details: "",
         duration: 3,
@@ -332,7 +332,7 @@ test("load appointments of date", async () => {
 
     const a3i: AppointmentCreationInfo = {
         customer: customer,
-        date: "31-12-2021",
+        date: "2021-12-31",
         time: 23,
         details: "",
         duration: 2,
@@ -454,7 +454,7 @@ test("appointment update count", async () => {
 
     const a1i: AppointmentCreationInfo = {
         customer: customer,
-        date: "31-12-2021",
+        date: "2021-12-31",
         time: 22,
         details: "",
         duration: 4,
@@ -463,7 +463,7 @@ test("appointment update count", async () => {
 
     const a2i: AppointmentCreationInfo = {
         customer: customer,
-        date: date_to_db_string(new Date()),
+        date: current_date().toString(),
         time: 21,
         details: "",
         duration: 3,
