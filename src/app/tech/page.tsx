@@ -1,3 +1,3 @@
 export default function Tech() {
-    return(<div>Not yet implemented</div>);
+    return <div>Not yet implemented</div>;
 }

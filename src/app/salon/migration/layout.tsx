@@ -4,11 +4,11 @@ import { get_current_user } from "~/app/api/c_user";
 export default async function RootLayout({
     children,
 }: {
-    children: React.ReactNode,
+    children: React.ReactNode;
 }) {
     const user = await get_current_user();
 
-    if(!user) {
+    if (!user) {
         redirect("/");
     }
 
@@ -18,7 +18,5 @@ export default async function RootLayout({
         redirect("/");
     }
 
-    return (
-        <div>{children}</div>
-    );
+    return <div>{children}</div>;
 }
