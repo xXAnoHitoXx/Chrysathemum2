@@ -30,12 +30,18 @@ export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
 
     return (
         <div className="flex h-dvh w-full justify-center">
-            <div className="m-auto grid grid-cols-1 justify-items-center">
+            <div className="m-auto grid grid-cols-2 justify-items-center gap-10">
                 <button
                     onClick={on_click("5CBL")}
                     className="h-20 w-32 rounded-full border-4 border-sky-500"
                 >
                     5 Cumberland
+                </button>
+                <button
+                    onClick={on_click("SCVL")}
+                    className="h-20 w-32 rounded-full border-4 border-sky-500"
+                >
+                    1624 Sackville
                 </button>
             </div>
         </div>

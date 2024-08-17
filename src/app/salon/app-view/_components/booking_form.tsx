@@ -29,7 +29,7 @@ function to_appointment(form_data: BookingFormData): Appointment {
         details: form_data.details,
         technician: {
             id: "phantom_tech",
-            name: "-",
+            name: "Booking",
             color: "border-neutral-400 text-neutral-900 bg-red-600",
             active: true,
         },
