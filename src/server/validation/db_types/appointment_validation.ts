@@ -60,7 +60,20 @@ export function to_appointment(t: unknown): Appointment | DataError {
         };
     }
 
+    if (t.technician == null) {
+        return {
+            id: id,
+            customer: cust,
+            salon: salon,
+            date: date,
+            time: time,
+            duration: duration,
+            details: details,
+            technician: null,
+        };
+    }
     const technician = to_technician(t.technician);
+
     if (is_data_error(technician))
         return technician.stack(context, "failed to cast technician");
 
@@ -155,7 +168,7 @@ export function to_appointment_entry(t: unknown): AppointmentEntry | DataError {
 export function to_appointment_creation_info(
     t: unknown,
 ): AppointmentCreationInfo | DataError {
-    const context = "Casting to Appointment Creation Info";
+    const context = `Casting {${t}} to Appointment Creation Info`;
     if (!is_object(t)) {
         return data_error(context, "not an object");
     }

@@ -5,14 +5,18 @@ import { parse_response } from "~/app/api/response_parser";
 import { is_data_error } from "~/server/data_error";
 import { Customer } from "~/server/db_schema/type_def";
 import { to_customer } from "~/server/validation/db_types/customer_validation";
+import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { to_array } from "~/server/validation/simple_type";
 import { quick_sort } from "~/util/ano_quick_sort";
+
+const History: { LastCustomer: Customer | null } = { LastCustomer: null };
 
 export function CustomerSearch(props: {
     on_complete: (customer: Customer) => void;
 }) {
     const [customer_name, set_name] = useState("");
     const [loading, set_loading] = useState(false);
+    const [has_searched, set_has_searched] = useState(false);
     const [phone_number, set_phone_number] = useState("");
     const [customers, set_customers] = useState<Customer[]>([]);
     const [customers_display, set_customers_display] = useState<Customer[]>([]);
@@ -97,6 +101,7 @@ export function CustomerSearch(props: {
                 full_phone_number = "1" + phone_number;
         }
         set_loading(false);
+        set_has_searched(true);
     }
 
     async function create() {
@@ -121,6 +126,7 @@ export function CustomerSearch(props: {
             return;
         }
 
+        History.LastCustomer = customer;
         props.on_complete(customer);
     }
 
@@ -158,12 +164,6 @@ export function CustomerSearch(props: {
         set_name(name);
     }
 
-    function create_onclick(customer: Customer): () => void {
-        return () => {
-            props.on_complete(customer);
-        };
-    }
-
     return (
         <div className="flex w-full flex-wrap gap-1">
             <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-500 border-t-sky-500 p-2">
@@ -191,22 +191,39 @@ export function CustomerSearch(props: {
             <div className="flex w-full flex-wrap gap-2 p-2">
                 {customers_display.map((customer: Customer) => (
                     <button
-                        onClick={create_onclick(customer)}
+                        onClick={() => {
+                            History.LastCustomer = customer;
+                            props.on_complete(customer);
+                        }}
                         className="h-20 w-fit rounded-3xl border-2 border-sky-400 p-3"
                     >
                         {customer.name}
                         <br />
-                        {customer.phone_number}
+                        {format_phone_number(customer.phone_number)}
                     </button>
                 ))}
-                {customers.length === 0 ? null : (
+                {History.LastCustomer == null ? null : (
+                    <button
+                        onClick={() => {
+                            if (History.LastCustomer != null)
+                                props.on_complete(History.LastCustomer);
+                        }}
+                        className="h-20 w-32 rounded-full border-2 border-sky-500 bg-sky-300"
+                    >
+                        LastCustomer <br />
+                        {History.LastCustomer.name}
+                        <br />
+                        {format_phone_number(History.LastCustomer.phone_number)}
+                    </button>
+                )}
+                {has_searched ? (
                     <button
                         onClick={create}
                         className="h-20 w-32 rounded-full border-2 border-sky-500 bg-sky-300"
                     >
                         Create Customer
                     </button>
-                )}
+                ) : null}
             </div>
         </div>
     );

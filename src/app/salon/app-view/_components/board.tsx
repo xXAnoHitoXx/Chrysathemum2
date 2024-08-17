@@ -1,5 +1,6 @@
 import { map, range } from "itertools";
 import { Appointment, Hour } from "~/server/db_schema/type_def";
+import { format_phone_number } from "~/server/validation/semantic/phone_format";
 
 function timestamp(time: number, hours: Hour) {
     const stamp =
@@ -48,7 +49,7 @@ export function Board(props: {
             id="AppointmentEntry View"
             className="flex h-fit w-full flex-nowrap overflow-x-scroll"
         >
-            <ul className="m-2 grid auto-rows-max grid-cols-appointment-board">
+            <ul className="m-2 grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
                 {map(range(8, 21), (i) =>
                     timestamp(i, { open: 10, close: 19 }),
                 )}
@@ -81,16 +82,13 @@ export function Board(props: {
                                     props.on_select(app);
                                 }}
                             >
+                                {app.customer.name}
+                                <br />
+                                {format_phone_number(app.customer.phone_number)}
+                                <br />
                                 {app.technician == null
-                                    ? "-"
-                                    : app.technician.name}
-                                <br />
-                                {app.duration < 3
-                                    ? app.customer.name
-                                    : app.customer.name +
-                                      " - " +
-                                      app.customer.phone_number}
-                                <br />
+                                    ? null
+                                    : app.technician.name + " " + "-" + " "}
                                 {app.details}
                             </button>
                         </li>

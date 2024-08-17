@@ -34,11 +34,8 @@ export function data_error(context: string, detail: string): DataError {
     return new SimpleDataError(context, detail);
 }
 
-export function log_error<T>(res: PartialResult<T>): T {
+export function handle_partial_errors<T>(res: PartialResult<T>): T {
     res.error?.log();
-    return res.data;
-}
-export function report_error<T>(res: PartialResult<T>): T {
     res.error?.report();
     return res.data;
 }

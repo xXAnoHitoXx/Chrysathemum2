@@ -24,8 +24,7 @@ import {
 } from "../../crud/appointment/customer_appointments";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
-import { current_date, valiDate } from "~/server/validation/semantic/date";
-import { appointment_update_count_increment } from "../../crud/appointment/update_count";
+import { valiDate } from "~/server/validation/semantic/date";
 
 export const create_new_appointment: Query<
     AppointmentCreationInfo,
@@ -62,10 +61,6 @@ export const create_new_appointment: Query<
 
     if (is_data_error(list)) {
         return list.stack(context, "creating customer appointment index");
-    }
-
-    if (current_date().toString() === entry.date) {
-        await appointment_update_count_increment(entry.date, f_db);
     }
 
     return {
@@ -109,6 +104,8 @@ export const retrieve_appointments_on_date: Query<
     technicians.data.forEach((tech) => {
         tech_map[tech.id] = tech;
     });
+
+    appointment_entries.error?.log();
 
     const appointments: Appointment[] = [];
 
@@ -193,10 +190,6 @@ export const update_appointment: Query<
         f_db,
     );
 
-    if (current_date().toString() === appointment.date) {
-        await appointment_update_count_increment(appointment.date, f_db);
-    }
-
     if (is_data_error(entry_update)) return entry_update.stack(context, "...");
 };
 
@@ -219,10 +212,6 @@ export const delete_appointment: Query<Appointment, void> = async (
         { customer_id: appointment.customer.id, id: appointment.id },
         f_db,
     );
-
-    if (current_date().toString() === appointment.date) {
-        await appointment_update_count_increment(appointment.date, f_db);
-    }
 
     const e = await del_entry;
     if (is_data_error(e)) return e.stack(context, "failed to delete entry");

@@ -9,7 +9,7 @@ export function current_date() {
 }
 
 export function valiDate(date: unknown): string | DataError {
-    const context = "Casting to Date";
+    const context = `Casting {${date}} to Date`;
     if (!is_string(date)) return data_error(context, "not a string");
 
     const split = date.split("-");

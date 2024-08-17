@@ -43,7 +43,7 @@ export const clone_technicians_from_prods: Query<void, void> = async (
     if (prod_tech.error != null) {
         return prod_tech.error.stack(context, "production tech contain errors");
     }
-    if (tech.error != null) {
+   if (tech.error != null) {
         return tech.error.stack(context, "env technician contain error");
     }
     if (prod_index.error != null) {

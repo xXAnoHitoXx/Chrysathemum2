@@ -16,7 +16,6 @@ import { retrieve_appointment_entry } from "../../crud/appointment/appointment_e
 import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
 import { TechnicianCreationInfo } from "~/app/api/technician/create/validation";
 import { create_new_technician } from "../technician/technician_queries";
-import { retrieve_appointment_update_count_of_date } from "../../crud/appointment/update_count";
 import { current_date } from "~/server/validation/semantic/date";
 
 const test_suit = "appointment_queries_tests";
@@ -501,17 +500,6 @@ test("appointment update count", async () => {
         fail();
     }
 
-    let u = await pack_test(a1.date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(0);
-
     const a2 = await pack_test(a2i, test_name)
         .bind(create_new_appointment)
         .unpack();
@@ -520,17 +508,6 @@ test("appointment update count", async () => {
         a2.log();
         fail();
     }
-
-    u = await pack_test(a2.date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(1);
 
     const update: AppointmentUpdateInfo = {
         technician_id: null,
@@ -551,17 +528,6 @@ test("appointment update count", async () => {
         fail();
     }
 
-    u = await pack_test(a1.date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(0);
-
     const a2_updated = await pack_test(
         { appointment: a2, update: update },
         test_name,
@@ -574,17 +540,6 @@ test("appointment update count", async () => {
         fail();
     }
 
-    u = await pack_test(a2.date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(2);
-
     const a1_del = await pack_test(a1, test_name)
         .bind(delete_appointment)
         .unpack();
@@ -594,17 +549,6 @@ test("appointment update count", async () => {
         fail();
     }
 
-    u = await pack_test(a1.date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(0);
-
     const a2_del = await pack_test(a2, test_name)
         .bind(delete_appointment)
         .unpack();
@@ -613,15 +557,4 @@ test("appointment update count", async () => {
         a2_del.log();
         fail();
     }
-
-    u = await pack_test(a2.date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(3);
 });

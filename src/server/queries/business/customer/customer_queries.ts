@@ -61,14 +61,19 @@ export const customer_name_search: Query<
         else customers.push(customer);
     });
 
-    return {
-        error: lotta_errors(
-            `Name search {${customer_name_query}}`,
-            "encountered corrupted entries",
-            errors,
-        ),
-        data: customers,
-    };
+    return errors.length == 0
+        ? {
+              error: null,
+              data: customers,
+          }
+        : {
+              error: lotta_errors(
+                  `Name search {${customer_name_query}}`,
+                  "encountered corrupted entries",
+                  errors,
+              ),
+              data: customers,
+          };
 };
 
 export const update_customer_info: Query<

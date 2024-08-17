@@ -8,7 +8,7 @@ export function BoardDatePicker(props: {
 }) {
     const [holder, update_date] = useState(props.date);
     return (
-        <div className="flex w-full flex-wrap gap-1 border-t-2 border-t-sky-500 p-1">
+        <div className="flex w-3/4 flex-wrap gap-1">
             <DatePicker
                 className="w-36"
                 label="Date"
@@ -26,7 +26,8 @@ export function BoardDatePicker(props: {
             <Button
                 color="secondary"
                 onClick={() => {
-                    props.set_date(props.date);
+                    console.log(props.date);
+                    update_date(props.date);
                 }}
             >
                 Reset

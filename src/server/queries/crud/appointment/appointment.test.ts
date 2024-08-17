@@ -12,10 +12,6 @@ import {
     delete_customers_appointment_entry,
     retrieve_customer_appointments,
 } from "./customer_appointments";
-import {
-    appointment_update_count_increment,
-    retrieve_appointment_update_count_of_date,
-} from "./update_count";
 
 const test_suit = "appointment_cruds";
 
@@ -223,61 +219,4 @@ test("test customer appointment list entries CRUDs querries", async () => {
     }
 
     expect(customer_history.data.length).toBe(0);
-});
-
-test("test update count", async () => {
-    const test_name = test_suit.concat("/test_appointment_update_count/");
-
-    const date = "12-123-1234";
-
-    let u = await pack_test(date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(0);
-
-    let incr = await pack_test(date, test_name)
-        .bind(appointment_update_count_increment)
-        .unpack();
-
-    if (is_data_error(incr)) {
-        incr.log();
-        fail();
-    }
-
-    u = await pack_test(date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(1);
-
-    incr = await pack_test(date, test_name)
-        .bind(appointment_update_count_increment)
-        .unpack();
-
-    if (is_data_error(incr)) {
-        incr.log();
-        fail();
-    }
-
-    u = await pack_test(date, test_name)
-        .bind(retrieve_appointment_update_count_of_date)
-        .unpack();
-
-    if (is_data_error(u)) {
-        u.log();
-        fail();
-    }
-
-    expect(u).toBe(2);
 });
