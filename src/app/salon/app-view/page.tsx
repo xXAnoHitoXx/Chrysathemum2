@@ -6,17 +6,22 @@ import { Method } from "~/app/api/api_query";
 import { to_array } from "~/server/validation/simple_type";
 import { to_appointment } from "~/server/validation/db_types/appointment_validation";
 import { is_data_error } from "~/server/data_error";
-import { parse_response } from "~/app/api/response_parser";
+import {
+    handle_react_query_response,
+    parse_response,
+} from "~/app/api/response_parser";
 import { current_date } from "~/server/validation/semantic/date";
 import { BoardDatePicker } from "./_components/date_picker";
 import { Board } from "./_components/board";
 import { Booking } from "./_components/booking_form";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@nextui-org/button";
+import { AppEdit } from "./_components/app_edit";
 
 export enum State {
     Default = "Default",
     Booking = "Booking",
+    AppEdit = "Edit",
 }
 
 const useAppointmentList = (
@@ -24,24 +29,21 @@ const useAppointmentList = (
 ): [Appointment[], Dispatch<SetStateAction<Appointment[]>>] => {
     const [appointments, set_appointments] = useState<Appointment[]>([]);
 
-    const { data } = useQuery({
+    useQuery({
         queryFn: () =>
-            fetch("/api/app_view/" + date, { method: Method.GET }).then((res) =>
-                res.json(),
+            fetch("/api/app_view/" + date, {
+                method: Method.GET,
+                cache: "no-store",
+            }).then(
+                handle_react_query_response(
+                    to_array(to_appointment),
+                    (appointments) => {
+                        set_appointments(appointments);
+                    },
+                ),
             ),
         queryKey: ["appointment_list", date],
     });
-
-    useEffect(() => {
-        const appointments_query_result = to_array(to_appointment)(data);
-
-        if (is_data_error(appointments_query_result)) {
-            appointments_query_result.log();
-            appointments_query_result.report();
-        } else {
-            set_appointments(appointments_query_result);
-        }
-    }, [data]);
 
     return [appointments, set_appointments];
 };
@@ -54,6 +56,17 @@ export default function Page() {
     const [appointments, set_appointments] = useAppointmentList(
         date.toString(),
     );
+
+    const [focus_appointments, set_focus] = useState<Appointment[]>([]);
+
+    useEffect(() => {
+        if (
+            current_state === State.AppEdit &&
+            focus_appointments.length === 0
+        ) {
+            set_state(State.Default);
+        }
+    }, [focus_appointments]);
 
     async function book_appointments() {
         const response = await fetch("/api/app_view/" + date.toString(), {
@@ -82,7 +95,12 @@ export default function Page() {
         }
 
         set_appointments(appointments);
+        to_default_state();
+    }
+
+    function to_default_state() {
         set_phantoms([]);
+        set_focus([]);
         set_state(State.Default);
     }
 
@@ -109,12 +127,7 @@ export default function Page() {
                 <BoardDatePicker date={date} set_date={set_date} />
                 <div className="flex w-1/4 flex-row-reverse">
                     {current_state !== State.Default ? (
-                        <Button
-                            color="danger"
-                            onClick={() => {
-                                set_state(State.Default);
-                            }}
-                        >
+                        <Button color="danger" onClick={to_default_state}>
                             X
                         </Button>
                     ) : null}
@@ -123,12 +136,35 @@ export default function Page() {
 
             <Board
                 appointments={[...appointments, ...phantoms]}
-                on_select={(_) => {}}
+                on_select={(appointment) => {
+                    if (focus_appointments.includes(appointment)) {
+                        return;
+                    }
+                    set_focus([...focus_appointments, appointment]);
+                    set_state(State.AppEdit);
+                }}
             />
             {current_state === State.Booking ? (
                 <Booking
                     set_phantom_appointments={set_phantoms}
                     on_complete={book_appointments}
+                />
+            ) : current_state === State.AppEdit ? (
+                <AppEdit
+                    appointments={focus_appointments}
+                    date={date.toString()}
+                    on_deselect={(appointment) => {
+                        set_focus([
+                            ...focus_appointments.filter(
+                                (app) => app.id !== appointment.id,
+                            ),
+                        ]);
+                    }}
+                    on_change={() => {}}
+                    on_complete={(appointments) => {
+                        set_appointments(appointments);
+                        to_default_state();
+                    }}
                 />
             ) : null}
         </div>
