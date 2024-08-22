@@ -36,6 +36,31 @@ export function AppEdit(props: {
         );
     }
 
+    function change_time(delta: number) {
+        for (let i = 0; i < props.appointments.length; i++) {
+            const app = props.appointments[i];
+            if (app != undefined) {
+                app.time = ((app.time + 51 + delta) % 52) + 1;
+            }
+        }
+        props.on_change();
+    }
+
+    function change_duration(delta: number) {
+        for (let i = 0; i < props.appointments.length; i++) {
+            const app = props.appointments[i];
+            if (app != undefined) {
+                app.duration = app.duration + delta;
+                if (app.duration < 2) {
+                    app.duration = 2;
+                } else if (app.duration > 50) {
+                    app.duration = 50;
+                }
+            }
+        }
+        props.on_change();
+    }
+
     return (
         <>
             <div className="flex h-max w-full gap-1">
@@ -46,38 +71,66 @@ export function AppEdit(props: {
                 <div className="flex w-full flex-1 flex-col flex-wrap gap-1 border-l-2 border-l-sky-500 p-1">
                     <div className="flex w-full">
                         {props.appointments.length > 0 ? (
-                            <div className="w-1/3 flex-wrap border-r-2 border-r-sky-500 p-1">
-                                <div className="w-full">Time</div>
-                                <Button size="sm">&lt;</Button>
-                                <Button size="sm">&gt;</Button>
-                            </div>
-                        ) : null}
-                        {props.appointments.length === 1 ? (
                             <>
                                 <div className="w-1/3 flex-wrap border-r-2 border-r-sky-500 p-1">
-                                    <div className="w-full">Duration</div>
-                                    <Button size="sm">&lt;</Button>
-                                    <Button size="sm">&gt;</Button>
-                                </div>
-                                <div className="w-1/3 p-1">
-                                    <div className="w-full">Details</div>
-                                    <Input
+                                    <div className="w-full">Time</div>
+                                    <Button
                                         size="sm"
-                                        defaultValue={
-                                            props.appointments[0]
-                                                ? props.appointments[0].details
-                                                : ""
-                                        }
-                                        onValueChange={(value) => {
-                                            const app = props.appointments[0];
-                                            if (app != undefined) {
-                                                app.details = value;
-                                                props.on_change();
-                                            }
+                                        onClick={() => {
+                                            change_time(-1);
                                         }}
-                                    />
+                                    >
+                                        &lt;
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => {
+                                            change_time(1);
+                                        }}
+                                    >
+                                        &gt;
+                                    </Button>
+                                </div>
+                                <div className="w-1/3 flex-wrap border-r-2 border-r-sky-500 p-1">
+                                    <div className="w-full">Duration</div>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => {
+                                            change_duration(-1);
+                                        }}
+                                    >
+                                        &lt;
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => {
+                                            change_duration(1);
+                                        }}
+                                    >
+                                        &gt;
+                                    </Button>
                                 </div>
                             </>
+                        ) : null}
+                        {props.appointments.length === 1 ? (
+                            <div className="w-1/3 p-1">
+                                <div className="w-full">Details</div>
+                                <Input
+                                    size="sm"
+                                    defaultValue={
+                                        props.appointments[0]
+                                            ? props.appointments[0].details
+                                            : ""
+                                    }
+                                    onValueChange={(value) => {
+                                        const app = props.appointments[0];
+                                        if (app != undefined) {
+                                            app.details = value;
+                                            props.on_change();
+                                        }
+                                    }}
+                                />
+                            </div>
                         ) : null}
                     </div>
                     <div className="flex w-full gap-1">
