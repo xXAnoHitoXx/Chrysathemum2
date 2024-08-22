@@ -140,101 +140,118 @@ export default function Page() {
     }
 
     return (
-        <div className="flex flex-wrap gap-2 p-2">
-            {current_state === State.Default ? (
-                <div className="flex w-fit">
-                    <button
-                        onClick={() => {
-                            set_state(State.Booking);
-                        }}
-                        className="h-20 w-32 rounded-full border-2 border-sky-400"
-                    >
-                        Book Appointment
-                    </button>
-                    <a href="/salon/nav/">
-                        <button className="h-20 w-32 rounded-full border-2 border-sky-400">
-                            Other Actions
-                        </button>
-                    </a>
-                </div>
-            ) : null}
-            <div className="m-1 flex w-full border-t-2 border-t-sky-500 p-1">
-                <BoardDatePicker date={date} set_date={set_date} />
-                <div className="flex w-1/4 flex-row-reverse">
-                    {current_state !== State.Default ? (
-                        <Button
-                            color="danger"
-                            onClick={
-                                current_state === State.Booking
-                                    ? to_default_state
-                                    : () => {
-                                          reload_appointments();
-                                          to_default_state();
-                                      }
-                            }
+        <div className="flex flex-1 flex-col overflow-y-auto">
+            <div
+                className={
+                    "flex" +
+                    " " +
+                    (current_state === State.Default ? "h-full" : "h-2/3") +
+                    " " +
+                    "w-full flex-col justify-start gap-2 p-2"
+                }
+            >
+                {current_state === State.Default ? (
+                    <div className="flex h-fit w-fit">
+                        <button
+                            onClick={() => {
+                                set_state(State.Booking);
+                            }}
+                            className="h-20 w-32 rounded-full border-2 border-sky-400"
                         >
-                            X
-                        </Button>
-                    ) : null}
+                            Book Appointment
+                        </button>
+                        <a href="/salon/nav/">
+                            <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                                Other Actions
+                            </button>
+                        </a>
+                    </div>
+                ) : null}
+                <div className="m-1 flex h-fit w-full border-t-2 border-t-sky-500 p-1">
+                    <BoardDatePicker date={date} set_date={set_date} />
+                    <div className="flex w-1/4 flex-row-reverse">
+                        {current_state !== State.Default ? (
+                            <Button
+                                color="danger"
+                                onClick={
+                                    current_state === State.Booking
+                                        ? to_default_state
+                                        : () => {
+                                              reload_appointments();
+                                              to_default_state();
+                                          }
+                                }
+                            >
+                                X
+                            </Button>
+                        ) : null}
+                    </div>
                 </div>
-            </div>
 
-            <Board
-                appointments={[...appointments, ...phantoms]}
-                on_select={
-                    current_state === State.Default ||
-                    current_state === State.AppEdit
-                        ? (appointment) => {
-                              if (phantoms.includes(appointment)) {
+                <Board
+                    appointments={[...appointments, ...phantoms]}
+                    on_select={
+                        current_state === State.Default ||
+                        current_state === State.AppEdit
+                            ? (appointment) => {
+                                  if (phantoms.includes(appointment)) {
+                                      set_appointments([
+                                          ...appointments,
+                                          ...phantoms.filter(
+                                              (app) =>
+                                                  app.id !== appointment.id,
+                                          ),
+                                      ]);
+                                      set_phantoms([appointment]);
+                                      return;
+                                  }
+                                  set_phantoms([...phantoms, appointment]);
+                                  set_changes([...changes, appointment]);
                                   set_appointments([
-                                      ...appointments,
-                                      ...phantoms.filter(
-                                          (app) => app.id !== appointment.id,
+                                      ...appointments.filter(
+                                          (app) =>
+                                              app.id.localeCompare(
+                                                  appointment.id,
+                                              ) !== 0,
                                       ),
                                   ]);
-                                  set_phantoms([appointment]);
-                                  return;
+                                  set_state(State.AppEdit);
                               }
-                              set_phantoms([...phantoms, appointment]);
-                              set_changes([...changes, appointment]);
-                              set_appointments([
-                                  ...appointments.filter(
-                                      (app) =>
-                                          app.id.localeCompare(
-                                              appointment.id,
-                                          ) !== 0,
-                                  ),
-                              ]);
-                              set_state(State.AppEdit);
-                          }
-                        : () => {}
-                }
-            />
-
-            {current_state === State.Booking ? (
-                <Booking
-                    set_phantom_appointments={set_phantoms}
-                    on_complete={book_appointments}
+                            : () => {}
+                    }
                 />
-            ) : current_state === State.AppEdit ? (
-                <AppEdit
-                    appointments={phantoms}
-                    date={date.toString()}
-                    on_deselect={(appointment) => {
-                        set_phantoms([
-                            ...phantoms.filter(
-                                (app) => app.id !== appointment.id,
-                            ),
-                        ]);
-                        set_appointments([...appointments, appointment]);
-                    }}
-                    on_change={trigger_redraw}
-                    on_update={update_appointments}
-                    on_delete={(appointments) => {
-                        set_appointments(appointments);
-                        to_default_state();
-                    }}
-                />
+            </div>
+            {current_state !== State.Default ? (
+                <div className="flex h-1/3 w-full">
+                    {current_state === State.Booking ? (
+                        <Booking
+                            set_phantom_appointments={set_phantoms}
+                            on_complete={book_appointments}
+                        />
+                    ) : current_state === State.AppEdit ? (
+                        <AppEdit
+                            appointments={phantoms}
+                            date={date.toString()}
+                            on_deselect={(appointment) => {
+                                set_phantoms([
+                                    ...phantoms.filter(
+                                        (app) => app.id !== appointment.id,
+                                    ),
+                                ]);
+                                set_appointments([
+                                    ...appointments,
+                                    appointment,
+                                ]);
+                            }}
+                            on_change={trigger_redraw}
+                            on_update={update_appointments}
+                            on_delete={(appointments) => {
+                                set_appointments(appointments);
+                                to_default_state();
+                            }}
+                        />
+                    ) : null}
+                </div>
             ) : null}
         </div>
     );
