@@ -19,11 +19,9 @@ import { DataError } from "~/server/data_error";
 export default function ClientSide({
     technicians,
     roster,
-    salon,
 }: {
     technicians: Technician[];
     roster: { technician_id: string; color: string }[];
-    salon: string;
 }) {
     const inactive_list: Technician[] = technicians.filter(
         (technician) => !technician.active,
@@ -89,7 +87,7 @@ export default function ClientSide({
             })
             .imap((technician) =>
                 fetch_query({
-                    url: "/api/technician/location/".concat(salon),
+                    url: "/api/technician/location",
                     method: Method.POST,
                     params: { data: technician },
                     to: () => null,
@@ -103,7 +101,7 @@ export default function ClientSide({
                 )
                 .imap((technician) =>
                     fetch_query({
-                        url: "/api/technician/location/".concat(salon),
+                        url: "/api/technician/location",
                         method: Method.DELETE,
                         params: { data: technician },
                         to: () => null,

@@ -1,4 +1,10 @@
-import { data_error, DataError, is_data_error } from "../data_error";
+import {
+    data_error,
+    DataError,
+    is_data_error,
+    lotta_errors,
+    PartialResult,
+} from "../data_error";
 import { FireDB } from "../db_schema/fb_schema";
 
 export type Query<T, U> = (
@@ -44,6 +50,46 @@ export async function db_query<T>(
 export function map<T, U>(mapper: (t: T) => U): Query<T, U> {
     return async (t: T, _): Promise<U> => {
         return mapper(t);
+    };
+}
+
+export function array_query<T, U>(
+    query: Query<T, U>,
+    context: string,
+    detail: string,
+): Query<T[], PartialResult<U[]>> {
+    return async (t_arr, f_db) => {
+        const queries: (U | DataError | Promise<U | DataError>)[] = [];
+
+        for (let i = 0; i < t_arr.length; i++) {
+            const t = t_arr[i];
+            if (t) {
+                queries.push(query(t, f_db));
+            }
+        }
+
+        const data: U[] = [];
+        const errors: DataError[] = [];
+
+        const results = await Promise.all(queries);
+
+        for (let i = 0; i < results.length; i++) {
+            const res = results[i];
+            if (res != undefined) {
+                if (is_data_error(res)) errors.push(res);
+                else data.push(res);
+            }
+        }
+
+        return errors.length === 0
+            ? {
+                  data: data,
+                  error: null,
+              }
+            : {
+                  data: data,
+                  error: lotta_errors(context, detail, errors),
+              };
     };
 }
 

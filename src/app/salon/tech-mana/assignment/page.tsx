@@ -33,7 +33,6 @@ export default async function Ass() {
         <ClientSide
             technicians={technicians.data}
             roster={roster}
-            salon={salon}
         />
     );
 }

@@ -8,7 +8,6 @@ import {
 import {
     Appointment,
     AppointmentCreationInfo,
-    AppointmentUpdateInfo,
     Technician,
 } from "~/server/db_schema/type_def";
 import {
@@ -109,11 +108,12 @@ export const retrieve_appointments_on_date: Query<
 
     const appointments: Appointment[] = [];
 
+
     for (let i = 0; i < appointment_entries.data.length; i++) {
         const entry = appointment_entries.data[i];
         if (entry == null) {
             errors.push(data_error(context, "undefined in entry array"));
-            break;
+            continue;
         }
 
         const sub_context = `filling out appointment { ${entry.id} }`;
@@ -130,7 +130,7 @@ export const retrieve_appointments_on_date: Query<
                     `error retrieving customer { ${entry.customer_id} }`,
                 ),
             );
-            break;
+            continue;
         }
 
         if (entry.technician_id != null) {
@@ -142,7 +142,7 @@ export const retrieve_appointments_on_date: Query<
                     technician: tech,
                     customer: customer,
                 });
-                break;
+                continue;
             }
         }
 
@@ -167,25 +167,31 @@ export const retrieve_appointments_on_date: Query<
     };
 };
 
-export const update_appointment: Query<
-    { appointment: Appointment; update: AppointmentUpdateInfo },
-    void
-> = async ({ appointment, update }, f_db) => {
-    const context = `update technician { ${appointment.technician == null ? "NO TECH" : appointment.technician.name} } to appointment { ${appointment.details} }`;
+export const update_appointment: Query<Appointment, void> = async (
+    appointment,
+    f_db,
+) => {
+    const context = "update appointment";
 
     const updates: Record<string, unknown> = {};
 
-    updates["technician_id"] = update.technician_id;
-    updates["time"] = update.time;
-    updates["details"] = update.details;
-    updates["duration"] = update.duration;
+    const tech = appointment.technician;
+    if (tech == null) {
+        updates["technician_id"] = null;
+    } else {
+        updates["technician_id"] = tech.id;
+    }
+
+    updates["time"] = appointment.time;
+    updates["details"] = appointment.details;
+    updates["duration"] = appointment.duration;
 
     const entry_update = await update_appointment_entry(
         {
             date: appointment.date,
             salon: appointment.salon,
             id: appointment.id,
-            record: update,
+            record: updates,
         },
         f_db,
     );

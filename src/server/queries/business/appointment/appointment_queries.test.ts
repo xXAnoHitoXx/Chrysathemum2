@@ -168,10 +168,7 @@ test("appointment update", async () => {
         duration: 3,
     };
 
-    const updated = await pack_test(
-        { appointment: appointment, update: update },
-        test_name,
-    )
+    const updated = await pack_test({ ...appointment, ...update }, test_name)
         .bind(update_appointment)
         .unpack();
 
@@ -281,10 +278,7 @@ test("tech assignment", async () => {
         details: appointment.details,
     };
 
-    const assignment = await pack_test(
-        { appointment: appointment, update: update },
-        test_name,
-    )
+    const assignment = await pack_test({ ...appointment, ...update }, test_name)
         .bind(update_appointment)
         .unpack();
 
@@ -516,10 +510,7 @@ test("appointment update count", async () => {
         details: "bruh",
     };
 
-    const a1_updated = await pack_test(
-        { appointment: a1, update: update },
-        test_name,
-    )
+    const a1_updated = await pack_test({ ...a1, ...update }, test_name)
         .bind(update_appointment)
         .unpack();
 
@@ -528,10 +519,7 @@ test("appointment update count", async () => {
         fail();
     }
 
-    const a2_updated = await pack_test(
-        { appointment: a2, update: update },
-        test_name,
-    )
+    const a2_updated = await pack_test({ ...a2, ...update }, test_name)
         .bind(update_appointment)
         .unpack();
 

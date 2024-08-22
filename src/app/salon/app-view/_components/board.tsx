@@ -1,6 +1,7 @@
 import { map, range } from "itertools";
 import { Appointment, Hour } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
+import { bubble_sort } from "~/util/ano_bubble_sort";
 
 function timestamp(time: number, hours: Hour) {
     const stamp =
@@ -44,10 +45,23 @@ export function Board(props: {
     appointments: Appointment[];
     on_select: (appointment: Appointment) => void;
 }) {
+    bubble_sort(props.appointments, (a, b) => {
+        if (a.time !== b.time) return b.time - a.time;
+        if (a.customer.id !== b.customer.id)
+            return a.customer.id.localeCompare(b.customer.id);
+        return a.id.localeCompare(b.id);
+    });
+
+    function short_hand(name: string): string {
+        const short = name.split(" ")[0];
+        if (short == undefined) return "";
+        return short;
+    }
+
     return (
         <div
             id="AppointmentEntry View"
-            className="flex h-fit w-full flex-nowrap overflow-x-scroll"
+            className="flex h-fit flex-nowrap overflow-x-scroll"
         >
             <ul className="m-2 grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
                 {map(range(8, 21), (i) =>
@@ -84,11 +98,20 @@ export function Board(props: {
                             >
                                 {app.customer.name}
                                 <br />
-                                {format_phone_number(app.customer.phone_number)}
-                                <br />
+                                {app.duration > 2 ? (
+                                    <>
+                                        {format_phone_number(
+                                            app.customer.phone_number,
+                                        )}
+                                        <br />
+                                    </>
+                                ) : null}
                                 {app.technician == null
                                     ? null
-                                    : app.technician.name + " " + "-" + " "}
+                                    : short_hand(app.technician.name) +
+                                      " " +
+                                      "-" +
+                                      " "}
                                 {app.details}
                             </button>
                         </li>

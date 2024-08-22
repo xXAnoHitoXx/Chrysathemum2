@@ -1,22 +1,27 @@
 "use client";
 
 import { Appointment } from "~/server/db_schema/type_def";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Method } from "~/app/api/api_query";
 import { to_array } from "~/server/validation/simple_type";
 import { to_appointment } from "~/server/validation/db_types/appointment_validation";
 import { is_data_error } from "~/server/data_error";
-import { parse_response } from "~/app/api/response_parser";
+import {
+    handle_react_query_response,
+    parse_response,
+} from "~/app/api/response_parser";
 import { current_date } from "~/server/validation/semantic/date";
 import { BoardDatePicker } from "./_components/date_picker";
 import { Board } from "./_components/board";
 import { Booking } from "./_components/booking_form";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@nextui-org/button";
+import { AppEdit } from "./_components/app_edit";
 
 export enum State {
     Default = "Default",
     Booking = "Booking",
+    AppEdit = "Edit",
 }
 
 const useAppointmentList = (
@@ -24,24 +29,21 @@ const useAppointmentList = (
 ): [Appointment[], Dispatch<SetStateAction<Appointment[]>>] => {
     const [appointments, set_appointments] = useState<Appointment[]>([]);
 
-    const { data } = useQuery({
+    useQuery({
         queryFn: () =>
-            fetch("/api/app_view/" + date, { method: Method.GET }).then((res) =>
-                res.json(),
+            fetch("/api/app_view/" + date, {
+                method: Method.GET,
+                cache: "no-store",
+            }).then(
+                handle_react_query_response(
+                    to_array(to_appointment),
+                    (appointments) => {
+                        set_appointments(appointments);
+                    },
+                ),
             ),
         queryKey: ["appointment_list", date],
     });
-
-    useEffect(() => {
-        const appointments_query_result = to_array(to_appointment)(data);
-
-        if (is_data_error(appointments_query_result)) {
-            appointments_query_result.log();
-            appointments_query_result.report();
-        } else {
-            set_appointments(appointments_query_result);
-        }
-    }, [data]);
 
     return [appointments, set_appointments];
 };
@@ -54,6 +56,7 @@ export default function Page() {
     const [appointments, set_appointments] = useAppointmentList(
         date.toString(),
     );
+    const [changes, set_changes] = useState<Appointment[]>([]);
 
     async function book_appointments() {
         const response = await fetch("/api/app_view/" + date.toString(), {
@@ -82,8 +85,58 @@ export default function Page() {
         }
 
         set_appointments(appointments);
+        to_default_state();
+    }
+
+    function trigger_redraw() {
+        set_appointments([...appointments]);
+    }
+
+    function to_default_state() {
         set_phantoms([]);
+        set_changes([]);
         set_state(State.Default);
+    }
+
+    async function reload_appointments() {
+        await fetch("/api/app_view/" + date, {
+            method: Method.GET,
+            cache: "no-store",
+        }).then(
+            handle_react_query_response(
+                to_array(to_appointment),
+                (appointments) => {
+                    set_appointments(appointments);
+                },
+            ),
+        );
+    }
+
+    async function update_appointments() {
+        if (changes.length === 0) return;
+
+        await fetch("/api/app_view/" + date, {
+            method: Method.PATCH,
+            cache: "no-store",
+            body: JSON.stringify(changes),
+        })
+            .then(
+                handle_react_query_response(
+                    to_array(to_appointment),
+                    (appointments) => {
+                        set_appointments(appointments);
+                    },
+                    () => {
+                        reload_appointments();
+                    },
+                ),
+            )
+            .catch(() => {
+                reload_appointments();
+            })
+            .finally(() => {
+                to_default_state();
+            });
     }
 
     return (
@@ -111,9 +164,14 @@ export default function Page() {
                     {current_state !== State.Default ? (
                         <Button
                             color="danger"
-                            onClick={() => {
-                                set_state(State.Default);
-                            }}
+                            onClick={
+                                current_state === State.Booking
+                                    ? to_default_state
+                                    : () => {
+                                          reload_appointments();
+                                          to_default_state();
+                                      }
+                            }
                         >
                             X
                         </Button>
@@ -123,12 +181,59 @@ export default function Page() {
 
             <Board
                 appointments={[...appointments, ...phantoms]}
-                on_select={(_) => {}}
+                on_select={
+                    current_state === State.Default ||
+                    current_state === State.AppEdit
+                        ? (appointment) => {
+                              if (phantoms.includes(appointment)) {
+                                  set_appointments([
+                                      ...appointments,
+                                      ...phantoms.filter(
+                                          (app) => app.id !== appointment.id,
+                                      ),
+                                  ]);
+                                  set_phantoms([appointment]);
+                                  return;
+                              }
+                              set_phantoms([...phantoms, appointment]);
+                              set_changes([...changes, appointment]);
+                              set_appointments([
+                                  ...appointments.filter(
+                                      (app) =>
+                                          app.id.localeCompare(
+                                              appointment.id,
+                                          ) !== 0,
+                                  ),
+                              ]);
+                              set_state(State.AppEdit);
+                          }
+                        : () => {}
+                }
             />
+
             {current_state === State.Booking ? (
                 <Booking
                     set_phantom_appointments={set_phantoms}
                     on_complete={book_appointments}
+                />
+            ) : current_state === State.AppEdit ? (
+                <AppEdit
+                    appointments={phantoms}
+                    date={date.toString()}
+                    on_deselect={(appointment) => {
+                        set_phantoms([
+                            ...phantoms.filter(
+                                (app) => app.id !== appointment.id,
+                            ),
+                        ]);
+                        set_appointments([...appointments, appointment]);
+                    }}
+                    on_change={trigger_redraw}
+                    on_update={update_appointments}
+                    on_delete={(appointments) => {
+                        set_appointments(appointments);
+                        to_default_state();
+                    }}
                 />
             ) : null}
         </div>
