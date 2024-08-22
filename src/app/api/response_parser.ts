@@ -3,6 +3,7 @@ import { data_error, DataError, is_data_error } from "~/server/data_error";
 export function handle_react_query_response<T>(
     to: (t: unknown) => T | DataError,
     handler: (t: T) => void,
+    error_handler: (e: DataError) => void = ()=>{},
 ): (response: Response) => Promise<void> {
     return async (response) => {
         if (!response.ok) {
@@ -12,11 +13,13 @@ export function handle_react_query_response<T>(
             );
             error.log();
             error.report();
+            error_handler(error);
         } else {
             const data = to(await response.json());
             if (is_data_error(data)) {
                 data.log();
                 data.report();
+                error_handler(data);
             } else {
                 handler(data);
             }

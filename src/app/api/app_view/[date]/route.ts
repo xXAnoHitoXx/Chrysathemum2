@@ -4,6 +4,7 @@ import {
     create_new_appointment,
     delete_appointment,
     retrieve_appointments_on_date,
+    update_appointment,
 } from "~/server/queries/business/appointment/appointment_queries";
 import { handle_partial_errors, is_data_error } from "~/server/data_error";
 import { parse_request, unpack_response } from "~/app/api/server_parser";
@@ -36,6 +37,9 @@ export async function GET(
             };
         })
         .bind(retrieve_appointments_on_date)
+        .bind((data) => {
+            return data;
+        })
         .bind(handle_partial_errors);
     return unpack_response(query);
 }
@@ -44,7 +48,7 @@ export async function POST(
     request: Request,
     { params }: { params: { date: string } },
 ) {
-    const context = "Create Appointments API Call";
+    const context = "Create Appointmenpts API Call";
     const query = pack(Bisquit.salon_selection)
         .bind(get_bisquit)
         .bind((salon) => {
@@ -67,6 +71,35 @@ export async function POST(
                         create_new_appointment,
                         context,
                         "create appointments",
+                    ),
+                )
+                .bind((partial) => {
+                    if (partial.error == null)
+                        return { date: params.date, salon: salon };
+                    else return partial.error;
+                })
+                .bind(retrieve_appointments_on_date)
+                .bind(handle_partial_errors)
+                .unpack();
+        });
+    return unpack_response(query);
+}
+
+export async function PATCH(
+    request: Request,
+    { params }: { params: { date: string } },
+) {
+    const context = "UPDATE appointments api call";
+    const query = pack(Bisquit.salon_selection)
+        .bind(get_bisquit)
+        .bind((salon) => {
+            return pack(request)
+                .bind(parse_request(to_array(to_appointment)))
+                .bind(
+                    array_query(
+                        update_appointment,
+                        context,
+                        "failed to update some appointment",
                     ),
                 )
                 .bind((partial) => {

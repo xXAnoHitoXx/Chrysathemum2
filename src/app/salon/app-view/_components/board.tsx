@@ -1,6 +1,7 @@
 import { map, range } from "itertools";
 import { Appointment, Hour } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
+import { bubble_sort } from "~/util/ano_bubble_sort";
 
 function timestamp(time: number, hours: Hour) {
     const stamp =
@@ -44,6 +45,12 @@ export function Board(props: {
     appointments: Appointment[];
     on_select: (appointment: Appointment) => void;
 }) {
+    bubble_sort(props.appointments, (a, b) => {
+        if (a.time !== b.time) return a.time - b.time;
+        if (a.customer.id !== b.customer.id)
+            return a.customer.id.localeCompare(b.customer.id);
+        return a.id.localeCompare(b.id);
+    });
     return (
         <div
             id="AppointmentEntry View"

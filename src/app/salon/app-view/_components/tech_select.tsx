@@ -13,7 +13,7 @@ export function TechSelectBar(props: {
 
     useQuery({
         queryFn: () =>
-            fetch("/api/location", {
+            fetch("/api/technician/location", {
                 method: Method.GET,
                 cache: "no-cache",
             }).then(
@@ -34,7 +34,9 @@ export function TechSelectBar(props: {
                 {technicians.map((technician: Technician) => (
                     <button
                         className={"border-2".concat(
+                            " ",
                             technician.color,
+                            " ",
                             "h-20 w-32 rounded-3xl",
                         )}
                         onClick={() => {
