@@ -61,7 +61,7 @@ export function Board(props: {
     return (
         <div
             id="AppointmentEntry View"
-            className="flex h-fit flex-nowrap overflow-x-scroll"
+            className="flex-1 flex-nowrap overflow-x-scroll"
         >
             <ul className="m-2 grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
                 {map(range(8, 21), (i) =>

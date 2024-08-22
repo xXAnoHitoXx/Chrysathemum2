@@ -32,8 +32,10 @@ export default function RootLayout({
             <html lang="en" className="dark">
                 <body className={`font-sans ${inter.variable}`}>
                     <Providers>
+                        <div className="flex flex-col w-full h-dvh">
                         <TopNav />
                         {children}
+                        </div>
                     </Providers>
                 </body>
             </html>

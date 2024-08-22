@@ -62,8 +62,8 @@ export function AppEdit(props: {
     }
 
     return (
-        <>
-            <div className="flex h-max w-full gap-1">
+        <div className="flex w-full flex-wrap">
+            <div className="full flex w-full gap-1">
                 <AppDisplay
                     appointments={props.appointments}
                     on_click={is_Loading ? () => {} : props.on_deselect}
@@ -174,7 +174,7 @@ export function AppEdit(props: {
                     }}
                 />
             ) : null}
-        </>
+        </div>
     );
 }
 
@@ -183,35 +183,37 @@ function AppDisplay(props: {
     on_click: (appointment: Appointment) => void;
 }) {
     return (
-        <div className="grid w-1/3 grid-cols-1 justify-items-center">
-            {props.appointments.map((app) => {
-                const app_color =
-                    app.technician == null
-                        ? "border-violet-500 text-violet-500 bg-slate-950"
-                        : app.technician.color;
-                return (
-                    <button
-                        className={"w-5/6 border-2".concat(
-                            " ",
-                            app_color,
-                            " ",
-                            "m-1 rounded",
-                        )}
-                        onClick={() => {
-                            props.on_click(app);
-                        }}
-                    >
-                        {app.customer.name}
-                        <br />
-                        {format_phone_number(app.customer.phone_number)}
-                        <br />
-                        {app.technician == null
-                            ? null
-                            : app.technician.name + " " + "-" + " "}
-                        {app.details}
-                    </button>
-                );
-            })}
+        <div className="h-fit w-1/3 overflow-y-auto">
+            <div className="grid w-full grid-cols-1 justify-items-center">
+                {props.appointments.map((app) => {
+                    const app_color =
+                        app.technician == null
+                            ? "border-violet-500 text-violet-500 bg-slate-950"
+                            : app.technician.color;
+                    return (
+                        <button
+                            className={"w-5/6 border-2".concat(
+                                " ",
+                                app_color,
+                                " ",
+                                "m-1 rounded",
+                            )}
+                            onClick={() => {
+                                props.on_click(app);
+                            }}
+                        >
+                            {app.customer.name}
+                            <br />
+                            {format_phone_number(app.customer.phone_number)}
+                            <br />
+                            {app.technician == null
+                                ? null
+                                : app.technician.name + " " + "-" + " "}
+                            {app.details}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 }
