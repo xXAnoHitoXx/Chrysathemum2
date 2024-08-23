@@ -28,7 +28,7 @@ export default function MigrationStation() {
 
         for (const batch_of_customers of batches) {
             console.log(batch_of_customers);
-            await Promise.all(
+            const res = await Promise.all(
                 batch_of_customers.map((customer) =>
                     fetch_query({
                         url: "/api/migration/customer",
@@ -38,6 +38,14 @@ export default function MigrationStation() {
                     }),
                 ),
             );
+
+            for (let i = 0; i < res.length; i++) {
+                const result = res[i];
+                if (is_data_error(result)) {
+                    result.log();
+                    result.report();
+                }
+            }
         }
     }
 
