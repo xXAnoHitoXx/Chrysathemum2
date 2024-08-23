@@ -25,7 +25,7 @@ export default async function HomePage() {
             <div className="m-auto grid grid-cols-1 justify-items-center">
                 <SignedOut>
                     <SignInButton mode="modal">
-                        <button className="h-20 w-32 rounded-full border-4 border-sky-500">
+                        <button className="h-20 w-32 rounded-full border-4 border-sky-900">
                             Sign In
                         </button>
                     </SignInButton>

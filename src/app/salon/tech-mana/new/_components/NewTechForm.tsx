@@ -205,7 +205,7 @@ export function NewTechForm({
     return (
         <div className="flex h-fit w-full flex-wrap gap-2 p-2">
             <div className="flex h-fit w-full flex-nowrap justify-center border-b border-b-sky-400 p-2">
-                <div className="flex w-1/2 max-w-96 gap-1 border-r border-sky-500 p-3">
+                <div className="flex w-1/2 max-w-96 gap-1 border-r border-sky-900 p-3">
                     <form onSubmit={onSubmit} className="flex flex-wrap gap-1">
                         <Input
                             onValueChange={name_change}

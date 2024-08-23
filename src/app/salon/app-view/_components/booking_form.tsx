@@ -67,7 +67,7 @@ export function Booking(props: {
     ) : (
         <div className="flex w-full flex-col justify-items-start">
             <div className="flex h-fit w-full">
-                <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-500 p-1">
+                <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-900 p-1">
                     <div className="w-full">Time</div>
                     <Button
                         size="sm"
@@ -88,7 +88,7 @@ export function Booking(props: {
                         &gt;
                     </Button>
                 </div>
-                <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-500 p-1">
+                <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-900 p-1">
                     <div className="w-full">Duration</div>
                     <Button
                         size="sm"
@@ -148,7 +148,7 @@ export function Booking(props: {
             </div>
             {props.phantom.map((data) => (
                 <div className="flex w-full">
-                    <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-500 p-1">
+                    <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-900 p-1">
                         <div className="w-full">Time</div>
                         <Button
                             size="sm"
@@ -169,7 +169,7 @@ export function Booking(props: {
                             &gt;
                         </Button>
                     </div>
-                    <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-500 p-1">
+                    <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-900 p-1">
                         <div className="w-full">Duration</div>
                         <Button
                             size="sm"

@@ -26,7 +26,7 @@ function timestamp(time: number, hours: Hour, on_click: () => void) {
         <div
             key={"time_".concat(time.toString())}
             draggable="false"
-            className={"row-start-1 h-10".concat(
+            className={"row-start-1 h-10 border-b-3 border-b-sky-800".concat(
                 " ",
                 "col-start-",
                 ((time - 8) * 4 + 1).toString(),
@@ -63,9 +63,9 @@ export function Board(props: {
     return (
         <div
             id="AppointmentEntry View"
-            className="flex-1 flex-nowrap overflow-x-scroll"
+            className="flex-1 flex-nowrap overflow-x-scroll border-4 border-sky-900"
         >
-            <ul className="m-2 grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
+            <ul className="grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
                 {map(range(8, 21), (i) =>
                     timestamp(i, { open: 10, close: 19 }, () => {
                         props.on_time_stamp(i);

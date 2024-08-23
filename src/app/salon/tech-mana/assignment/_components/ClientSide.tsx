@@ -154,7 +154,7 @@ export default function ClientSide({
             className="flex h-fit w-full flex-wrap justify-start gap-1 p-2"
         >
             <h1>At Current Location</h1>
-            <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+            <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                 <ul
                     className="flex h-full w-fit min-w-full flex-nowrap gap-1"
                     ref={current_location}
@@ -163,9 +163,9 @@ export default function ClientSide({
                         <li data-label={tech} key={tech.id}>
                             <button
                                 disabled={true}
-                                className={"border-2 ".concat(
+                                className={"border-2".concat(
                                     tech.color,
-                                    " h-20 w-32 rounded-3xl",
+                                    "h-20 w-32 rounded-3xl",
                                 )}
                             >
                                 {tech.name}
@@ -175,7 +175,7 @@ export default function ClientSide({
                 </ul>
             </div>
             <h1>Active Technician</h1>
-            <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+            <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                 <ul
                     className="flex h-full w-fit min-w-full flex-nowrap gap-1"
                     ref={active}
@@ -184,9 +184,9 @@ export default function ClientSide({
                         <li data-label={tech} key={tech.id}>
                             <button
                                 disabled={true}
-                                className={"border-2 ".concat(
+                                className={"border-2".concat(
                                     tech.color,
-                                    " h-20 w-32 rounded-3xl",
+                                    "h-20 w-32 rounded-3xl",
                                 )}
                             >
                                 {tech.name}
@@ -196,7 +196,7 @@ export default function ClientSide({
                 </ul>
             </div>
             <h1>Inactive Technician</h1>
-            <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+            <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                 <ul
                     className="flex h-full w-fit min-w-full flex-nowrap gap-1"
                     ref={inactive}
@@ -204,9 +204,9 @@ export default function ClientSide({
                     {inactive_tech_list.map((tech: Technician) => (
                         <li data-label={tech} key={tech.id}>
                             <button
-                                className={"border-2 ".concat(
+                                className={"border-2".concat(
                                     tech.color,
-                                    " h-20 w-32 rounded-3xl",
+                                    "h-20 w-32 rounded-3xl",
                                 )}
                             >
                                 {tech.name}
@@ -234,7 +234,7 @@ export default function ClientSide({
                                     Move the following technicians to current
                                     Location
                                 </h1>
-                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                                     <div className="flex h-fit w-fit flex-nowrap gap-1">
                                         {ano_iter(current_location_tech_list)
                                             .ifilter(
@@ -245,9 +245,9 @@ export default function ClientSide({
                                             )
                                             .map((technician) => (
                                                 <button
-                                                    className={"border-2 ".concat(
+                                                    className={"border-2".concat(
                                                         technician.color,
-                                                        " h-20 w-32 rounded-3xl",
+                                                        "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
                                                 >
@@ -260,7 +260,7 @@ export default function ClientSide({
                                     Remove the following technicians from
                                     current Location
                                 </h1>
-                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                                     <div className="flex h-fit w-fit flex-nowrap gap-1">
                                         {ano_chain_iter(
                                             active_tech_list,
@@ -273,9 +273,9 @@ export default function ClientSide({
                                             )
                                             .map((technician) => (
                                                 <button
-                                                    className={"border-2 ".concat(
+                                                    className={"border-2".concat(
                                                         technician.color,
-                                                        " h-20 w-32 rounded-3xl",
+                                                        "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
                                                 >
@@ -287,7 +287,7 @@ export default function ClientSide({
                                 <h1>
                                     Mark the following technicians as active
                                 </h1>
-                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                                     <div className="flex h-fit w-fit flex-nowrap gap-1">
                                         {ano_iter(active_tech_list)
                                             .ifilter((technician) =>
@@ -297,9 +297,9 @@ export default function ClientSide({
                                             )
                                             .map((technician) => (
                                                 <button
-                                                    className={"border-2 ".concat(
+                                                    className={"border-2".concat(
                                                         technician.color,
-                                                        " h-20 w-32 rounded-3xl",
+                                                        "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
                                                 >
@@ -311,7 +311,7 @@ export default function ClientSide({
                                 <h1>
                                     Mark the following technicians as inactive
                                 </h1>
-                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-500">
+                                <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">
                                     <div className="flex h-fit w-fit flex-nowrap gap-1">
                                         {ano_iter(inactive_tech_list)
                                             .ifilter(
@@ -322,9 +322,9 @@ export default function ClientSide({
                                             )
                                             .map((technician) => (
                                                 <button
-                                                    className={"border-2 ".concat(
+                                                    className={"border-2".concat(
                                                         technician.color,
-                                                        " h-20 w-32 rounded-3xl",
+                                                        "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
                                                 >

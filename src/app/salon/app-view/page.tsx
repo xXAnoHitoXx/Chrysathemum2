@@ -187,14 +187,14 @@ export default function Page() {
                         <a href="/salon/nav/">
                             <button
                                 disabled={is_loading}
-                                className="h-20 w-32 rounded-full border-2 border-sky-400"
+                                className="h-20 w-32 rounded-full border-2 border-sky-900 bg-gray-500"
                             >
                                 Other Actions
                             </button>
                         </a>
                     </div>
                 ) : null}
-                <div className="m-1 flex h-fit w-full border-t-2 border-t-sky-500 p-1">
+                <div className="m-1 flex h-fit w-full border-t-2 border-t-sky-900 p-1">
                     <BoardDatePicker date={date} set_date={set_date} />
                     <div className="flex w-1/4 flex-row-reverse gap-10">
                         {current_state === State.AppEdit ? (

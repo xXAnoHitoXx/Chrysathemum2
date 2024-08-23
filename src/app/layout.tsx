@@ -35,9 +35,9 @@ export default function RootLayout({
             <html lang="en" className="dark">
                 <body className={`font-sans ${inter.variable}`}>
                     <Providers>
-                        <div className="flex flex-col w-full h-dvh">
-                        <TopNav />
-                        {children}
+                        <div className="flex h-dvh w-full flex-col">
+                            <TopNav />
+                            {children}
                         </div>
                     </Providers>
                 </body>
@@ -51,16 +51,16 @@ function TopNav() {
     return (
         <nav
             id="top-nav"
-            className="flex w-full items-center justify-between border-b-4 border-sky-500 p-4 text-xl font-semibold"
+            className="flex w-full items-center justify-between border-b-4 border-sky-900 p-4 text-xl font-semibold"
         >
             <a href="/">
-                <div>{
-                    is_data_error(salon) ?
-                        ("Chrysanthemum Spa") :
-                        salon === "5CBL" ?
-                            ("Cumberland") :
-                            ("Sackville")
-                }</div>
+                <div>
+                    {is_data_error(salon)
+                        ? "Chrysanthemum Spa"
+                        : salon === "5CBL"
+                          ? "Cumberland"
+                          : "Sackville"}
+                </div>
             </a>
 
             <div>

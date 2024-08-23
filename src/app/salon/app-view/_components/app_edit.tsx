@@ -42,11 +42,11 @@ export function AppEdit(props: {
                     appointments={props.appointments}
                     on_click={props.on_deselect}
                 />
-                <div className="flex w-full flex-1 flex-col flex-wrap gap-1 border-l-2 border-l-sky-500 p-1">
+                <div className="flex w-full flex-1 flex-col flex-wrap gap-1 border-l-2 border-l-sky-900 p-1">
                     <div className="flex w-full">
                         {props.appointments.length > 0 ? (
                             <>
-                                <div className="w-1/3 flex-wrap border-r-2 border-r-sky-500 p-1">
+                                <div className="w-1/3 flex-wrap border-r-2 border-r-sky-900 p-1">
                                     <div className="w-full">Time</div>
                                     <Button
                                         size="sm"
@@ -65,7 +65,7 @@ export function AppEdit(props: {
                                         &gt;
                                     </Button>
                                 </div>
-                                <div className="w-1/3 flex-wrap border-r-2 border-r-sky-500 p-1">
+                                <div className="w-1/3 flex-wrap border-r-2 border-r-sky-900 p-1">
                                     <div className="w-full">Duration</div>
                                     <Button
                                         size="sm"

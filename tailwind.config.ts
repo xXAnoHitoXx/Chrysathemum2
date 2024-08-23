@@ -153,7 +153,5 @@ export default {
             pattern: /row-span-2/,
         },
     ],
-
-    darkMode: "class",
     plugins: [nextui()],
 } satisfies Config;

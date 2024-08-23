@@ -166,7 +166,7 @@ export function CustomerSearch(props: {
 
     return (
         <div className="flex w-full flex-wrap gap-1">
-            <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-500 border-t-sky-500 p-2">
+            <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
                 <Button
                     className="justify-self-center"
                     color="primary"
@@ -195,7 +195,7 @@ export function CustomerSearch(props: {
                             History.LastCustomer = customer;
                             props.on_complete(customer);
                         }}
-                        className="h-20 w-fit rounded-3xl border-2 border-sky-400 p-3"
+                        className="h-20 w-fit rounded-3xl border-2 border-sky-900 p-3"
                     >
                         {customer.name}
                         <br />
@@ -208,7 +208,7 @@ export function CustomerSearch(props: {
                             if (History.LastCustomer != null)
                                 props.on_complete(History.LastCustomer);
                         }}
-                        className="h-20 w-32 rounded-full border-2 border-sky-500 bg-sky-300"
+                        className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-300"
                     >
                         LastCustomer <br />
                         {History.LastCustomer.name}
@@ -219,7 +219,7 @@ export function CustomerSearch(props: {
                 {has_searched ? (
                     <button
                         onClick={create}
-                        className="h-20 w-32 rounded-full border-2 border-sky-500 bg-sky-300"
+                        className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-300"
                     >
                         Create Customer
                     </button>
