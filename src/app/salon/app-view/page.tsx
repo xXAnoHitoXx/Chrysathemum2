@@ -60,7 +60,10 @@ export default function Page() {
     const [changes, set_changes] = useState<Appointment[]>([]);
     const [start_time, set_start_time] = useState(1);
 
+    const [is_loading, set_is_loading] = useState(false);
+
     async function book_appointments() {
+        set_is_loading(true);
         const response = await fetch("/api/app_view/" + date.toString(), {
             method: Method.POST,
             body: JSON.stringify(
@@ -88,6 +91,7 @@ export default function Page() {
 
         set_appointments(appointments);
         to_default_state();
+        set_is_loading(false);
     }
 
     function trigger_redraw() {
@@ -101,14 +105,37 @@ export default function Page() {
     }
 
     async function reload_appointments() {
+        set_is_loading(true);
         await fetch("/api/app_view/" + date, {
             method: Method.GET,
             cache: "no-store",
+        })
+            .then(
+                handle_react_query_response(
+                    to_array(to_appointment),
+                    (appointments) => {
+                        set_appointments(appointments);
+                    },
+                ),
+            )
+            .finally(() => {
+                set_is_loading(false);
+            });
+    }
+
+    async function delete_appointments() {
+        if (current_state !== State.AppEdit) return;
+
+        await fetch("/api/app_view/" + date, {
+            method: Method.DELETE,
+            cache: "no-cache",
+            body: JSON.stringify(phantoms),
         }).then(
             handle_react_query_response(
                 to_array(to_appointment),
                 (appointments) => {
                     set_appointments(appointments);
+                    to_default_state();
                 },
             ),
         );
@@ -116,6 +143,8 @@ export default function Page() {
 
     async function update_appointments() {
         if (changes.length === 0) return;
+
+        set_is_loading(true);
 
         await fetch("/api/app_view/" + date, {
             method: Method.PATCH,
@@ -138,6 +167,7 @@ export default function Page() {
             })
             .finally(() => {
                 to_default_state();
+                set_is_loading(false);
             });
     }
 
@@ -155,7 +185,10 @@ export default function Page() {
                 {current_state === State.Default ? (
                     <div className="flex h-fit w-fit">
                         <a href="/salon/nav/">
-                            <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                            <button
+                                disabled={is_loading}
+                                className="h-20 w-32 rounded-full border-2 border-sky-400"
+                            >
                                 Other Actions
                             </button>
                         </a>
@@ -163,10 +196,29 @@ export default function Page() {
                 ) : null}
                 <div className="m-1 flex h-fit w-full border-t-2 border-t-sky-500 p-1">
                     <BoardDatePicker date={date} set_date={set_date} />
-                    <div className="flex w-1/4 flex-row-reverse">
+                    <div className="flex w-1/4 flex-row-reverse gap-10">
+                        {current_state === State.AppEdit ? (
+                            <>
+                                <Button
+                                    color="primary"
+                                    isLoading={is_loading}
+                                    onClick={update_appointments}
+                                >
+                                    Confirm
+                                </Button>
+                                <Button
+                                    color="danger"
+                                    isLoading={is_loading}
+                                    onClick={delete_appointments}
+                                >
+                                    Delete
+                                </Button>
+                            </>
+                        ) : null}
                         {current_state !== State.Default ? (
                             <Button
                                 color="danger"
+                                isLoading={is_loading}
                                 onClick={
                                     current_state === State.Booking
                                         ? to_default_state
@@ -176,7 +228,7 @@ export default function Page() {
                                           }
                                 }
                             >
-                                X
+                                Cancel
                             </Button>
                         ) : null}
                     </div>
@@ -188,6 +240,7 @@ export default function Page() {
                         current_state === State.Default ||
                         current_state === State.AppEdit
                             ? (appointment) => {
+                                  if (is_loading) return;
                                   if (phantoms.includes(appointment)) {
                                       set_appointments([
                                           ...appointments,
@@ -216,6 +269,7 @@ export default function Page() {
                     on_time_stamp={
                         current_state === State.Default
                             ? (time) => {
+                                  if (is_loading) return;
                                   set_start_time(time);
                                   set_state(State.Booking);
                               }
@@ -223,7 +277,7 @@ export default function Page() {
                     }
                 />
             </div>
-            {current_state !== State.Default ? (
+            {current_state !== State.Default && !is_loading ? (
                 <div className="flex h-1/3 w-full justify-start">
                     {current_state === State.Booking ? (
                         <Booking
@@ -249,11 +303,6 @@ export default function Page() {
                                 ]);
                             }}
                             on_change={trigger_redraw}
-                            on_update={update_appointments}
-                            on_delete={(appointments) => {
-                                set_appointments(appointments);
-                                to_default_state();
-                            }}
                         />
                     ) : null}
                 </div>

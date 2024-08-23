@@ -1,11 +1,6 @@
 import { Button } from "@nextui-org/button";
-import { useState } from "react";
-import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
 import { Appointment } from "~/server/db_schema/type_def";
-import { to_appointment } from "~/server/validation/db_types/appointment_validation";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
-import { to_array } from "~/server/validation/simple_type";
 import { TechSelectBar } from "./tech_select";
 import { Input } from "@nextui-org/react";
 
@@ -13,29 +8,8 @@ export function AppEdit(props: {
     appointments: Appointment[];
     date: string;
     on_deselect: (appointment: Appointment) => void;
-    on_delete: (appointments: Appointment[]) => void;
-    on_update: () => void;
     on_change: () => void;
 }) {
-    const [is_Loading, set_Loading] = useState(false);
-
-    async function delete_appointments() {
-        set_Loading(true);
-
-        await fetch("/api/app_view/" + props.date, {
-            method: Method.DELETE,
-            cache: "no-cache",
-            body: JSON.stringify(props.appointments),
-        }).then(
-            handle_react_query_response(
-                to_array(to_appointment),
-                (appointments) => {
-                    props.on_delete(appointments);
-                },
-            ),
-        );
-    }
-
     function change_time(delta: number) {
         for (let i = 0; i < props.appointments.length; i++) {
             const app = props.appointments[i];
@@ -66,7 +40,7 @@ export function AppEdit(props: {
             <div className="full flex w-full gap-1">
                 <AppDisplay
                     appointments={props.appointments}
-                    on_click={is_Loading ? () => {} : props.on_deselect}
+                    on_click={props.on_deselect}
                 />
                 <div className="flex w-full flex-1 flex-col flex-wrap gap-1 border-l-2 border-l-sky-500 p-1">
                     <div className="flex w-full">
@@ -132,27 +106,6 @@ export function AppEdit(props: {
                                 />
                             </div>
                         ) : null}
-                    </div>
-                    <div className="flex w-full gap-1">
-                        <Button
-                            color="primary"
-                            size="md"
-                            isLoading={is_Loading}
-                            onClick={() => {
-                                set_Loading(true);
-                                props.on_update();
-                            }}
-                        >
-                            Confirm
-                        </Button>
-                        <Button
-                            onClick={delete_appointments}
-                            isLoading={is_Loading}
-                            size="md"
-                            color="danger"
-                        >
-                            Delete
-                        </Button>
                     </div>
                 </div>
             </div>
