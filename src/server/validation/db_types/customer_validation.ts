@@ -1,5 +1,5 @@
 import { Customer, CustomerCreationInfo } from "~/server/db_schema/type_def";
-import { is_object, is_string } from "../simple_type";
+import { is_number, is_object, is_string } from "../simple_type";
 import { data_error, DataError } from "~/server/data_error";
 
 export function to_customer_creation_info(
@@ -31,16 +31,22 @@ export function to_customer(t: unknown): Customer | DataError {
         return data_error("Casting to Customer", "missing field");
     }
 
-    const { id, name, phone_number, notes } = t;
+    const { id, name, notes } = t;
 
-    if (
-        !(
-            is_string(id) &&
-            is_string(name) &&
-            is_string(phone_number) &&
-            is_string(notes)
-        )
-    ) {
+    let { phone_number } = t;
+
+    if (is_number(phone_number)) {
+        phone_number = phone_number.toString();
+    }
+
+    if (!is_string(phone_number)) {
+        return data_error(
+            "Casting to Customer",
+            "phone number needs to be number or string",
+        );
+    }
+
+    if (!(is_string(id) && is_string(name) && is_string(notes))) {
         return data_error("Casting to Customer", "wrong field type");
     }
 

@@ -42,7 +42,7 @@ export const migrate_customer_data: Query<OldCustomerData, Customer> = async (
         const customer = await create_new_customer(
             {
                 name: data.name,
-                phone_number: data.phoneNumber,
+                phone_number: data.phoneNumber.toString(),
             },
             f_db,
         );
