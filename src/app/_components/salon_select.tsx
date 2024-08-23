@@ -25,6 +25,7 @@ export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
             });
 
             router.push(next_page);
+            router.refresh();
         };
     };
 

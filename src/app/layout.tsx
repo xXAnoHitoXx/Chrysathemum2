@@ -6,6 +6,9 @@ import { Providers } from "./providers";
 
 import { Inter } from "next/font/google";
 import { dark } from "@clerk/themes";
+import { get_bisquit } from "~/server/queries/crud/biscuits";
+import { Bisquit } from "~/server/validation/bisquit";
+import { is_data_error } from "~/server/data_error";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -44,13 +47,20 @@ export default function RootLayout({
 }
 
 function TopNav() {
+    const salon = get_bisquit(Bisquit.salon_selection);
     return (
         <nav
             id="top-nav"
             className="flex w-full items-center justify-between border-b-4 border-sky-500 p-4 text-xl font-semibold"
         >
             <a href="/">
-                <div>Chrysanthemum Spa</div>
+                <div>{
+                    is_data_error(salon) ?
+                        ("Chrysanthemum Spa") :
+                        salon === "5CBL" ?
+                            ("Cumberland") :
+                            ("Sackville")
+                }</div>
             </a>
 
             <div>
