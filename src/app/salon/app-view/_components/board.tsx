@@ -3,7 +3,7 @@ import { Appointment, Hour } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 
-function timestamp(time: number, hours: Hour) {
+function timestamp(time: number, hours: Hour, on_click: () => void) {
     const stamp =
         time < 12
             ? time.toString().concat(" am")
@@ -35,6 +35,7 @@ function timestamp(time: number, hours: Hour) {
                 " ",
                 color,
             )}
+            onClick={on_click}
         >
             {stamp}
         </div>
@@ -43,7 +44,8 @@ function timestamp(time: number, hours: Hour) {
 
 export function Board(props: {
     appointments: Appointment[];
-    on_select: (appointment: Appointment) => void;
+    on_appoitment_select: (appointment: Appointment) => void;
+    on_time_stamp: (time: number) => void;
 }) {
     bubble_sort(props.appointments, (a, b) => {
         if (a.time !== b.time) return b.time - a.time;
@@ -65,7 +67,9 @@ export function Board(props: {
         >
             <ul className="m-2 grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
                 {map(range(8, 21), (i) =>
-                    timestamp(i, { open: 10, close: 19 }),
+                    timestamp(i, { open: 10, close: 19 }, () => {
+                        props.on_time_stamp(i);
+                    }),
                 )}
                 {props.appointments.map((app: Appointment) => {
                     const app_color =
@@ -93,7 +97,7 @@ export function Board(props: {
                             <button
                                 className="ml-1 h-full w-full text-ellipsis text-left"
                                 onClick={() => {
-                                    props.on_select(app);
+                                    props.on_appoitment_select(app);
                                 }}
                             >
                                 {app.customer.name}

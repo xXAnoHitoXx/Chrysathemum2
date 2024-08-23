@@ -52,11 +52,13 @@ export default function Page() {
     // general
     const [current_state, set_state] = useState(State.Default);
     const [date, set_date] = useState(current_date());
-    const [phantoms, set_phantoms] = useState<Appointment[]>([]);
     const [appointments, set_appointments] = useAppointmentList(
         date.toString(),
     );
+
+    const [phantoms, set_phantoms] = useState<Appointment[]>([]);
     const [changes, set_changes] = useState<Appointment[]>([]);
+    const [start_time, set_start_time] = useState(1);
 
     async function book_appointments() {
         const response = await fetch("/api/app_view/" + date.toString(), {
@@ -152,14 +154,6 @@ export default function Page() {
             >
                 {current_state === State.Default ? (
                     <div className="flex h-fit w-fit">
-                        <button
-                            onClick={() => {
-                                set_state(State.Booking);
-                            }}
-                            className="h-20 w-32 rounded-full border-2 border-sky-400"
-                        >
-                            Book Appointment
-                        </button>
                         <a href="/salon/nav/">
                             <button className="h-20 w-32 rounded-full border-2 border-sky-400">
                                 Other Actions
@@ -190,7 +184,7 @@ export default function Page() {
 
                 <Board
                     appointments={[...appointments, ...phantoms]}
-                    on_select={
+                    on_appoitment_select={
                         current_state === State.Default ||
                         current_state === State.AppEdit
                             ? (appointment) => {
@@ -219,13 +213,24 @@ export default function Page() {
                               }
                             : () => {}
                     }
+                    on_time_stamp={
+                        current_state === State.Default
+                            ? (time) => {
+                                  set_start_time(time);
+                                  set_state(State.Booking);
+                              }
+                            : () => {}
+                    }
                 />
             </div>
             {current_state !== State.Default ? (
-                <div className="flex h-1/3 w-full">
+                <div className="flex h-1/3 w-full justify-start">
                     {current_state === State.Booking ? (
                         <Booking
+                            start_time={start_time}
+                            phantom={phantoms}
                             set_phantom_appointments={set_phantoms}
+                            on_change={trigger_redraw}
                             on_complete={book_appointments}
                         />
                     ) : current_state === State.AppEdit ? (
