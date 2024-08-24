@@ -51,7 +51,7 @@ function TopNav() {
     return (
         <nav
             id="top-nav"
-            className="flex w-full items-center justify-between border-b-4 border-sky-900 p-4 text-xl font-semibold"
+            className="flex w-full items-center justify-between border-b-4 border-sky-900 bg-sky-100 p-4 text-xl font-semibold"
         >
             <a href="/">
                 <div>
