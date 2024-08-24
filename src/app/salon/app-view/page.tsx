@@ -195,7 +195,7 @@ export default function Page() {
                     </div>
                 ) : null}
                 <div className="m-1 flex h-fit w-full border-t-2 border-t-sky-900 p-1">
-                    <BoardDatePicker date={date} set_date={set_date} />
+                    <BoardDatePicker set_date={set_date} />
                     <div className="flex w-1/4 flex-row-reverse gap-10">
                         {current_state === State.AppEdit ? (
                             <>
@@ -281,7 +281,7 @@ export default function Page() {
                 <div className="flex h-1/3 w-full justify-start">
                     {current_state === State.Booking ? (
                         <Booking
-                            start_time={start_time}
+                            booking_time_hour={start_time}
                             phantom={phantoms}
                             set_phantom_appointments={set_phantoms}
                             on_change={trigger_redraw}

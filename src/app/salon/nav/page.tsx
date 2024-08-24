@@ -12,9 +12,6 @@ export default async function Nav() {
         <div>
             <div className="flex h-fit w-full flex-wrap justify-center gap-2 p-4">
                 <button className="h-20 w-32 rounded-full border-2 border-sky-400">
-                    Book Appointment
-                </button>
-                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
                     Gift Card Manager
                 </button>
                 <button className="h-20 w-32 rounded-full border-2 border-sky-400">
@@ -47,20 +44,14 @@ function AdminTasks(is_admin: boolean) {
                 <button className="h-20 w-32 rounded-full border-2 border-sky-400">
                     Monthly View
                 </button>
-                <MigrationStation />
+                <a href="/salon/migration">
+                    <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                        Migration Station
+                    </button>
+                </a>
             </div>
         );
     }
 
     return;
-}
-
-function MigrationStation() {
-    return (
-        <a href="/salon/migration">
-            <button className="h-20 w-32 rounded-full border-2 border-sky-400">
-                Migration Station
-            </button>
-        </a>
-    );
 }
