@@ -2,20 +2,27 @@ import { redirect } from "next/navigation";
 import { get_current_user } from "~/app/api/c_user";
 
 export default async function Nav() {
-
     const user = await get_current_user();
 
-    if(!user){
+    if (!user) {
         redirect("/");
     }
 
-    return(
+    return (
         <div>
-            <div className="flex flex-wrap w-full h-fit p-4 gap-2 justify-center">
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Book Appointment</button>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Gift Card Manager</button>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Sale</button>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Customer Finder</button>
+            <div className="flex h-fit w-full flex-wrap justify-center gap-2 p-4">
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Book Appointment
+                </button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Gift Card Manager
+                </button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Sale
+                </button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Customer Finder
+                </button>
             </div>
             {AdminTasks(user?.publicMetadata.Role === "admin")}
         </div>
@@ -23,17 +30,24 @@ export default async function Nav() {
 }
 
 function AdminTasks(is_admin: boolean) {
-
     if (is_admin) {
-        return(
-            <div className="flex flex-wrap w-full h-fit p-4 gap-2 justify-center">
+        return (
+            <div className="flex h-fit w-full flex-wrap justify-center gap-2 p-4">
                 <a href={"/salon/tech-mana/nav/"}>
-                    <button className="border-2 border-sky-400 rounded-full w-32 h-20">Manage Technicians</button>
+                    <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                        Manage Technicians
+                    </button>
                 </a>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Daily Tally</button>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Weekly Tips</button>
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Monthly View</button>
-                <MigrationStation/>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Daily Tally
+                </button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Weekly Tips
+                </button>
+                <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                    Monthly View
+                </button>
+                <MigrationStation />
             </div>
         );
     }
@@ -43,8 +57,10 @@ function AdminTasks(is_admin: boolean) {
 
 function MigrationStation() {
     return (
-            <a href="/salon/migration">
-                <button className="border-2 border-sky-400 rounded-full w-32 h-20">Migration Station</button>
-            </a>
+        <a href="/salon/migration">
+            <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                Migration Station
+            </button>
+        </a>
     );
 }

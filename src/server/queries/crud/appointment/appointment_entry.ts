@@ -1,55 +1,159 @@
 import { AppointmentEntry } from "~/server/db_schema/type_def";
-import { Query } from "../../server_queries_monad";
-import { DataSnapshot, DatabaseReference, get, push, remove, set, update } from "firebase/database";
-import { server_error } from "~/server/server_error";
-import { to_appointment } from "~/server/validation/db_types/appointment_validation";
+import { db_query, Query } from "../../server_queries_monad";
+import { to_appointment_entry } from "~/server/validation/db_types/appointment_validation";
+import {
+    data_error,
+    DataError,
+    is_data_error,
+    lotta_errors,
+    PartialResult,
+} from "~/server/data_error";
+import { get, push, remove, set, update } from "firebase/database";
+import {
+    PATH_APPOINTMENTS,
+    PATH_DATES,
+    PATH_ENTRIES,
+} from "~/server/db_schema/fb_schema";
 
-export const create_appointment_entry: Query<{
-        customer_id: string,
-        technician_id: string | null,
-        date: string,
-        time: number,
-        duration: number,
-        details: string,
-    }, AppointmentEntry> = async (params, f_db) => {
-        const id_ref: DatabaseReference = await push(f_db.appointment_entries([]));
+function appointment_entry(
+    date: string,
+    salon: string,
+    id: string | null = null,
+): string[] {
+    const a = [PATH_DATES, date, PATH_APPOINTMENTS, salon, PATH_ENTRIES];
+    if (id != null) a.push(id);
+    return a;
+}
 
-        if(id_ref.key == null) {
-            return server_error("failed to create appointment entry with null id");
+export const create_appointment_entry: Query<
+    {
+        customer_id: string;
+        technician_id: string | null;
+        date: string;
+        time: number;
+        duration: number;
+        details: string;
+        salon: string;
+    },
+    AppointmentEntry
+> = async (params, f_db) => {
+    const context = "Create appointment entry { ".concat(params.details, " }");
+    const id_ref = push(
+        f_db.access(appointment_entry(params.date, params.salon)),
+    );
+
+    if (id_ref.key == null) {
+        return data_error(
+            context,
+            "failed to create appointment entry with null id",
+        );
+    }
+
+    const appointment: AppointmentEntry = {
+        id: id_ref.key,
+        customer_id: params.customer_id,
+        technician_id: params.technician_id,
+        date: params.date,
+        time: params.time,
+        duration: params.duration,
+        details: params.details,
+        salon: params.salon,
+    };
+
+    const res = await db_query(context, set(id_ref, appointment));
+    if (is_data_error(res)) return res;
+
+    return appointment;
+};
+
+export const retrieve_appointment_entries_on_date: Query<
+    { date: string; salon: string },
+    PartialResult<AppointmentEntry[]>
+> = async ({ date, salon }, f_db) => {
+    const context = "Retrieving appointments of ".concat(date);
+
+    const ref = f_db.access(appointment_entry(date, salon));
+    const data = await db_query(context, get(ref));
+    if (is_data_error(data)) return data;
+
+    if (!data.exists()) {
+        return { data: [], error: null };
+    }
+
+    const appointments: AppointmentEntry[] = [];
+    const error: DataError[] = [];
+
+    data.forEach((child) => {
+        const appointment = to_appointment_entry(child.val());
+        if (is_data_error(appointment)) {
+            error.push(
+                appointment.stack(
+                    "Parsing { ".concat(child.key, " }"),
+                    "corrupted entry",
+                ),
+            );
+            return;
         }
+        appointments.push(appointment);
+    });
 
-        const appointment: AppointmentEntry = {
-            id: id_ref.key,
-            customer_id: params.customer_id,
-            technician_id: params.technician_id,
-            date: params.date,
-            time: params.time,
-            duration: params.duration,
-            details: params.details,
-        }
+    return {
+        data: appointments,
+        error:
+            error.length == 0
+                ? null
+                : lotta_errors(
+                      context,
+                      error.length.toString().concat(" corrupted entries"),
+                      error,
+                  ),
+    };
+};
 
-        await set(id_ref, appointment);
-        return appointment;
+export const retrieve_appointment_entry: Query<
+    { id: string; salon: string; date: string },
+    AppointmentEntry
+> = async ({ id, salon, date }, f_db) => {
+    const context = "Retrieving appointment entry { ".concat(id, " }");
+    const data = await db_query(
+        context,
+        get(f_db.access(appointment_entry(date, salon, id))),
+    );
+    if (is_data_error(data)) return data;
+
+    if (!data.exists()) {
+        return data_error(
+            context,
+            "retrieving non existing AppointmentEntry {".concat(id, "}"),
+        );
     }
 
-export const retrieve_appointment_entry: Query<{ id: string }, AppointmentEntry> =
-    async ({ id }, f_db) => {
-        const data: DataSnapshot = await get(f_db.appointment_entries([id]));
+    const e = to_appointment_entry(data.val());
+    if (is_data_error(e)) return e.stack(context, "corrupted entry");
+    return e;
+};
 
-        if(!data.exists()){
-            return server_error("retrieving non exist AppointmentEntry {".concat(id, "}"));
-        }
+export const update_appointment_entry: Query<
+    {
+        date: string;
+        salon: string;
+        id: string;
+        record: Record<string, unknown>;
+    },
+    void
+> = async ({ date, salon, id, record }, f_db) => {
+    return db_query(
+        "Update AppointmentEntry Entry",
+        update(f_db.access(appointment_entry(date, salon, id)), record),
+    );
+};
 
-        
-        return to_appointment(data.val());
-    }
-
-export const update_appointment_entry: Query<AppointmentEntry, void> =
-    async (appointment, f_db) => {
-        await update(f_db.appointment_entries([appointment.id]), appointment);
-    }
-
-export const delete_appointment_entry : Query<{ id: string }, void> =
-    async (params: { id : string }, f_db) => {
-        await remove(f_db.appointment_entries([params.id]));
-    }
+export const delete_appointment_entry: Query<
+    { date: string; salon: string; id: string },
+    void
+> = async ({ id, salon, date }, f_db) => {
+    return db_query(
+        "Remove appointment entry { ".concat(id, " }"),
+        remove(f_db.access(appointment_entry(date, salon, id))),
+    );
+};

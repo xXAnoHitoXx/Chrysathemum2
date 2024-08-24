@@ -1,14 +1,17 @@
 import { AnoError } from "./ano_error";
 
-export function bubble_sort<T>(arr: T[], comp: (a: T, b: T) => number): AnoError | void {
+export function bubble_sort<T>(
+    arr: T[],
+    comp: (a: T, b: T) => number,
+): AnoError | void {
     try {
         let sorted = false;
-        while(!sorted) {
+        while (!sorted) {
             sorted = true;
             for (let i = 1; i < arr.length; i++) {
-                if(comp(arr[i-1]!, arr[i]!) < 0) {
+                if (comp(arr[i - 1]!, arr[i]!) < 0) {
                     sorted = false;
-                    swap(arr, i-1, i);
+                    swap(arr, i - 1, i);
                 }
             }
         }
@@ -17,7 +20,7 @@ export function bubble_sort<T>(arr: T[], comp: (a: T, b: T) => number): AnoError
     }
 }
 
-function swap(arr: any[], a: number, b: number){
+function swap(arr: any[], a: number, b: number) {
     const t = arr[a];
     arr[a] = arr[b];
     arr[b] = t;

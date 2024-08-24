@@ -1,11 +1,11 @@
-import { is_response_error, TypeConversionError } from "./validation_error";
+import { data_error, DataError, is_data_error } from "../data_error";
 
 export function is_string(t: unknown): t is string {
     if (t == null) {
         return false;
     }
 
-    return (typeof t === "string");
+    return typeof t === "string";
 }
 
 export function is_boolean(t: unknown): t is boolean {
@@ -13,7 +13,15 @@ export function is_boolean(t: unknown): t is boolean {
         return false;
     }
 
-    return (typeof t === "boolean");
+    return typeof t === "boolean";
+}
+
+export function is_function(t: unknown): t is Function {
+    if (t == null) {
+        return false;
+    }
+
+    return typeof t === "function";
 }
 
 export function is_number(t: unknown): t is number {
@@ -21,7 +29,15 @@ export function is_number(t: unknown): t is number {
         return false;
     }
 
-    return (typeof t === "number");
+    return typeof t === "number";
+}
+
+export function is_big_int(t: unknown): t is BigInt {
+    if (t == null) {
+        return false;
+    }
+
+    return typeof t === "bigint";
 }
 
 export function is_object(t: unknown): t is object {
@@ -29,24 +45,30 @@ export function is_object(t: unknown): t is object {
         return false;
     }
 
-    return (typeof t === "object");
+    return typeof t === "object";
 }
 
-export function to_array<T>(to: (t: unknown) => T | TypeConversionError): (t: unknown) => T[] | TypeConversionError {
+export function to_array<T>(
+    to: (t: unknown) => T | DataError,
+): (t: unknown) => T[] | DataError {
     return (t: unknown) => {
-        if(!Array.isArray(t)) {
-            return { error: "not an array" };
+        if (!Array.isArray(t)) {
+            return data_error("Casting to Array", "not an array");
         }
 
         const arr: T[] = [];
 
         for (const element of t) {
             const e = to(element);
-            if (!is_response_error(e)) {
-                arr.push(e);
+            if (is_data_error(e)) {
+                return e.stack(
+                    "Casting to Array",
+                    "an element is not of type T",
+                );
             }
+            arr.push(e);
         }
 
         return arr;
-    }
+    };
 }

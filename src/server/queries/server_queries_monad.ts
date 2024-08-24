@@ -1,18 +1,35 @@
+import {
+    data_error,
+    DataError,
+    is_data_error,
+    lotta_errors,
+    PartialResult,
+} from "../data_error";
 import { FireDB } from "../db_schema/fb_schema";
-import { is_server_error, ServerError } from "../server_error";
 
-export type QueryError = ServerError;
+export type Query<T, U> = (
+    t: T,
+    fire_db: FireDB,
+) => Promise<U | DataError> | U | DataError;
 
-export type Query<T, U> = (t: T, fire_db: FireDB) => (Promise<U | QueryError> | U | QueryError);
+export abstract class ServerQueryData<T> {
+    protected fire_db: FireDB;
+    protected is_test: boolean;
 
-export interface ServerQueryData<T> {
-    unpack(): Promise<T | QueryError>;
-    bind<U>(query: Query<T, U>): ServerQueryData<U>;
-    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U>;
-}
+    abstract unpack(): Promise<T | DataError>;
 
-export function is_successful_query<T>(result: T | QueryError): result is T {
-    return !(is_server_error(result));
+    constructor(fire_db: FireDB, is_test: boolean) {
+        this.fire_db = fire_db;
+        this.is_test = is_test;
+    }
+
+    bind<U>(query: Query<T, U>): ServerQueryData<U> {
+        return new ChainedQueryData(this, query, this.fire_db, this.is_test);
+    }
+
+    err_bind<U>(query: Query<DataError, U>): ServerQueryData<T | U> {
+        return new ErrQueryData(this, query, this.fire_db, this.is_test);
+    }
 }
 
 export function pack<T>(data: T): ServerQueryData<T> {
@@ -23,82 +40,88 @@ export function pack_test<T>(data: T, test_name: string): ServerQueryData<T> {
     return new SimpleQueryData(data, new FireDB(test_name), true);
 }
 
-export function merge<R, S, T>(
-    r: ServerQueryData<R>,
-    s: ServerQueryData<S>,
-    merger: (r: R, s: S) => T | QueryError
-): ServerQueryData<T> {
-    return r.bind(async (r: R, _): Promise<T | QueryError> => {
-        return s.bind(async (s: S, _): Promise<T | QueryError> => {
-            return merger(r, s);
-        }).unpack();
-    });
+export async function db_query<T>(
+    context: string,
+    promise: Promise<T>,
+): Promise<T | DataError> {
+    return promise.catch(() => data_error(context, "database error"));
 }
 
 export function map<T, U>(mapper: (t: T) => U): Query<T, U> {
     return async (t: T, _): Promise<U> => {
         return mapper(t);
-    }
+    };
 }
 
-export function retain_input_n_output<T, U, V>(
-    query: Query<T, U>, 
-    packer: (input: T, output: U) => V | QueryError
-): Query<T, V> {
-    return async (t: T, fire_db: FireDB) => {
-        const u = await query(t, fire_db);
-        if (is_server_error(u)) {
-            return u;
+export function array_query<T, U>(
+    query: Query<T, U>,
+    context: string,
+    detail: string,
+): Query<T[], PartialResult<U[]>> {
+    return async (t_arr, f_db) => {
+        const queries: (U | DataError | Promise<U | DataError>)[] = [];
+
+        for (let i = 0; i < t_arr.length; i++) {
+            const t = t_arr[i];
+            if (t) {
+                queries.push(query(t, f_db));
+            }
         }
-        return packer(t, u);
-    }
-}
 
-export function retain_input<T, U>(query: Query<T, U>): Query<T, T> {
-    return async (t: T, fire_db: FireDB) => {
-        const err: QueryError | U = await query(t, fire_db);
-        if (is_server_error(err)){
-            return err;
+        const data: U[] = [];
+        const errors: DataError[] = [];
+
+        const results = await Promise.all(queries);
+
+        for (let i = 0; i < results.length; i++) {
+            const res = results[i];
+            if (res != undefined) {
+                if (is_data_error(res)) errors.push(res);
+                else data.push(res);
+            }
         }
-        return t;
-    }
+
+        return errors.length === 0
+            ? {
+                  data: data,
+                  error: null,
+              }
+            : {
+                  data: data,
+                  error: lotta_errors(context, detail, errors),
+              };
+    };
 }
 
-class SimpleQueryData<T> implements ServerQueryData<T> {
-    private data: T | QueryError; 
-    private fire_db: FireDB;
-    private is_test: boolean;
+class SimpleQueryData<T> extends ServerQueryData<T> {
+    private data: T | DataError;
 
-    constructor(data: T | QueryError, fire_db: FireDB, is_test: boolean) {
+    constructor(data: T | DataError, fire_db: FireDB, is_test: boolean) {
+        super(fire_db, is_test);
         this.data = data;
         this.fire_db = fire_db;
         this.is_test = is_test;
     }
 
-    async unpack(): Promise<T | QueryError> {
+    async unpack(): Promise<T | DataError> {
         return this.data;
-    }
-
-    bind<U>(query: Query<T, U>): ServerQueryData<U> {
-        return new ChainedQueryData<T, U>(this, query, this.fire_db, this.is_test);
-    }
-
-    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U> {
-        const packed_data = new SimpleQueryData(this, this.fire_db, this.is_test);
-        return packed_data.bind(query);
     }
 }
 
 class NOTHING {}
 
-class ChainedQueryData<S, T> implements ServerQueryData<T> {
-    private data: ServerQueryData<S>; 
+class ChainedQueryData<S, T> extends ServerQueryData<T> {
+    private data: ServerQueryData<S>;
     private query: Query<S, T>;
-    private fire_db: FireDB;
-    private is_test: boolean;
-    private output: T | QueryError | NOTHING;
+    private output: T | DataError | NOTHING;
 
-    constructor(data: ServerQueryData<S>, query: Query<S, T>, fire_db: FireDB, is_test: boolean) {
+    constructor(
+        data: ServerQueryData<S>,
+        query: Query<S, T>,
+        fire_db: FireDB,
+        is_test: boolean,
+    ) {
+        super(fire_db, is_test);
         this.data = data;
         this.query = query;
         this.fire_db = fire_db;
@@ -106,28 +129,53 @@ class ChainedQueryData<S, T> implements ServerQueryData<T> {
         this.output = new NOTHING();
     }
 
-    async unpack(): Promise<T | QueryError> {
+    async unpack(): Promise<T | DataError> {
         if (this.output instanceof NOTHING) {
-            const data: S | QueryError = await this.data.unpack();
+            const data: S | DataError = await this.data.unpack();
 
-            if (is_server_error(data)) {
+            if (is_data_error(data)) {
                 return data;
             }
 
-            const ret: T | QueryError = await this.query(data, this.fire_db);
+            const ret: T | DataError = await this.query(data, this.fire_db);
             this.output = ret;
             return ret;
         }
 
         return this.output;
     }
+}
 
-    bind<U>(query: Query<T, U>): ServerQueryData<U> {
-        return new ChainedQueryData<T, U>(this, query, this.fire_db, this.is_test);
+class ErrQueryData<S, T> extends ServerQueryData<T | S> {
+    private data: ServerQueryData<T>;
+    private query: Query<DataError, S>;
+    private output: T | S | DataError | NOTHING;
+
+    constructor(
+        data: ServerQueryData<T>,
+        query: Query<DataError, S>,
+        f_db: FireDB,
+        is_test: boolean,
+    ) {
+        super(f_db, is_test);
+        this.data = data;
+        this.query = query;
+        this.output = new NOTHING();
     }
 
-    packed_bind<U>(query: Query<ServerQueryData<T>, U>): ServerQueryData<U> {
-        const packed_data = new SimpleQueryData(this, this.fire_db, this.is_test);
-        return packed_data.bind(query);
+    async unpack(): Promise<T | S | DataError> {
+        if (this.output instanceof NOTHING) {
+            const data: T | DataError = await this.data.unpack();
+
+            if (!is_data_error(data)) {
+                return data;
+            }
+
+            const ret: S | DataError = await this.query(data, this.fire_db);
+            this.output = ret;
+            return ret;
+        }
+
+        return this.output;
     }
 }
