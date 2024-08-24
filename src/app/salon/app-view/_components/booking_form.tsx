@@ -2,9 +2,19 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { Appointment } from "~/server/db_schema/type_def";
 import { CustomerSearch } from "../../_components/customer_search";
 import { Button, Input } from "@nextui-org/react";
+import {
+    BOARD_STARTING_HOUR,
+    DURATION_30_MINUTES,
+    MAX_APPOINTMENT_DURATION,
+    MAX_APPOINTMENT_TIME,
+    modulus,
+    TIME_INTERVALS_PER_HOUR,
+    to_0_index,
+    to_1_index,
+} from "~/server/validation/semantic/appointment_time";
 
 export function Booking(props: {
-    start_time: number;
+    booking_time_hour: number;
     phantom: Appointment[];
     set_phantom_appointments: Dispatch<SetStateAction<Appointment[]>>;
     on_change: () => void;
@@ -13,7 +23,9 @@ export function Booking(props: {
     const [is_loading, set_is_loading] = useState(false);
 
     function change_time(app: Appointment, delta: number) {
-        app.time = ((app.time + 51 + delta) % 52) + 1;
+        let t = to_0_index(app.time) + delta;
+        t = modulus(t, MAX_APPOINTMENT_TIME);
+        app.time = to_1_index(t);
     }
 
     function change_time_all(delta: number) {
@@ -36,10 +48,10 @@ export function Booking(props: {
 
     function change_duration(app: Appointment, delta: number) {
         app.duration = app.duration + delta;
-        if (app.duration < 2) {
-            app.duration = 2;
-        } else if (app.duration > 50) {
-            app.duration = 50;
+        if (app.duration < DURATION_30_MINUTES) {
+            app.duration = MAX_APPOINTMENT_DURATION;
+        } else if (app.duration > MAX_APPOINTMENT_DURATION) {
+            app.duration = DURATION_30_MINUTES;
         }
     }
 
@@ -56,7 +68,10 @@ export function Booking(props: {
                         color: "border-neutral-400 text-neutral-900 bg-red-400",
                         active: true,
                     },
-                    time: (props.start_time - 8) * 4,
+                    time: to_1_index(
+                        (props.booking_time_hour - BOARD_STARTING_HOUR) *
+                            TIME_INTERVALS_PER_HOUR,
+                    ),
                     duration: 4,
                     details: "",
                     salon: "",
