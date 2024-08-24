@@ -56,7 +56,7 @@ export function Booking(props: {
                         color: "border-neutral-400 text-neutral-900 bg-red-400",
                         active: true,
                     },
-                    time: props.start_time,
+                    time: (props.start_time - 8) * 4,
                     duration: 4,
                     details: "",
                     salon: "",
