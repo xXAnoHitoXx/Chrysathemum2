@@ -40,9 +40,10 @@
         -   [x] ~runable from dev environment~
         -   [x] ~migrating customers~
         -   [ ] migrating transactions
-    -   [ ] appointment viewer
+    -   [x] ~appointment viewer~
         -   [x] ~display board~
-    -   [ ] booking
+    -   [x] ~booking~
+    -   [ ] closing transactions
     -   [ ] view daily breakdown
     -   [ ] sumary
     -   [ ] month tally
