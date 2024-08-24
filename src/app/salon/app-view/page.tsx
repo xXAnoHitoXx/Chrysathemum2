@@ -187,7 +187,7 @@ export default function Page() {
                         <a href="/salon/nav/">
                             <button
                                 disabled={is_loading}
-                                className="h-20 w-32 rounded-full border-2 border-sky-900 bg-gray-500"
+                                className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                             >
                                 Other Actions
                             </button>

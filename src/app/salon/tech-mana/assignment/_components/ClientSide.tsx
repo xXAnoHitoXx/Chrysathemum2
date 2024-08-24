@@ -164,7 +164,9 @@ export default function ClientSide({
                             <button
                                 disabled={true}
                                 className={"border-2".concat(
+                                    " ",
                                     tech.color,
+                                    " ",
                                     "h-20 w-32 rounded-3xl",
                                 )}
                             >
@@ -185,7 +187,9 @@ export default function ClientSide({
                             <button
                                 disabled={true}
                                 className={"border-2".concat(
+                                    " ",
                                     tech.color,
+                                    " ",
                                     "h-20 w-32 rounded-3xl",
                                 )}
                             >
@@ -205,7 +209,9 @@ export default function ClientSide({
                         <li data-label={tech} key={tech.id}>
                             <button
                                 className={"border-2".concat(
+                                    " ",
                                     tech.color,
+                                    " ",
                                     "h-20 w-32 rounded-3xl",
                                 )}
                             >
@@ -246,7 +252,9 @@ export default function ClientSide({
                                             .map((technician) => (
                                                 <button
                                                     className={"border-2".concat(
+                                                        " ",
                                                         technician.color,
+                                                        " ",
                                                         "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
@@ -274,7 +282,9 @@ export default function ClientSide({
                                             .map((technician) => (
                                                 <button
                                                     className={"border-2".concat(
+                                                        " ",
                                                         technician.color,
+                                                        " ",
                                                         "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
@@ -298,7 +308,9 @@ export default function ClientSide({
                                             .map((technician) => (
                                                 <button
                                                     className={"border-2".concat(
+                                                        " ",
                                                         technician.color,
+                                                        " ",
                                                         "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}
@@ -323,7 +335,9 @@ export default function ClientSide({
                                             .map((technician) => (
                                                 <button
                                                     className={"border-2".concat(
+                                                        " ",
                                                         technician.color,
+                                                        " ",
                                                         "h-20 w-32 rounded-3xl",
                                                     )}
                                                     key={technician.id}

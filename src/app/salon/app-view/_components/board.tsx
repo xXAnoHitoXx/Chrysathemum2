@@ -15,12 +15,12 @@ function timestamp(time: number, hours: Hour, on_click: () => void) {
         time < hours.open || time >= hours.close
             ? //close
               time % 2 == 1
-                ? "bg-red-800 text-zinc-300"
-                : "bg-red-500 text-zinc-900"
+                ? "bg-red-600 text-zinc-950"
+                : "bg-red-400 text-zinc-950"
             : //open
               time % 2 == 1
-              ? "bg-neutral-800 text-zinc-300"
-              : "bg-neutral-400 text-zinc-900";
+              ? "bg-neutral-400 text-zinc-950"
+              : "bg-sky-100 text-zinc-950";
 
     return (
         <div
