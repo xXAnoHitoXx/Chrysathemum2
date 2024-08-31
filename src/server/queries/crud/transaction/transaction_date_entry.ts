@@ -36,7 +36,7 @@ export const create_trasaction_date_entry: Query<
     return db_query(context, set(ref, params));
 };
 
-export const retrieve_transactions_on_date: Query<
+export const retrieve_transaction_entries_on_date: Query<
     { date: string; salon: string },
     PartialResult<TransactionEntry[]>
 > = async ({ date, salon }, f_db) => {

@@ -3,8 +3,14 @@ import { Closing } from "~/server/db_schema/type_def";
 import { db_query, Query } from "../../server_queries_monad";
 import { get, set } from "firebase/database";
 import { to_closing } from "~/server/validation/db_types/accounting_validation";
+import { PATH_DATES, PATH_TRANSACTIONS } from "~/server/db_schema/fb_schema";
 
 const close = "close";
+
+function closing_path(date: string, salon: string): string[] {
+    const a = [PATH_DATES, date, PATH_TRANSACTIONS, salon, close];
+    return a;
+}
 
 export const close_date: Query<
     { date: string; salon: string; closing: Closing },
@@ -12,7 +18,7 @@ export const close_date: Query<
 > = async ({ date, salon, closing }, f_db) => {
     const context = `close date { ${date} } at { ${salon} }`;
 
-    const ref = f_db.accounting_date_entries(date, [salon, close]);
+    const ref = f_db.access(closing_path(date, salon));
     return db_query(context, set(ref, closing));
 };
 
@@ -21,7 +27,7 @@ export const retrieve_closing_data: Query<
     Closing
 > = async ({ date, salon }, f_db) => {
     const context = `retrieve closing data of { ${date} } at { ${salon} }`;
-    const ref = f_db.accounting_date_entries(date, [salon, close]);
+    const ref = f_db.access(closing_path(date, salon));
 
     const data = await db_query(context, get(ref));
     if (is_data_error(data)) return data;

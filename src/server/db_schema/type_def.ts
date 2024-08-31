@@ -71,6 +71,21 @@ export type AppointmentEntry = {
     salon: string;
 };
 
+export type Transaction = {
+    id: string;
+    customer: Customer;
+    technician: Technician;
+    salon: string;
+    date: string;
+    time: number;
+    details: string;
+    amount: number;
+    tip: number;
+    cash: number;
+    gift: number;
+    discount: number;
+}
+
 export type TransactionEntry = {
     id: string;
     customer_id: string;

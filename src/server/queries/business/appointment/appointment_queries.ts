@@ -104,8 +104,6 @@ export const retrieve_appointments_on_date: Query<
         tech_map[tech.id] = tech;
     });
 
-    appointment_entries.error?.log();
-
     const appointments: Appointment[] = [];
 
     for (let i = 0; i < appointment_entries.data.length; i++) {
