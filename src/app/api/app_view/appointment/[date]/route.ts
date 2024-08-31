@@ -15,6 +15,8 @@ import {
     to_appointment,
     to_appointment_creation_info,
 } from "~/server/validation/db_types/appointment_validation";
+import { to_closing_info } from "~/server/validation/db_types/accounting_validation";
+import { close_transaction } from "~/server/queries/business/transaction/transaction_queries";
 
 export async function GET(
     _: Request,
@@ -82,6 +84,22 @@ export async function POST(
                 .bind(handle_partial_errors)
                 .unpack();
         });
+    return unpack_response(query);
+}
+
+export async function PUT(
+    request: Request,
+    { params }: { params: { date: string } },
+) {
+    const query = pack(request)
+        .bind(parse_request(to_closing_info))
+        .bind(close_transaction)
+        .bind(() => Bisquit.salon_selection)
+        .bind(get_bisquit)
+        .bind((salon) => ({ date: params.date, salon: salon }))
+        .bind(retrieve_appointments_on_date)
+        .bind(handle_partial_errors);
+
     return unpack_response(query);
 }
 

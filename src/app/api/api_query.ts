@@ -6,6 +6,7 @@ export enum Method {
     GET = "GET",
     PATCH = "PATCH",
     DELETE = "DELETE",
+    PUT = "PUT",
 }
 
 export async function fetch_query<T>({

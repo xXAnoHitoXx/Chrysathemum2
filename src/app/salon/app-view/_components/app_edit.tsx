@@ -3,6 +3,7 @@ import { Appointment } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { TechSelectBar } from "./tech_select";
 import { Input } from "@nextui-org/react";
+import { NoTechColor } from "~/constants";
 
 export function AppEdit(props: {
     appointments: Appointment[];
@@ -141,7 +142,7 @@ function AppDisplay(props: {
                 {props.appointments.map((app) => {
                     const app_color =
                         app.technician == null
-                            ? "border-violet-500 text-violet-500 bg-slate-950"
+                            ? NoTechColor
                             : app.technician.color;
                     return (
                         <button

@@ -108,7 +108,6 @@ export const retrieve_appointments_on_date: Query<
 
     const appointments: Appointment[] = [];
 
-
     for (let i = 0; i < appointment_entries.data.length; i++) {
         const entry = appointment_entries.data[i];
         if (entry == null) {

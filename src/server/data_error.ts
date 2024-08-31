@@ -20,6 +20,7 @@ export interface DataError {
     stack(context: string, detail: string): DataError;
     log(): void;
     report(): void;
+    contains(message: string[]): boolean;
 }
 
 export function lotta_errors(
@@ -86,6 +87,14 @@ class LottaError implements DataError {
     report(): void {
         Sentry.captureMessage(this.message());
     }
+
+    contains(messages: string[]) {
+        for (let i = 0; i < messages.length; i++) {
+            const m = messages[i];
+            if (!(m != undefined && this.message().includes(m))) return false;
+        }
+        return true;
+    }
 }
 
 class SimpleDataError {
@@ -116,6 +125,14 @@ class SimpleDataError {
 
     report() {
         Sentry.captureMessage(this._message);
+    }
+
+    contains(messages: string[]) {
+        for (let i = 0; i < messages.length; i++) {
+            const m = messages[i];
+            if (!(m != undefined && this._message.includes(m))) return false;
+        }
+        return true;
     }
 }
 

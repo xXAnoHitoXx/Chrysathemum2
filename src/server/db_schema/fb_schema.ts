@@ -10,6 +10,7 @@ export const PATH_ENTRIES = "id/";
 export const PATH_DATES = "dates/";
 
 export const PATH_APPOINTMENTS = "appointments/";
+export const PATH_TRANSACTIONS = "transactions/";
 export const PATH_UPDATE_COUNT = "update_count";
 
 const prod = "production";
@@ -20,7 +21,6 @@ const operarion = "operarion";
 const customers_root = "customers/";
 const technicians_root = "technicians/";
 const locations_root = "locations/";
-const transactions_root = "transactions/";
 const accounting_root = "accounting/";
 
 export async function clear_test_data(
@@ -115,13 +115,6 @@ export class FireDB {
 
     location_schedule(sub_path: string[]): DatabaseReference {
         return this.ref(locations_root, "schedule/", sub_path);
-    }
-
-    transaction_date_entries(
-        date: string,
-        sub_path: string[],
-    ): DatabaseReference {
-        return this.ref(date, transactions_root, sub_path);
     }
 
     accounting_date_entries(

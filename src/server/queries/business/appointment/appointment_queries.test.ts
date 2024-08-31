@@ -271,8 +271,8 @@ test("tech assignment", async () => {
         fail();
     }
 
-    const update: AppointmentUpdateInfo = {
-        technician_id: tech.id,
+    const update = {
+        technician: tech,
         time: appointment.time,
         duration: appointment.duration,
         details: appointment.details,
