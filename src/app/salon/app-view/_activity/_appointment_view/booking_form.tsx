@@ -1,19 +1,22 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Appointment } from "~/server/db_schema/type_def";
-import { CustomerSearch } from "../../_components/customer_search";
+import {
+    CustomerSearch,
+    LastCustomerSave,
+} from "../../_components/customer_search";
 import { Button, Input } from "@nextui-org/react";
 import {
-    BOARD_STARTING_HOUR,
     DURATION_30_MINUTES,
+    hour_to_time,
     MAX_APPOINTMENT_DURATION,
     MAX_APPOINTMENT_TIME,
     modulus,
-    TIME_INTERVALS_PER_HOUR,
     to_0_index,
     to_1_index,
 } from "~/server/validation/semantic/appointment_time";
 
 export function Booking(props: {
+    last_customer_save: LastCustomerSave;
     booking_time_hour: number;
     phantom: Appointment[];
     set_phantom_appointments: Dispatch<SetStateAction<Appointment[]>>;
@@ -57,6 +60,7 @@ export function Booking(props: {
 
     return props.phantom.length === 0 ? (
         <CustomerSearch
+            save={props.last_customer_save}
             on_complete={(customer) => {
                 const p: Appointment = {
                     id: "phantom0",
@@ -68,10 +72,7 @@ export function Booking(props: {
                         color: "border-neutral-400 text-neutral-900 bg-red-400",
                         active: true,
                     },
-                    time: to_1_index(
-                        (props.booking_time_hour - BOARD_STARTING_HOUR) *
-                            TIME_INTERVALS_PER_HOUR,
-                    ),
+                    time: hour_to_time(props.booking_time_hour),
                     duration: 4,
                     details: "",
                     salon: "",

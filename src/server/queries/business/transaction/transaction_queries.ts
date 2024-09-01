@@ -162,6 +162,7 @@ export const retrieve_transactions_on_date: Query<
 
     return {
         data: transactions,
-        error: lotta_errors(context, "...", errors),
+        error:
+            errors.length === 0 ? null : lotta_errors(context, "...", errors),
     };
 };

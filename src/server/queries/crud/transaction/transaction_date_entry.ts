@@ -1,6 +1,6 @@
 import { TransactionEntry } from "~/server/db_schema/type_def";
 import { db_query, Query } from "../../server_queries_monad";
-import { to_transaction } from "~/server/validation/db_types/transaction_validation";
+import { to_transaction_entry } from "~/server/validation/db_types/transaction_validation";
 import {
     data_error,
     DataError,
@@ -54,7 +54,7 @@ export const retrieve_transaction_entries_on_date: Query<
     const error: DataError[] = [];
 
     data.forEach((child) => {
-        const transaction = to_transaction(child.val());
+        const transaction = to_transaction_entry(child.val());
         if (is_data_error(transaction)) {
             error.push(
                 transaction.stack(
@@ -98,7 +98,7 @@ export const retrieve_transaction_entry: Query<
         );
     }
 
-    const e = to_transaction(data.val());
+    const e = to_transaction_entry(data.val());
     if (is_data_error(e)) return e.stack(context, "corrupted entry");
     return e;
 };

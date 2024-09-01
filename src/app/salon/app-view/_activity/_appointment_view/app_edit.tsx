@@ -1,11 +1,12 @@
 import { Button } from "@nextui-org/button";
-import { Appointment } from "~/server/db_schema/type_def";
+import { Appointment, Technician } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { TechSelectBar } from "./tech_select";
 import { Input } from "@nextui-org/react";
 import { NoTechColor } from "~/constants";
 
 export function AppEdit(props: {
+    technicians: Technician[];
     appointments: Appointment[];
     date: string;
     on_deselect: (appointment: Appointment) => void;
@@ -112,6 +113,7 @@ export function AppEdit(props: {
             </div>
             {props.appointments.length === 1 ? (
                 <TechSelectBar
+                    technicians={props.technicians}
                     on_select={(tech) => {
                         const app = props.appointments[0];
                         if (app != undefined) {
