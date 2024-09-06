@@ -4,7 +4,7 @@ import {
     create_trasaction_date_entry,
     delete_transaction_date_entry,
     retrieve_transaction_entry,
-    retrieve_transactions_on_date,
+    retrieve_transaction_entries_on_date,
     update_transaction_date_entry,
 } from "./transaction_date_entry";
 import { is_data_error } from "~/server/data_error";
@@ -201,7 +201,7 @@ test("test retrieve transactions on date querries", async () => {
     };
 
     const blank = await pack_test({ date: t1.date, salon: t1.salon }, test_name)
-        .bind(retrieve_transactions_on_date)
+        .bind(retrieve_transaction_entries_on_date)
         .bind((res) => {
             if (res.error != null) {
                 res.error.log();
@@ -239,7 +239,7 @@ test("test retrieve transactions on date querries", async () => {
         { date: t1.date, salon: t1.salon },
         test_name,
     )
-        .bind(retrieve_transactions_on_date)
+        .bind(retrieve_transaction_entries_on_date)
         .bind((res) => {
             if (res.error != null) {
                 res.error.log();
@@ -281,7 +281,7 @@ test("test retrieve transactions on date querries", async () => {
         { date: t1.date, salon: t1.salon },
         test_name,
     )
-        .bind(retrieve_transactions_on_date)
+        .bind(retrieve_transaction_entries_on_date)
         .bind((res) => {
             if (res.error != null) {
                 res.error.log();
@@ -340,7 +340,7 @@ test("test retrieve transactions on date querries", async () => {
         { date: t1.date, salon: t1.salon },
         test_name,
     )
-        .bind(retrieve_transactions_on_date)
+        .bind(retrieve_transaction_entries_on_date)
         .bind((res) => {
             if (res.error != null) {
                 res.error.log();

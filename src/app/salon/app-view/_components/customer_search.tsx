@@ -9,9 +9,16 @@ import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { to_array } from "~/server/validation/simple_type";
 import { quick_sort } from "~/util/ano_quick_sort";
 
-const History: { LastCustomer: Customer | null } = { LastCustomer: null };
+export type LastCustomerSave = {
+    data: Customer | null;
+};
+
+export const last_customer_default_save: LastCustomerSave = {
+    data: null,
+};
 
 export function CustomerSearch(props: {
+    save: LastCustomerSave;
     on_complete: (customer: Customer) => void;
 }) {
     const [customer_name, set_name] = useState("");
@@ -126,7 +133,7 @@ export function CustomerSearch(props: {
             return;
         }
 
-        History.LastCustomer = customer;
+        props.save.data = customer;
         props.on_complete(customer);
     }
 
@@ -192,7 +199,7 @@ export function CustomerSearch(props: {
                 {customers_display.map((customer: Customer) => (
                     <button
                         onClick={() => {
-                            History.LastCustomer = customer;
+                            props.save.data = customer;
                             props.on_complete(customer);
                         }}
                         className="h-20 w-fit rounded-3xl border-2 border-sky-900 p-3"
@@ -202,18 +209,18 @@ export function CustomerSearch(props: {
                         {format_phone_number(customer.phone_number)}
                     </button>
                 ))}
-                {History.LastCustomer == null ? null : (
+                {props.save.data == null ? null : (
                     <button
                         onClick={() => {
-                            if (History.LastCustomer != null)
-                                props.on_complete(History.LastCustomer);
+                            if (props.save.data != null)
+                                props.on_complete(props.save.data);
                         }}
                         className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-300"
                     >
                         LastCustomer <br />
-                        {History.LastCustomer.name}
+                        {props.save.data.name}
                         <br />
-                        {format_phone_number(History.LastCustomer.phone_number)}
+                        {format_phone_number(props.save.data.name)}
                     </button>
                 )}
                 {has_searched ? (

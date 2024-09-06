@@ -1,6 +1,7 @@
-import { data_error, DataError } from "~/server/data_error";
-import { Account, Closing } from "~/server/db_schema/type_def";
+import { data_error, DataError, is_data_error } from "~/server/data_error";
+import { Account, Appointment, Closing } from "~/server/db_schema/type_def";
 import { is_number, is_object } from "../simple_type";
+import { to_appointment } from "./appointment_validation";
 
 export function to_account(t: unknown): Account | DataError {
     const context = "casting to Account";
@@ -37,4 +38,35 @@ export function to_closing(t: unknown): Closing | DataError {
         return data_error(context, "wrong field types");
 
     return { machine: machine, cash: cash, gift: gift, discount: discount };
+}
+
+export function to_closing_info(
+    t: unknown,
+): { appointment: Appointment; close: Closing; account: Account } | DataError {
+    const context = "casting to Closing info";
+
+    if (!is_object(t)) return data_error(context, "not an object");
+
+    if (!("appointment" in t && "close" in t && "account" in t))
+        return data_error(context, "missing fields");
+
+    const { appointment, close, account } = t;
+
+    const appointment_casted = to_appointment(appointment);
+
+    if (is_data_error(appointment_casted))
+        return appointment_casted.stack(context, "...");
+
+    const close_casted = to_closing(close);
+    if (is_data_error(close_casted)) return close_casted.stack(context, "...");
+
+    const account_casted = to_account(account);
+    if (is_data_error(account_casted))
+        return account_casted.stack(context, "...");
+
+    return {
+        appointment: appointment_casted,
+        close: close_casted,
+        account: account_casted,
+    };
 }

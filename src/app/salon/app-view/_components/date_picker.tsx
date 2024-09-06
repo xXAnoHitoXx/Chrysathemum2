@@ -10,9 +10,10 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { current_date } from "~/server/validation/semantic/date";
 
 export function BoardDatePicker(props: {
+    date: CalendarDate;
     set_date: Dispatch<SetStateAction<CalendarDate>>;
 }) {
-    const [holder, update_date] = useState(current_date());
+    const [holder, update_date] = useState(props.date);
     return (
         <div className="flex w-3/4 flex-wrap gap-1">
             <Popover

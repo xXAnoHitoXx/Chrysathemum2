@@ -1,5 +1,6 @@
 import { map, range } from "itertools";
 import { Appointment, Hour } from "~/server/db_schema/type_def";
+import { hour_to_time } from "~/server/validation/semantic/appointment_time";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 
@@ -7,7 +8,7 @@ function timestamp(time: number, hours: Hour, on_click: () => void) {
     const stamp =
         time < 12
             ? time.toString().concat(" am")
-            : time == 12
+            : time === 12
               ? time.toString().concat(" pm")
               : (time - 12).toString().concat(" pm");
 
@@ -29,7 +30,7 @@ function timestamp(time: number, hours: Hour, on_click: () => void) {
             className={"row-start-1 h-10 border-b-3 border-b-sky-800".concat(
                 " ",
                 "col-start-",
-                ((time - 8) * 4 + 1).toString(),
+                hour_to_time(time).toString(),
                 " ",
                 "col-span-4",
                 " ",
@@ -91,7 +92,7 @@ export function Board(props: {
                                 " ",
                                 app_span,
                                 " ",
-                                "row-span-1 m-1 rounded",
+                                "row-span-1 rounded",
                             )}
                         >
                             <button
