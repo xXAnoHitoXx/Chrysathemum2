@@ -27,7 +27,8 @@ export function CustomerSearch(props: {
     const [phone_number, set_phone_number] = useState("");
     const [customers, set_customers] = useState<Customer[]>([]);
     const [customers_display, set_customers_display] = useState<Customer[]>([]);
-    const [error, set_error] = useState("");
+
+    const [errors, set_errors] = useState<string[]>([]);
 
     useEffect(() => {
         if (customers.length === 0) return;
@@ -93,7 +94,7 @@ export function CustomerSearch(props: {
 
             if (is_data_error(customers)) {
                 customers.report();
-                set_error("error retrieving customers, contact Tinn");
+                set_errors(["error retrieving customers, contact Tinn"]);
                 return;
             }
 
@@ -111,9 +112,19 @@ export function CustomerSearch(props: {
         set_has_searched(true);
     }
 
+    const empty_name_error = "customer name must not be empty";
+    const empty_phone_error = "customer phone number must not be empty";
+
     async function create() {
         if (customer_name === "") {
-            set_error("customer name must not be empty");
+            if (!errors.includes(empty_name_error))
+                set_errors([...errors, empty_name_error]);
+            return;
+        }
+
+        if (phone_number === "") {
+            if (!errors.includes(empty_phone_error))
+                set_errors([...errors, empty_phone_error]);
             return;
         }
 
@@ -129,7 +140,9 @@ export function CustomerSearch(props: {
 
         if (is_data_error(customer)) {
             customer.report();
-            set_error("error creating customer, contact Tinn");
+            set_errors([
+                `error creating customer {${customer_name}}, contact Tinn`,
+            ]);
             return;
         }
 
@@ -137,10 +150,11 @@ export function CustomerSearch(props: {
         props.on_complete(customer);
     }
 
+    const phone_format_error = "phone number must be a number";
+
     function on_phone_value_change(phone: string) {
-        if (phone === "") {
-            set_phone_number(phone);
-            return;
+        if (phone !== "") {
+            set_errors(errors.filter((e) => e !== empty_phone_error));
         }
 
         const num = parseInt(
@@ -153,16 +167,34 @@ export function CustomerSearch(props: {
         );
 
         if (isNaN(num) || phone.includes(".")) {
-            set_error("phone number must be a number");
-            return;
+            if (!errors.includes(phone_format_error)) {
+                set_errors([...errors, phone_format_error]);
+                set_phone_number("");
+            }
+        } else {
+            set_errors(
+                errors.filter(
+                    (e) => e !== phone_format_error && e !== empty_phone_error,
+                ),
+            );
+            set_phone_number(phone);
         }
-
-        set_phone_number(phone);
     }
 
+    const name_format_error = "name must not contain / or \\";
+
     function on_name_value_change(name: string) {
+        if (name !== "") {
+            set_errors(errors.filter((e) => e !== empty_name_error));
+        }
+
+        if (errors.includes(name_format_error)) {
+            set_errors(errors.filter((e) => e !== name_format_error));
+        }
+
         if (name.includes("/") || name.includes("\\")) {
-            set_error("name must not contain / or \\");
+            if (!errors.includes(name_format_error))
+                set_errors([...errors, name_format_error]);
         }
 
         name = name.replaceAll("/", "");
@@ -194,7 +226,11 @@ export function CustomerSearch(props: {
                     onValueChange={on_phone_value_change}
                 />
             </div>
-            {error !== "" ? <div>{error}</div> : null}
+            {errors.length !== 0
+                ? errors.map((e) => (
+                      <div className="w-full text-black">{e}</div>
+                  ))
+                : null}
             <div className="flex w-full flex-wrap gap-2 p-2">
                 {customers_display.map((customer: Customer) => (
                     <button
@@ -220,7 +256,7 @@ export function CustomerSearch(props: {
                         LastCustomer <br />
                         {props.save.data.name}
                         <br />
-                        {format_phone_number(props.save.data.name)}
+                        {format_phone_number(props.save.data.phone_number)}
                     </button>
                 )}
                 {has_searched ? (

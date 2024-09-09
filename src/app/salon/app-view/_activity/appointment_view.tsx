@@ -402,6 +402,17 @@ export function AppointmentView(props: {
                             className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                             onClick={() => {
                                 props.set_activity(
+                                    AppViewActivity.CustomerView,
+                                );
+                            }}
+                        >
+                            Customer Finder
+                        </button>
+                        <button
+                            disabled={is_loading}
+                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                            onClick={() => {
+                                props.set_activity(
                                     AppViewActivity.DailyRecordView,
                                 );
                             }}
