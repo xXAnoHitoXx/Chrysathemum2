@@ -7,6 +7,7 @@ import {
     Closing as Close,
 } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
+import { parse_bill } from "../../_components/bill";
 
 export function Closing(props: {
     appointment: Appointment;
@@ -25,21 +26,36 @@ export function Closing(props: {
     const [closing_data, set_closing_data] = useState<number[]>([]);
 
     function validate_bill(value: string) {
-        const vals = value.replaceAll(".", "").split(" ");
+        const bill = parse_bill(value);
 
-        if (vals.length < 2) {
+        if (bill.values[0] == undefined || bill.values[1] == undefined) {
             set_is_bill_valid(false);
             return;
         }
 
         const data: number[] = [];
-        for (let i = 0; i < vals.length; i++) {
-            const n = Number(vals[i]);
-            if (isNaN(n) || !Number.isInteger(n)) {
-                set_is_bill_valid(false);
-                return;
+
+        data.push(bill.values[0]);
+        data.push(bill.values[1]);
+
+        if (bill.note != undefined) {
+            const total = discounted
+                ? bill.values[0] + bill.values[1]
+                : bill.values[0] * TaxRate + bill.values[1];
+            switch (bill.note) {
+                case "g":
+                    data.push(0);
+                case "c":
+                    data.push(total);
             }
-            data.push(n);
+        } else {
+            let i = 2;
+            let v = bill.values[i];
+            while (v != undefined) {
+                data.push(v);
+                i++;
+                v = bill.values[i];
+            }
         }
 
         set_closing_data(data);

@@ -29,9 +29,9 @@ import { to_technician } from "~/server/validation/db_types/technician_validatio
 import { AppViewActivity } from "../page";
 import { Booking } from "./_appointment_view/booking_form";
 import { AppEdit } from "./_appointment_view/app_edit";
-import { Closing } from "./_appointment_view/closing";
 import { Board } from "./_appointment_view/board";
 import { LastCustomerSave } from "../_components/customer_search";
+import { Closing } from "./_appointment_view/closing";
 
 export type AppointmentViewSaveState = {
     data: Appointment[];
@@ -397,19 +397,17 @@ export function AppointmentView(props: {
                         >
                             Booking
                         </button>
-                        <a href="/salon/record/">
-                            <button
-                                disabled={is_loading}
-                                className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                onClick={() => {
-                                    props.set_activity(
-                                        AppViewActivity.DailyRecordView,
-                                    );
-                                }}
-                            >
-                                Daily Record
-                            </button>
-                        </a>
+                        <button
+                            disabled={is_loading}
+                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                            onClick={() => {
+                                props.set_activity(
+                                    AppViewActivity.DailyRecordView,
+                                );
+                            }}
+                        >
+                            Daily Record
+                        </button>
                         <a href="/salon/nav/">
                             <button
                                 disabled={is_loading}

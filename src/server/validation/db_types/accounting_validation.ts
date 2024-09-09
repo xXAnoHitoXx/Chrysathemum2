@@ -1,7 +1,13 @@
 import { data_error, DataError, is_data_error } from "~/server/data_error";
-import { Account, Appointment, Closing } from "~/server/db_schema/type_def";
+import {
+    Account,
+    Appointment,
+    Closing,
+    Transaction,
+} from "~/server/db_schema/type_def";
 import { is_number, is_object } from "../simple_type";
 import { to_appointment } from "./appointment_validation";
+import { to_transaction } from "./transaction_validation";
 
 export function to_account(t: unknown): Account | DataError {
     const context = "casting to Account";
@@ -66,6 +72,37 @@ export function to_closing_info(
 
     return {
         appointment: appointment_casted,
+        close: close_casted,
+        account: account_casted,
+    };
+}
+
+export function to_transaction_update_info(
+    t: unknown,
+): { transaction: Transaction; close: Closing; account: Account } | DataError {
+    const context = "casting to Closing info";
+
+    if (!is_object(t)) return data_error(context, "not an object");
+
+    if (!("transaction" in t && "close" in t && "account" in t))
+        return data_error(context, "missing fields");
+
+    const { transaction, close, account } = t;
+
+    const transaction_casted = to_transaction(transaction);
+
+    if (is_data_error(transaction_casted))
+        return transaction_casted.stack(context, "...");
+
+    const close_casted = to_closing(close);
+    if (is_data_error(close_casted)) return close_casted.stack(context, "...");
+
+    const account_casted = to_account(account);
+    if (is_data_error(account_casted))
+        return account_casted.stack(context, "...");
+
+    return {
+        transaction: transaction_casted,
         close: close_casted,
         account: account_casted,
     };
