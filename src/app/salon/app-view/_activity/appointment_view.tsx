@@ -471,6 +471,7 @@ export function AppointmentView(props: {
                                 ? (appointment) => {
                                       if (is_loading) return;
                                       if (phantoms.includes(appointment)) {
+                                          set_changes([appointment]);
                                           set_state(State.AppEdit);
                                       } else {
                                           if (phantoms.length != 0) {
