@@ -90,7 +90,7 @@ export function TransactionUpdate(props: {
                 <Input
                     isDisabled={is_loading}
                     className="flex-1"
-                    label="Bill"
+                    label="Bill: amount tip cash gift discount"
                     onValueChange={validate_bill}
                 />
             </div>
