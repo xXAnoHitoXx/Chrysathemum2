@@ -19,7 +19,7 @@ export function TransactionDisplay(props: {
                     { width: half, text: "Time" },
                     { width: full, text: "Customer Name" },
                     { width: full, text: "Amount (tip)" },
-                    { width: half, text: "Detail" },
+                    { width: full, text: "Detail" },
                     { width: half, text: "Machine" },
                     { width: half, text: "Cash" },
                     { width: half, text: "Gift" },
@@ -57,7 +57,7 @@ export function TransactionDisplay(props: {
                                         money(transaction.tip) +
                                         ")",
                                 },
-                                { width: half, text: transaction.details },
+                                { width: full, text: transaction.details },
                                 {
                                     width: half,
                                     text: money(
