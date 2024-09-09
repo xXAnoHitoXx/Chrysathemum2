@@ -197,7 +197,7 @@ export function DailyRecordView(props: {
                                 }
                                 onClick={props.return}
                             >
-                                return
+                                Return
                             </Button>
                             <Button
                                 color="primary"
@@ -225,8 +225,14 @@ export function DailyRecordView(props: {
                     </>
                 ) : (
                     <div className="flex flex-1 flex-row-reverse">
-                        <Button color="primary" size="md">
-                            Confirm
+                        <Button
+                            color="danger"
+                            size="md"
+                            onClick={() => {
+                                set_editing(null);
+                            }}
+                        >
+                            Return
                         </Button>
                     </div>
                 )}

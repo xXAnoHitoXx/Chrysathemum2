@@ -153,9 +153,8 @@ export function CustomerSearch(props: {
     const phone_format_error = "phone number must be a number";
 
     function on_phone_value_change(phone: string) {
-        if (phone === "") {
-            set_phone_number(phone);
-            return;
+        if (phone !== "") {
+            set_errors(errors.filter((e) => e !== empty_phone_error));
         }
 
         const num = parseInt(
@@ -168,21 +167,22 @@ export function CustomerSearch(props: {
         );
 
         if (isNaN(num) || phone.includes(".")) {
-            if (!errors.includes(phone_format_error))
+            if (!errors.includes(phone_format_error)) {
                 set_errors([...errors, phone_format_error]);
-            return;
+                set_phone_number("");
+            }
         } else {
             set_errors(
                 errors.filter(
                     (e) => e !== phone_format_error && e !== empty_phone_error,
                 ),
             );
+            set_phone_number(phone);
         }
-
-        set_phone_number(phone);
     }
 
     const name_format_error = "name must not contain / or \\";
+
     function on_name_value_change(name: string) {
         if (name !== "") {
             set_errors(errors.filter((e) => e !== empty_name_error));
@@ -256,7 +256,7 @@ export function CustomerSearch(props: {
                         LastCustomer <br />
                         {props.save.data.name}
                         <br />
-                        {format_phone_number(props.save.data.name)}
+                        {format_phone_number(props.save.data.phone_number)}
                     </button>
                 )}
                 {has_searched ? (

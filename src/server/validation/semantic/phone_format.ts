@@ -1,20 +1,26 @@
 export function format_phone_number(phone: string) {
+    phone = phone.replaceAll("-", "");
+    phone = phone.replaceAll("(", "");
+    phone = phone.replaceAll(")", "");
+
     const p = phone.split("");
-    if (p.length != 11) return phone;
-    return (
-        p[0] +
-        "-" +
-        p[1] +
-        p[2] +
-        p[3] +
-        "-" +
-        p[4] +
-        p[5] +
-        p[6] +
-        "-" +
-        p[7] +
-        p[8] +
-        p[9] +
-        p[10]
-    );
+
+    let formated = "";
+    for (let i = p.length - 1; i >= 0; i--) {
+        const s = p[i];
+        if (s != undefined) {
+            formated = s + formated;
+
+            if (i != 0) {
+                switch (formated.length) {
+                    case 4:
+                    case 8:
+                    case 12:
+                        formated = "-" + formated;
+                }
+            }
+        }
+    }
+
+    return formated;
 }

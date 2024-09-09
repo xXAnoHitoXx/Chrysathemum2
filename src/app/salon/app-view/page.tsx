@@ -10,10 +10,12 @@ import {
     DailyRecordView,
 } from "./_activity/daily_record_view";
 import { last_customer_default_save } from "./_components/customer_search";
+import { CustomerView } from "./_activity/customer_view";
 
 export enum AppViewActivity {
     AppointmentView,
     DailyRecordView,
+    CustomerView,
 }
 
 export default function Page() {
@@ -25,6 +27,13 @@ export default function Page() {
     const [last_customer_save] = useState(last_customer_default_save);
 
     switch (activity) {
+        case AppViewActivity.CustomerView:
+            return (
+                <CustomerView
+                    last_customer_save={last_customer_save}
+                    return={() => set_activity(AppViewActivity.AppointmentView)}
+                />
+            );
         case AppViewActivity.DailyRecordView:
             return (
                 <DailyRecordView
