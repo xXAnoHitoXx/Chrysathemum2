@@ -18,6 +18,7 @@ import { delete_appointment } from "../appointment/appointment_queries";
 import {
     create_trasaction_date_entry,
     retrieve_transaction_entries_on_date,
+    update_transaction_date_entry,
 } from "../../crud/transaction/transaction_date_entry";
 import { create_customer_trasaction_history_entry } from "../../crud/transaction/customer_transaction_entry";
 import { get_all_technicians } from "../technician/technician_queries";
@@ -79,6 +80,48 @@ export const close_transaction: Query<
 
     const register = await register_earnings_query;
     if (is_data_error(register)) return register.stack(context, "...");
+};
+
+export const update_transaction: Query<
+    { transaction: Transaction; account: Account; close: Closing },
+    void
+> = async ({ transaction, account, close }, f_db) => {
+    const entry: TransactionEntry = {
+        id: transaction.id,
+        details: transaction.details,
+        date: transaction.date,
+        time: transaction.time,
+        customer_id: transaction.customer.id,
+        technician_id: transaction.technician.id,
+        salon: transaction.salon,
+        amount: account.amount,
+        tip: account.tip,
+        cash: close.cash,
+        gift: close.gift,
+        discount: close.discount,
+    };
+
+    const update_transaction_query = update_transaction_date_entry(entry, f_db);
+    const register_earnings_query = register_earnings(
+        {
+            salon: entry.salon,
+            date: entry.date,
+            entity: entry.technician_id,
+            account: {
+                amount: account.amount - transaction.amount,
+                tip: account.tip - transaction.tip,
+            },
+        },
+        f_db,
+    );
+
+    const context = `Updating transaction ${transaction.id}`;
+
+    const update = await update_transaction_query;
+    if (is_data_error(update)) return update.stack(context, "...");
+
+    const earnings = await register_earnings_query;
+    if (is_data_error(earnings)) return earnings.stack(context, "...");
 };
 
 export const retrieve_transactions_on_date: Query<
