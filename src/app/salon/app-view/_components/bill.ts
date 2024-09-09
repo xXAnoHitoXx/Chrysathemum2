@@ -10,7 +10,14 @@ export function parse_bill(bill: string): Bill {
     for (let i = 0; i < vals.length; i++) {
         const v = vals[i];
 
-        if (v === "c" || v === "g" || v === "m") {
+        if (
+            v === "c" ||
+            v === "C" ||
+            v === "g" ||
+            v === "G" ||
+            v === "m" ||
+            v === "M"
+        ) {
             return {
                 values: data,
                 note: v,
