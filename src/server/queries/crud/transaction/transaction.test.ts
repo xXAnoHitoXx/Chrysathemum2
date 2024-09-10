@@ -378,6 +378,7 @@ test("test customer transaction history entries CRUDs querries", async () => {
         customer_id: "bruh",
         id: "q;wyfupl",
         date: "20 2 2085",
+        salon: "SCVL",
     };
 
     const create = await pack_test(history, test_name)

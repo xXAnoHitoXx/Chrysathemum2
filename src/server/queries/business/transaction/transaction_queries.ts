@@ -55,7 +55,12 @@ export const close_transaction: Query<
     const del_appointment = delete_appointment(appointment, f_db);
     const create_entry_query = create_trasaction_date_entry(entry, f_db);
     const create_history_query = create_customer_trasaction_history_entry(
-        { customer_id: entry.customer_id, id: entry.id, date: entry.date },
+        {
+            customer_id: entry.customer_id,
+            id: entry.id,
+            date: entry.date,
+            salon: entry.salon,
+        },
         f_db,
     );
     const register_earnings_query = register_earnings(
