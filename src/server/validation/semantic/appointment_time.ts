@@ -23,8 +23,11 @@ export function hour_to_time(h: number): number {
 }
 
 export function time_to_string(t: number): string {
-    const minute =
+    const minute_n: number =
         (to_0_index(t) % TIME_INTERVALS_PER_HOUR) * MINUTES_PER_TIME_INTERVAL;
+
+    const minute: string = minute_n === 0 ? "00" : minute_n.toString();
+
     let hour =
         Math.floor(to_0_index(t) / TIME_INTERVALS_PER_HOUR) +
         BOARD_STARTING_HOUR;
