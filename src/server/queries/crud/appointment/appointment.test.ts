@@ -10,7 +10,7 @@ import { is_data_error } from "~/server/data_error";
 import {
     create_customers_appointments_entry,
     delete_customers_appointment_entry,
-    retrieve_customer_appointments,
+    retrieve_customer_appointments_index,
 } from "./customer_appointments";
 
 const test_suit = "appointment_cruds";
@@ -171,7 +171,7 @@ test("test customer appointment list entries CRUDs querries", async () => {
         { customer_id: history.customer_id },
         test_name,
     )
-        .bind(retrieve_customer_appointments)
+        .bind(retrieve_customer_appointments_index)
         .unpack();
 
     if (is_data_error(customer_history)) {
@@ -205,7 +205,7 @@ test("test customer appointment list entries CRUDs querries", async () => {
         { customer_id: history.customer_id },
         test_name,
     )
-        .bind(retrieve_customer_appointments)
+        .bind(retrieve_customer_appointments_index)
         .unpack();
 
     if (is_data_error(customer_history)) {

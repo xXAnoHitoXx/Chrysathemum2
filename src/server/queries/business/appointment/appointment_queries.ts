@@ -8,18 +8,22 @@ import {
 import {
     Appointment,
     AppointmentCreationInfo,
+    AppointmentEntry,
+    Customer,
     Technician,
 } from "~/server/db_schema/type_def";
 import {
     create_appointment_entry,
     delete_appointment_entry,
     retrieve_appointment_entries_on_date,
+    retrieve_appointment_entry,
     update_appointment_entry,
 } from "../../crud/appointment/appointment_entry";
 import { Query } from "../../server_queries_monad";
 import {
     create_customers_appointments_entry,
     delete_customers_appointment_entry,
+    retrieve_customer_appointments_index,
 } from "../../crud/appointment/customer_appointments";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
@@ -69,27 +73,45 @@ export const create_new_appointment: Query<
     };
 };
 
-export const retrieve_appointments_on_date: Query<
-    { date: string; salon: string },
+export const retrieve_customers_appointments: Query<
+    Customer,
     PartialResult<Appointment[]>
-> = async ({ date, salon }, f_db) => {
-    const context = `retriving appointments of { ${date} }`;
-    const appointment_entries = await retrieve_appointment_entries_on_date(
-        { date: date, salon: salon },
+> = async (customer, f_db) => {
+    const context = `retriving appointments of customer { ${customer.name} }`;
+
+    const v: void = undefined;
+    const technician_query = get_all_technicians(v, f_db);
+
+    const index = await retrieve_customer_appointments_index(
+        { customer_id: customer.id },
         f_db,
     );
 
-    if (is_data_error(appointment_entries))
-        return appointment_entries.stack(context, "...");
+    if (is_data_error(index)) return index.stack(context, "...");
 
-    const errors: DataError[] = [];
+    const errors: DataError[] = index.error != null ? [index.error] : [];
 
-    if (appointment_entries.error != null) {
-        errors.push(appointment_entries.error);
+    const query: (
+        | Promise<AppointmentEntry | DataError>
+        | AppointmentEntry
+        | DataError
+    )[] = [];
+
+    for (const data of index.data) {
+        query.push(retrieve_appointment_entry(data, f_db));
     }
 
-    const v: void = undefined;
-    const technicians = await get_all_technicians(v, f_db);
+    const appointment_entries: AppointmentEntry[] = [];
+
+    (await Promise.all(query)).map((res: AppointmentEntry | DataError) => {
+        if (is_data_error(res)) {
+            errors.push(res);
+        } else {
+            appointment_entries.push(res);
+        }
+    });
+
+    const technicians = await technician_query;
 
     if (is_data_error(technicians))
         return technicians.stack(context, "unable to retrieve technicians");
@@ -104,7 +126,130 @@ export const retrieve_appointments_on_date: Query<
         tech_map[tech.id] = tech;
     });
 
+    const customer_entries: {
+        [index: string]: Promise<Customer | DataError> | Customer | DataError;
+    } = {};
+
+    for (let i = 0; i < appointment_entries.length; i++) {
+        const entry = appointment_entries[i];
+        if (entry == undefined) {
+            errors.push(data_error(context, "undefined in entry array"));
+            continue;
+        }
+
+        if (customer_entries[entry.customer_id] == undefined) {
+            customer_entries[entry.customer_id] = retrieve_customer_entry(
+                { customer_id: entry.customer_id },
+                f_db,
+            );
+        }
+    }
+
     const appointments: Appointment[] = [];
+
+    for (let i = 0; i < appointment_entries.length; i++) {
+        const entry = appointment_entries[i];
+        if (entry == undefined) continue;
+
+        const sub_context = `filling out appointment { ${entry.id} }`;
+
+        const customer = await customer_entries[entry.customer_id];
+
+        if (is_data_error(customer)) {
+            errors.push(
+                customer.stack(
+                    sub_context,
+                    `error retrieving customer { ${entry.customer_id} }`,
+                ),
+            );
+            continue;
+        }
+
+        if (customer == undefined) {
+            errors.push(
+                data_error(
+                    sub_context,
+                    `UNREACHABLE*! error retrieving customer { ${entry.customer_id} }`,
+                ),
+            );
+            continue;
+        }
+
+        if (entry.technician_id != null) {
+            const tech = tech_map[entry.technician_id];
+
+            if (tech != undefined) {
+                appointments.push({
+                    ...entry,
+                    technician: tech,
+                    customer: customer,
+                });
+                continue;
+            }
+        }
+
+        appointments.push({
+            id: entry.id,
+            date: entry.date,
+            duration: entry.duration,
+            details: entry.details,
+            time: entry.time,
+            technician: null,
+            customer: customer,
+            salon: entry.salon,
+        });
+    }
+    return {
+        data: appointments,
+        error:
+            errors.length == 0
+                ? null
+                : lotta_errors(context, "encountered errors", errors),
+    };
+};
+
+export const retrieve_appointments_on_date: Query<
+    { date: string; salon: string },
+    PartialResult<Appointment[]>
+> = async ({ date, salon }, f_db) => {
+    const context = `retriving appointments of { ${date} }`;
+
+    const appointment_entries_query = retrieve_appointment_entries_on_date(
+        { date: date, salon: salon },
+        f_db,
+    );
+    const v: void = undefined;
+    const technician_query = get_all_technicians(v, f_db);
+
+    const appointment_entries = await appointment_entries_query;
+
+    if (is_data_error(appointment_entries))
+        return appointment_entries.stack(context, "...");
+
+    const errors: DataError[] = [];
+
+    if (appointment_entries.error != null) {
+        errors.push(appointment_entries.error);
+    }
+
+    const technicians = await technician_query;
+
+    if (is_data_error(technicians))
+        return technicians.stack(context, "unable to retrieve technicians");
+
+    if (is_data_error(technicians.error)) {
+        errors.push(technicians.error);
+    }
+
+    const tech_map: { [index: string]: Technician } = {};
+
+    technicians.data.forEach((tech) => {
+        tech_map[tech.id] = tech;
+    });
+
+    const customer_entries: {
+        [index: string]: Promise<Customer | DataError> | Customer | DataError;
+    } = {};
 
     for (let i = 0; i < appointment_entries.data.length; i++) {
         const entry = appointment_entries.data[i];
@@ -113,18 +258,39 @@ export const retrieve_appointments_on_date: Query<
             continue;
         }
 
+        if (customer_entries[entry.customer_id] == undefined) {
+            customer_entries[entry.customer_id] = retrieve_customer_entry(
+                { customer_id: entry.customer_id },
+                f_db,
+            );
+        }
+    }
+
+    const appointments: Appointment[] = [];
+
+    for (let i = 0; i < appointment_entries.data.length; i++) {
+        const entry = appointment_entries.data[i];
+        if (entry == undefined) continue;
+
         const sub_context = `filling out appointment { ${entry.id} }`;
 
-        const customer = await retrieve_customer_entry(
-            { customer_id: entry.customer_id },
-            f_db,
-        );
+        const customer = await customer_entries[entry.customer_id];
 
         if (is_data_error(customer)) {
             errors.push(
                 customer.stack(
                     sub_context,
                     `error retrieving customer { ${entry.customer_id} }`,
+                ),
+            );
+            continue;
+        }
+
+        if (customer == undefined) {
+            errors.push(
+                data_error(
+                    sub_context,
+                    `UNREACHABLE*! error retrieving customer { ${entry.customer_id} }`,
                 ),
             );
             continue;

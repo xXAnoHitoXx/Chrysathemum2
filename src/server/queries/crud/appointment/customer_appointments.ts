@@ -21,7 +21,7 @@ export const create_customers_appointments_entry: Query<
     if (is_data_error(e)) return e;
 };
 
-export const retrieve_customer_appointments: Query<
+export const retrieve_customer_appointments_index: Query<
     { customer_id: string },
     PartialResult<{ id: string; date: string; salon: string }[]>
 > = async ({ customer_id }, f_db) => {
