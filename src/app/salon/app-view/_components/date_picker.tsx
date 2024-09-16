@@ -19,6 +19,7 @@ export function BoardDatePicker(props: {
             <Popover
                 placement="bottom"
                 onClose={() => {
+                    console.log("run");
                     props.set_date(holder);
                 }}
             >
@@ -51,6 +52,7 @@ export function BoardDatePicker(props: {
                 color="secondary"
                 onClick={() => {
                     update_date(current_date());
+                    props.set_date(holder);
                 }}
             >
                 Reset

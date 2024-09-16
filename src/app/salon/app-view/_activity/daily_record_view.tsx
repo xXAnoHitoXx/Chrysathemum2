@@ -26,14 +26,16 @@ const rec_view_transaction = "/api/app_view/daily_record/";
 const useTransactionList = (
     date: string,
     saved_transactions: Transaction[],
+    reset_filter: () => void,
 ): [Transaction[], Dispatch<SetStateAction<Transaction[]>>, boolean] => {
     const [transactions, set_transactions] =
         useState<Transaction[]>(saved_transactions);
     const router = useRouter();
 
     const { isFetching } = useQuery({
-        queryFn: () =>
-            fetch(rec_view_transaction + date, {
+        queryFn: () => {
+            console.log("fetching");
+            return fetch(rec_view_transaction + date, {
                 method: Method.GET,
                 cache: "no-store",
             }).then(
@@ -54,6 +56,7 @@ const useTransactionList = (
                             );
                         });
                         set_transactions(transactions);
+                        reset_filter();
                     },
                     (error) => {
                         if (
@@ -66,7 +69,8 @@ const useTransactionList = (
                         }
                     },
                 ),
-            ),
+            );
+        },
         queryKey: ["transaction_list", date],
     });
 
@@ -115,8 +119,9 @@ export function DailyRecordView(props: {
 }) {
     const [date, set_date] = useState(props.saves.data.date);
     const [transactions, _, isFetching] = useTransactionList(
-        props.saves.data.date.toString(),
+        date.toString(),
         props.saves.data.transactions,
+        () => set_filter([]),
     );
     const [filter, set_filter] = useState<string[]>(props.saves.data.filter);
     const [selection, set_selection] = useState<string[]>([]);
@@ -182,7 +187,7 @@ export function DailyRecordView(props: {
     }
 
     return (
-        <div className="flex w-full flex-col">
+        <div className="flex w-full flex-1 flex-col">
             <div className="flex w-full">
                 {editing == null ? (
                     <>
