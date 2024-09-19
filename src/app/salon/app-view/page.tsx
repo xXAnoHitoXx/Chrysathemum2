@@ -10,7 +10,10 @@ import {
     DailyRecordView,
 } from "./_activity/daily_record_view";
 import { last_customer_default_save } from "./_components/customer_search";
-import { CustomerView } from "./_activity/customer_view";
+import {
+    customer_history_default_save,
+    CustomerView,
+} from "./_activity/customer_view";
 
 export enum AppViewActivity {
     AppointmentView,
@@ -26,10 +29,13 @@ export default function Page() {
 
     const [last_customer_save] = useState(last_customer_default_save);
 
+    const [customer_history] = useState(customer_history_default_save);
+
     switch (activity) {
         case AppViewActivity.CustomerView:
             return (
                 <CustomerView
+                    saved_list={customer_history}
                     last_customer_save={last_customer_save}
                     return={() => set_activity(AppViewActivity.AppointmentView)}
                 />

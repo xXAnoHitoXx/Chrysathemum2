@@ -1,10 +1,14 @@
 import {
+    Appointment,
     Customer,
     CustomerCreationInfo,
     CustomerUpdateData,
+    Transaction,
 } from "~/server/db_schema/type_def";
-import { is_number, is_object, is_string } from "../simple_type";
+import { is_number, is_object, is_string, to_array } from "../simple_type";
 import { data_error, DataError, is_data_error } from "~/server/data_error";
+import { to_appointment } from "./appointment_validation";
+import { to_transaction } from "./transaction_validation";
 
 export function to_customer_creation_info(
     t: unknown,
@@ -95,4 +99,36 @@ export function to_customer(t: unknown): Customer | DataError {
     }
 
     return { id: id, name: name, phone_number: phone_number, notes: notes };
+}
+
+export function to_customer_data(t: unknown):
+    | {
+          appointments: Appointment[];
+          transactions: Transaction[];
+      }
+    | DataError {
+    if (!is_object(t)) {
+        return data_error("Casting to Customer Data", "not an object");
+    }
+
+    if (!("appointments" in t && "transactions" in t)) {
+        return data_error("Casting to Customer", "missing field");
+    }
+
+    const { appointments, transactions } = t;
+
+    const casted_appointments = to_array(to_appointment)(appointments);
+
+    if (is_data_error(casted_appointments))
+        return casted_appointments.stack("Casting to Customer Data", "...");
+
+    const casted_transactions = to_array(to_transaction)(transactions);
+
+    if (is_data_error(casted_transactions))
+        return casted_transactions.stack("Casting to Customer Data", "...");
+
+    return {
+        appointments: casted_appointments,
+        transactions: casted_transactions,
+    };
 }

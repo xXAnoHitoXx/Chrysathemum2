@@ -126,25 +126,6 @@ export const retrieve_customers_appointments: Query<
         tech_map[tech.id] = tech;
     });
 
-    const customer_entries: {
-        [index: string]: Promise<Customer | DataError> | Customer | DataError;
-    } = {};
-
-    for (let i = 0; i < appointment_entries.length; i++) {
-        const entry = appointment_entries[i];
-        if (entry == undefined) {
-            errors.push(data_error(context, "undefined in entry array"));
-            continue;
-        }
-
-        if (customer_entries[entry.customer_id] == undefined) {
-            customer_entries[entry.customer_id] = retrieve_customer_entry(
-                { customer_id: entry.customer_id },
-                f_db,
-            );
-        }
-    }
-
     const appointments: Appointment[] = [];
 
     for (let i = 0; i < appointment_entries.length; i++) {
@@ -153,23 +134,11 @@ export const retrieve_customers_appointments: Query<
 
         const sub_context = `filling out appointment { ${entry.id} }`;
 
-        const customer = await customer_entries[entry.customer_id];
-
         if (is_data_error(customer)) {
             errors.push(
                 customer.stack(
                     sub_context,
                     `error retrieving customer { ${entry.customer_id} }`,
-                ),
-            );
-            continue;
-        }
-
-        if (customer == undefined) {
-            errors.push(
-                data_error(
-                    sub_context,
-                    `UNREACHABLE*! error retrieving customer { ${entry.customer_id} }`,
                 ),
             );
             continue;
