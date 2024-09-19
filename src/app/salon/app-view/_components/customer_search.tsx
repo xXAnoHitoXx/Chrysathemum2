@@ -83,7 +83,7 @@ export function CustomerSearch(props: {
         set_loading(true);
         if (customer_name !== "") {
             const response = await fetch(
-                "/api/customer/name/" + customer_name,
+                "/api/app_view/customer/name/" + customer_name,
                 { method: Method.GET },
             );
 
@@ -128,7 +128,7 @@ export function CustomerSearch(props: {
             return;
         }
 
-        const response = await fetch("/api/customer", {
+        const response = await fetch("/api/app_view/customer", {
             method: Method.POST,
             body: JSON.stringify({
                 name: customer_name,
