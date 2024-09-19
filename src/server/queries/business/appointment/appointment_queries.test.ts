@@ -10,10 +10,10 @@ import {
     create_new_appointment,
     delete_appointment,
     retrieve_appointments_on_date,
+    retrieve_customers_appointments,
     update_appointment,
 } from "./appointment_queries";
 import { retrieve_appointment_entry } from "../../crud/appointment/appointment_entry";
-import { retrieve_customer_appointments } from "../../crud/appointment/customer_appointments";
 import { TechnicianCreationInfo } from "~/app/api/technician/create/validation";
 import { create_new_technician } from "../technician/technician_queries";
 import { current_date } from "~/server/validation/semantic/date";
@@ -93,8 +93,8 @@ test("appointment creation", async () => {
     expect(entry.details).toBe(appointment.details);
     expect(entry.technician_id).toBe(null);
 
-    const index = await pack_test({ customer_id: customer.id }, test_name)
-        .bind(retrieve_customer_appointments)
+    const index = await pack_test(customer, test_name)
+        .bind(retrieve_customers_appointments)
         .bind((res) => {
             if (res.error != null) {
                 res.error?.log();

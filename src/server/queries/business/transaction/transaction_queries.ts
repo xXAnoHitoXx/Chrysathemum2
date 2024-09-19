@@ -9,6 +9,7 @@ import {
     Account,
     Appointment,
     Closing,
+    Customer,
     Technician,
     Transaction,
     TransactionEntry,
@@ -18,12 +19,18 @@ import { delete_appointment } from "../appointment/appointment_queries";
 import {
     create_trasaction_date_entry,
     retrieve_transaction_entries_on_date,
+    retrieve_transaction_entry,
     update_transaction_date_entry,
 } from "../../crud/transaction/transaction_date_entry";
-import { create_customer_trasaction_history_entry } from "../../crud/transaction/customer_transaction_entry";
+import {
+    create_customer_trasaction_history_entry,
+    retrieve_customer_transactions_history,
+} from "../../crud/transaction/customer_transaction_entry";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
 import { register_earnings } from "../../crud/accounting/earning";
+import { iter, take } from "itertools";
+import { quick_sort } from "~/util/ano_quick_sort";
 
 export const close_transaction: Query<
     { appointment: Appointment; account: Account; close: Closing },
@@ -85,6 +92,125 @@ export const close_transaction: Query<
 
     const register = await register_earnings_query;
     if (is_data_error(register)) return register.stack(context, "...");
+};
+
+export const retrieve_customer_history: Query<
+    Customer,
+    PartialResult<Transaction[]>
+> = async (customer, f_db) => {
+    const context = `retriving transactions of customer { ${customer.name} }`;
+
+    const v: void = undefined;
+    const technician_query = get_all_technicians(v, f_db);
+
+    const index = await retrieve_customer_transactions_history(
+        { customer_id: customer.id },
+        f_db,
+    );
+
+    if (is_data_error(index)) return index.stack(context, "...");
+
+    const errors: DataError[] = index.error != null ? [index.error] : [];
+
+    const query: (
+        | Promise<TransactionEntry | DataError>
+        | TransactionEntry
+        | DataError
+    )[] = [];
+
+    for (const data of index.data) {
+        query.push(retrieve_transaction_entry(data, f_db));
+    }
+
+    const transaction_entries: TransactionEntry[] = [];
+
+    (await Promise.all(query)).map((res: TransactionEntry | DataError) => {
+        if (is_data_error(res)) {
+            errors.push(res);
+        } else {
+            transaction_entries.push(res);
+        }
+    });
+
+    const technicians = await technician_query;
+
+    if (is_data_error(technicians))
+        return technicians.stack(context, "unable to retrieve technicians");
+
+    if (is_data_error(technicians.error)) {
+        errors.push(technicians.error);
+    }
+
+    const tech_map: { [index: string]: Technician } = {};
+
+    technicians.data.forEach((tech) => {
+        tech_map[tech.id] = tech;
+    });
+
+    const transactions: Transaction[] = [];
+
+    for (let i = 0; i < transaction_entries.length; i++) {
+        const entry = transaction_entries[i];
+        if (entry == undefined) continue;
+
+        const sub_context = `filling out appointment { ${entry.id} }`;
+
+        if (is_data_error(customer)) {
+            errors.push(
+                customer.stack(
+                    sub_context,
+                    `error retrieving customer { ${entry.customer_id} }`,
+                ),
+            );
+            continue;
+        }
+
+        if (entry.technician_id != null) {
+            const tech = tech_map[entry.technician_id];
+
+            if (tech != undefined) {
+                transactions.push({
+                    ...entry,
+                    technician: tech,
+                    customer: customer,
+                });
+
+                if (transactions.length >= 20) {
+                    if (
+                        transactions[
+                            transactions.length - 1
+                        ]!.date.localeCompare(
+                            transactions[transactions.length - 2]!.date,
+                        ) === 0
+                    ) {
+                        break;
+                    }
+                }
+                continue;
+            }
+        }
+
+        errors.push(
+            data_error(
+                context,
+                `transactions {${entry.id}} missing technician {${entry.technician_id}}`,
+            ),
+        );
+    }
+
+    quick_sort(transactions, (t_a, t_b) => {
+        const comp = t_a.date.localeCompare(t_b.date);
+        if (comp !== 0) return comp;
+        return t_a.time - t_b.time;
+    });
+
+    return {
+        data: take(20, iter(transactions)),
+        error:
+            errors.length == 0
+                ? null
+                : lotta_errors(context, "encountered errors", errors),
+    };
 };
 
 export const update_transaction: Query<
