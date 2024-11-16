@@ -1,6 +1,7 @@
 import { Input } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { LastCustomerSave } from "../customer_search";
+import { format_phone_input } from "~/server/validation/semantic/phone_format";
 
 enum State {
     LastCustomer = "Last Customer",
@@ -74,7 +75,11 @@ export function SearchQueryInput(props: {
             <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
                 <Input
                     label="name / phone number"
-                    value={input}
+                    value={
+                        search_state === State.PhoneSearch
+                            ? format_phone_input(input)
+                            : input
+                    }
                     onValueChange={set_input}
                 />
             </div>
