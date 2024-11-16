@@ -6,11 +6,13 @@ import {
 import { Query } from "../../server_queries_monad";
 import {
     create_customer_entry,
+    retrieve_customer_entry,
     update_customer_entry,
 } from "../../crud/customer/customer_entry";
 import {
     create_customer_phone_index,
     delete_customer_phone_index,
+    retrieve_customer_phone_index,
 } from "../../crud/customer/customer_phone_index";
 import {
     DataError,
@@ -74,6 +76,55 @@ export const customer_name_search: Query<
               ),
               data: customers,
           };
+};
+
+export const customer_phone_search: Query<
+    string,
+    PartialResult<Customer[]>
+> = async (phone_number, f_db) => {
+    const context = "Customer phone search";
+    const index = await retrieve_customer_phone_index(
+        { phone_number: phone_number },
+        f_db,
+    );
+
+    if (is_data_error(index)) {
+        return index.stack(context, "failed to retrieve index");
+    }
+
+    const entries_queries: (
+        | Customer
+        | DataError
+        | Promise<Customer | DataError>
+    )[] = [];
+
+    for (let customer_id of index.data.customer_ids) {
+        entries_queries.push(
+            retrieve_customer_entry({ customer_id: customer_id }, f_db),
+        );
+    }
+
+    const errors = index.error == null ? [] : [index.error];
+    const customers: Customer[] = [];
+
+    const query_result: (Customer | DataError)[] =
+        await Promise.all(entries_queries);
+
+    for (let res of query_result) {
+        if (is_data_error(res)) {
+            errors.push(res);
+        } else {
+            customers.push(res);
+        }
+    }
+
+    return {
+        data: customers,
+        error:
+            errors.length == 0
+                ? null
+                : lotta_errors(context, "errors in some entries", errors),
+    };
 };
 
 export const update_customer_info: Query<

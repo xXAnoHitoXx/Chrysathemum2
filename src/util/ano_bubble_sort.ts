@@ -9,7 +9,7 @@ export function bubble_sort<T>(
         while (!sorted) {
             sorted = true;
             for (let i = 1; i < arr.length; i++) {
-                if (comp(arr[i - 1]!, arr[i]!) < 0) {
+                if (comp(arr[i - 1]!, arr[i]!) > 0) {
                     sorted = false;
                     swap(arr, i - 1, i);
                 }

@@ -28,7 +28,7 @@ export const customer_history_default_save: SavedCustomerHistory = {
     transactions: [],
 };
 
-const customer_api = "/api/customer/history";
+const customer_api = "/api/app_view/customer/history";
 
 const useCustomerHistory = (
     saved_list: SavedCustomerHistory,

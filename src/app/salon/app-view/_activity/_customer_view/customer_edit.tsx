@@ -40,7 +40,7 @@ export function CustomerEdit(props: {
         set_loading(true);
         props.set_loading(true);
 
-        return fetch("/api/customer", {
+        return fetch("/api/app_view/customer", {
             method: Method.PATCH,
             body: JSON.stringify({
                 customer: props.customer,
