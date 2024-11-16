@@ -8,7 +8,7 @@ import {
 } from "~/server/data_error";
 import { Appointment, Transaction } from "~/server/db_schema/type_def";
 import { pack } from "~/server/queries/server_queries_monad";
-import { parse_request, unpack_response } from "../../server_parser";
+import { parse_request, unpack_response } from "../../../server_parser";
 import { to_customer } from "~/server/validation/db_types/customer_validation";
 
 export async function POST(request: Request) {
