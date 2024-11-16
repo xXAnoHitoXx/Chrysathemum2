@@ -5,7 +5,10 @@ import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
 import { Customer } from "~/server/db_schema/type_def";
 import { to_customer } from "~/server/validation/db_types/customer_validation";
-import { format_phone_number } from "~/server/validation/semantic/phone_format";
+import {
+    format_phone_input,
+    format_phone_number,
+} from "~/server/validation/semantic/phone_format";
 
 export function CustomerEdit(props: {
     customer: Customer;
@@ -78,6 +81,7 @@ export function CustomerEdit(props: {
                 set_customer({ ...customer, phone_number: "" });
             }
         } else {
+            //todo error on phone digit count
             set_errors(
                 errors.filter(
                     (e) => e !== phone_format_error && e !== empty_phone_error,
@@ -85,7 +89,7 @@ export function CustomerEdit(props: {
             );
             set_customer({
                 ...customer,
-                phone_number: num.toString(),
+                phone_number: "1" + num.toString(),
             });
         }
     }
@@ -141,7 +145,9 @@ export function CustomerEdit(props: {
             <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
                 <Input
                     label="phone number"
-                    value={customer.phone_number}
+                    value={format_phone_input(
+                        customer.phone_number.substring(1),
+                    )}
                     onValueChange={on_phone_value_change}
                 />
             </div>

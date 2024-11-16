@@ -24,6 +24,10 @@ export async function name_search(customer_name: string): Promise<Customer[]> {
 }
 
 export async function phone_search(phone_number: string): Promise<Customer[]> {
+    phone_number = phone_number.replaceAll("-", "");
+    phone_number = phone_number.replaceAll("(", "");
+    phone_number = phone_number.replaceAll(")", "");
+
     if ([7, 10, 11].includes(phone_number.length)) {
         let full_phone_number = phone_number;
 
@@ -61,6 +65,10 @@ export async function create_customer({
     phone_number: string;
     customer_name: string;
 }): Promise<Customer> {
+    phone_number = phone_number.replaceAll("-", "");
+    phone_number = phone_number.replaceAll("(", "");
+    phone_number = phone_number.replaceAll(")", "");
+
     if ([7, 10, 11].includes(phone_number.length)) {
         let full_phone_number = phone_number;
 

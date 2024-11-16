@@ -2,7 +2,10 @@ import { Button, Input } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Customer } from "~/server/db_schema/type_def";
 import { LastCustomerSave } from "../customer_search";
-import { format_phone_number } from "~/server/validation/semantic/phone_format";
+import {
+    format_phone_input,
+    format_phone_number,
+} from "~/server/validation/semantic/phone_format";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 
 export default function SelectionDisplay(props: {
@@ -117,7 +120,7 @@ export default function SelectionDisplay(props: {
                 />
                 <Input
                     label="phone_number"
-                    value={customer_phone_number}
+                    value={format_phone_input(customer_phone_number)}
                     onValueChange={set_customer_phone_number}
                 />
             </div>

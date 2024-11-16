@@ -18,7 +18,7 @@
             -   [x] ~technician entries~
             -   [x] ~technician login index~
             -   [x] ~technician migration index~
-            -   [ ] sale tech
+            -   [x] ~sale tech~
         -   [x] ~location~
             -   [x] ~location entries~
             -   [x] ~location's technician~
@@ -43,8 +43,9 @@
     -   [x] ~appointment viewer~
         -   [x] ~display board~
     -   [x] ~booking~
-    -   [ ] closing transactions
-    -   [ ] view daily breakdown
+    -   [x] ~customer search~
+    -   [x] ~closing transactions~
+    -   [x] ~view daily breakdown~
     -   [ ] sumary
     -   [ ] month tally
 -   [ ] technician:
