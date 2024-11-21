@@ -14,11 +14,13 @@ import {
     customer_history_default_save,
     CustomerView,
 } from "./_activity/customer_view";
+import { SummaryView } from "./_activity/sumary_view";
 
 export enum AppViewActivity {
     AppointmentView,
     DailyRecordView,
     CustomerView,
+    SummaryView,
 }
 
 export default function Page() {
@@ -47,6 +49,8 @@ export default function Page() {
                     saves={daily_record_save}
                 />
             );
+        case AppViewActivity.SummaryView:
+            return <SummaryView/>;
         default:
             return (
                 <AppointmentView
