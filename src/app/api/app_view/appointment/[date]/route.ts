@@ -24,8 +24,8 @@ export async function GET(
 ): Promise<Response> {
     const query = pack(params.date)
         .bind(valiDate)
-        .bind((date) => {
-            const salon = get_bisquit(Bisquit.salon_selection);
+        .bind(async (date) => {
+            const salon = await get_bisquit(Bisquit.salon_selection);
             if (is_data_error(salon)) {
                 return salon.stack(
                     "Load Appointments API Call",
