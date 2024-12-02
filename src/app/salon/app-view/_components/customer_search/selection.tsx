@@ -24,6 +24,7 @@ export default function SelectionDisplay(props: {
     );
 
     const [error, set_error] = useState<string | undefined>(undefined);
+    const [is_loading, set_is_loaing] = useState(false);
 
     useEffect(() => {
         if (props.customers.length > 0) {
@@ -108,6 +109,7 @@ export default function SelectionDisplay(props: {
                     className="justify-self-center"
                     color="danger"
                     size="md"
+                    disabled={is_loading}
                     onClick={props.on_return}
                 >
                     Return
@@ -125,25 +127,14 @@ export default function SelectionDisplay(props: {
                 />
             </div>
             <div className="flex w-full flex-wrap gap-2 p-2">
-                {props.customers.map((customer: Customer) => (
-                    <button
-                        onClick={() => {
-                            props.save.data = customer;
-                            props.on_complete(customer);
-                        }}
-                        className="h-20 w-fit rounded-3xl border-2 border-sky-900 p-3"
-                    >
-                        {customer.name}
-                        <br />
-                        {format_phone_number(customer.phone_number)}
-                    </button>
-                ))}
                 {props.save.data == null ? null : (
                     <button
                         onClick={() => {
+                            set_is_loaing(true);
                             if (props.save.data != null)
                                 props.on_complete(props.save.data);
                         }}
+                        disabled={is_loading}
                         className="h-20 w-32 rounded-3xl border-2 border-sky-900 bg-sky-300"
                     >
                         LastCustomer <br />
@@ -155,12 +146,14 @@ export default function SelectionDisplay(props: {
                 <button
                     onClick={() => {
                         if (error === undefined) {
+                            set_is_loaing(true);
                             props.create_customer(
                                 customer_name,
                                 customer_phone_number,
                             );
                         }
                     }}
+                    disabled={is_loading}
                     className={
                         "h-20 rounded-3xl border-2 bg-sky-300" +
                         (error === undefined
@@ -172,6 +165,21 @@ export default function SelectionDisplay(props: {
                     <br />
                     {error === undefined ? "" : error}
                 </button>
+                {props.customers.map((customer: Customer) => (
+                    <button
+                        onClick={() => {
+                            set_is_loaing(true);
+                            props.save.data = customer;
+                            props.on_complete(customer);
+                        }}
+                        disabled={is_loading}
+                        className="h-20 w-fit rounded-3xl border-2 border-sky-900 p-3"
+                    >
+                        {customer.name}
+                        <br />
+                        {format_phone_number(customer.phone_number)}
+                    </button>
+                ))}
             </div>
         </div>
     );

@@ -8,8 +8,8 @@ import {
 } from "~/server/error_messages/messages";
 import { Bisquit } from "~/server/validation/bisquit";
 
-export function get_bisquit(name: Bisquit): string | DataError {
-    const cookies_store = cookies();
+export async function get_bisquit(name: Bisquit): Promise<string | DataError> {
+    const cookies_store = await cookies();
     const bisquit = cookies_store.get(name)?.value;
     if (bisquit == undefined)
         return data_error(
@@ -19,7 +19,7 @@ export function get_bisquit(name: Bisquit): string | DataError {
     return bisquit;
 }
 
-export function set_bisquit({ name, value }: { name: Bisquit; value: string }) {
-    const cookies_store = cookies();
+export async function set_bisquit({ name, value }: { name: Bisquit; value: string }) {
+    const cookies_store = await cookies();
     cookies_store.set(name, value);
 }

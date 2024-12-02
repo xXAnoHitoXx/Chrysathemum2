@@ -8,7 +8,7 @@ import { Bisquit } from "~/server/validation/bisquit";
 import { is_data_error } from "~/server/data_error";
 
 export default async function Ass() {
-    const salon = get_bisquit(Bisquit.salon_selection);
+    const salon = await get_bisquit(Bisquit.salon_selection);
     if (is_data_error(salon)) {
         redirect("/");
     }

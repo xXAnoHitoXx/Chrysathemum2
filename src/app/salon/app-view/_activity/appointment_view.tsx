@@ -419,6 +419,15 @@ export function AppointmentView(props: {
                         >
                             Daily Record
                         </button>
+                        <button
+                            disabled={is_loading}
+                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                            onClick={() => {
+                                props.set_activity(AppViewActivity.SummaryView);
+                            }}
+                        >
+                            Summary
+                        </button>
                         <a href="/salon/nav/">
                             <button
                                 disabled={is_loading}

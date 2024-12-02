@@ -46,8 +46,8 @@ export default function RootLayout({
     );
 }
 
-function TopNav() {
-    const salon = get_bisquit(Bisquit.salon_selection);
+async function TopNav() {
+    const salon = await get_bisquit(Bisquit.salon_selection);
     return (
         <nav
             id="top-nav"
