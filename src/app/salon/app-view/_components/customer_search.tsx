@@ -51,6 +51,10 @@ export function CustomerSearch(props: {
 
     const new_customer = useMutation({
         mutationFn: create_customer,
+        mutationKey: ["new Customer"],
+        onSuccess: (customer: Customer) => {
+            props.on_complete(customer);
+        }
     });
 
     if (state === State.Input) {
