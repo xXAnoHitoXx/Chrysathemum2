@@ -29,10 +29,5 @@ export default async function Ass() {
         technicians.error.report();
     }
 
-    return (
-        <ClientSide
-            technicians={technicians.data}
-            roster={roster}
-        />
-    );
+    return <ClientSide technicians={technicians.data} roster={roster} />;
 }

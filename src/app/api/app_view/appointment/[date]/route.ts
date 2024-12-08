@@ -17,11 +17,16 @@ import {
 } from "~/server/validation/db_types/appointment_validation";
 import { to_closing_info } from "~/server/validation/db_types/accounting_validation";
 import { close_transaction } from "~/server/queries/business/transaction/transaction_queries";
+import { require_permission, Role } from "~/app/api/c_user";
 
 export async function GET(
     _: Request,
     { params }: { params: { date: string } },
 ): Promise<Response> {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(params.date)
         .bind(valiDate)
         .bind(async (date) => {
@@ -50,6 +55,10 @@ export async function POST(
     request: Request,
     { params }: { params: { date: string } },
 ) {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const context = "Create Appointmenpts API Call";
     const query = pack(Bisquit.salon_selection)
         .bind(get_bisquit)
@@ -91,6 +100,10 @@ export async function PUT(
     request: Request,
     { params }: { params: { date: string } },
 ) {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(request)
         .bind(parse_request(to_closing_info))
         .bind(close_transaction)
@@ -107,6 +120,10 @@ export async function PATCH(
     request: Request,
     { params }: { params: { date: string } },
 ) {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const context = "UPDATE appointments api call";
     const query = pack(Bisquit.salon_selection)
         .bind(get_bisquit)
@@ -136,6 +153,10 @@ export async function DELETE(
     request: Request,
     { params }: { params: { date: string } },
 ) {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(request)
         .bind(parse_request(to_array(to_appointment)))
         .bind(

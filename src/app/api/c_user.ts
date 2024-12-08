@@ -1,11 +1,22 @@
-import { User, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 
-//why wasn't it done this way to begin with
-export async function get_current_user(): Promise<User | null> {
-    try {
-        const user = await currentUser();
-        return user;
-    } catch {
-        return null;
+export enum Role {
+    Admin = "admin",
+    Operator = "operator",
+    Tech = "tech",
+}
+
+export async function require_permission(roles: Role[]): Promise<void> {
+    const user = await currentUser();
+    if (!user) {
+        return Promise.reject("not logged in");
     }
+
+    for (const role of roles) {
+        if (role === user.publicMetadata.Role) {
+            return;
+        }
+    }
+
+    return Promise.reject("not permitted");
 }

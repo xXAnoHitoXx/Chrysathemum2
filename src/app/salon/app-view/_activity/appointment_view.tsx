@@ -58,6 +58,7 @@ const useAppointmentList = (
     const [appointments, set_appointments] = useState<Appointment[]>(
         saved_list.data,
     );
+
     const router = useRouter();
 
     useQuery({

@@ -14,7 +14,7 @@ export default async function Page() {
         redirect("/");
     }
 
-    const salon = get_bisquit(Bisquit.salon_selection);
+    const salon = await get_bisquit(Bisquit.salon_selection);
 
     if (is_data_error(salon)) {
         redirect("/");
