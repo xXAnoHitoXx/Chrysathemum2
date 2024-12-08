@@ -35,6 +35,8 @@
         -   [x] ~create technician~
         -   [x] ~assign technician to salon location~
         -   [x] ~set technician inactive~
+        -   [ ] edit technician
+        -   [ ] assignment remove drag and drop
     -   [ ] migration framework
         -   restriction: vercel limited timeout on development
         -   [x] ~runable from dev environment~

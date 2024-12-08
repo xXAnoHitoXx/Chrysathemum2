@@ -1,22 +1,23 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { get_current_user } from "./api/c_user";
 import SalonSelect from "./_components/salon_select";
 import RetryRedirect from "./_components/retry_redirect";
+import { currentUser } from "@clerk/nextjs/server";
+import { Role } from "./api/c_user";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-    const user = await get_current_user();
+    const user = await currentUser();
 
     if (user) {
-        if (user.publicMetadata.Role === "tech") {
+        if (user.publicMetadata.Role === Role.Tech) {
             redirect("/tech");
         }
 
         const is_manager =
-            user.publicMetadata.Role === "admin" ||
-            user.publicMetadata.Role === "operator";
+            user.publicMetadata.Role === Role.Admin ||
+            user.publicMetadata.Role === Role.Operator;
         return <SalonSelect is_admin={is_manager} />;
     }
 

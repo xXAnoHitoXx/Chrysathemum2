@@ -8,11 +8,16 @@ import { get_bisquit } from "~/server/queries/crud/biscuits";
 import { pack } from "~/server/queries/server_queries_monad";
 import { Bisquit } from "~/server/validation/bisquit";
 import { to_transaction_update_info } from "~/server/validation/db_types/accounting_validation";
+import { require_permission, Role } from "../../../c_user";
 
 export async function GET(
     _: Request,
     { params }: { params: { date: string } },
 ) {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(Bisquit.salon_selection)
         .bind(get_bisquit)
         .bind((salon) => ({ salon: salon, date: params.date }))
@@ -23,6 +28,10 @@ export async function GET(
 }
 
 export async function PATCH(request: Request) {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(request)
         .bind(parse_request(to_transaction_update_info))
         .bind(update_transaction);

@@ -1,15 +1,26 @@
 "use client";
 
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
-import { useState } from "react";
-import type { FormEvent, ChangeEvent } from "react";
 import TechPreview from "./TechPreview";
-import sanitizer from "~/server/validation/text_sanitization";
 import type { Technician } from "~/server/db_schema/type_def";
 import TechDisplayBar from "./TechDisplayBar";
 import { to_technician } from "~/server/validation/db_types/technician_validation";
 import { fetch_query, Method } from "~/app/api/api_query";
 import { is_data_error } from "~/server/data_error";
+import { useMutation } from "@tanstack/react-query";
+import { use_button_controller } from "~/app/_components/button_locker";
+import { ChangeEvent, useEffect, useState } from "react";
+import { sanitize_text_input } from "~/server/validation/text_sanitization";
+
+type FormData = {
+    name: string;
+    text_color: string;
+    text_intensity: string;
+    bg_color: string;
+    bg_intensity: string;
+    border_color: string;
+    border_intensity: string;
+};
 
 export function NewTechForm({
     starting_active_technicians,
@@ -22,150 +33,74 @@ export function NewTechForm({
         starting_active_technicians,
     );
 
-    const [name, set_name] = useState("Tinn");
-    const [text_color, set_text_color] = useState("sky");
-    const [text_intensity, set_text_intensity] = useState("300");
-    const [bg_color, set_bg_color] = useState("slate");
-    const [bg_intensity, set_bg_intensity] = useState("950");
-    const [border_color, set_border_color] = useState("sky");
-    const [border_intensity, set_border_intensity] = useState("500");
+    const [form_data, set_formdata] = useState({
+        name: "Tinn",
+        text_color: "sky",
+        text_intensity: "300",
+        bg_color: "slate",
+        bg_intensity: "950",
+        border_color: "sky",
+        border_intensity: "500",
+    });
+
     const [color_data, set_color_data] = useState(
         "border-sky-500 bg-slate-950 text-sky-300",
     );
-    const [is_loading, set_is_loading] = useState(false);
 
-    function update_style(
-        text_color: string,
-        text_intensity: string,
-        bg_color: string,
-        bg_intensity: string,
-        border_color: string,
-        border_intensity: string,
-    ) {
+    const button_set = use_button_controller();
+
+    useEffect(() => {
         set_color_data(
             "border-".concat(
-                border_color.toLowerCase(),
+                form_data.border_color.toLowerCase(),
                 "-",
-                border_intensity,
+                form_data.border_intensity,
                 " ",
                 "text-",
-                text_color.toLowerCase(),
+                form_data.text_color.toLowerCase(),
                 "-",
-                text_intensity,
+                form_data.text_intensity,
                 " ",
                 "bg-",
-                bg_color.toLowerCase(),
+                form_data.bg_color.toLowerCase(),
                 "-",
-                bg_intensity,
+                form_data.bg_intensity,
             ),
         );
+    }, [form_data]);
+
+    const create_new_tech = useMutation({
+        mutationFn: async () => {
+            const new_tech = await fetch_query({
+                url: "/api/technician/create",
+                method: Method.POST,
+                params: {
+                    data: {
+                        name: form_data.name,
+                        color: color_data,
+                        active_salon: salon,
+                    },
+                },
+                to: to_technician,
+            });
+
+            if (!is_data_error(new_tech)) {
+                set_active_techs([new_tech, ...active_techs]);
+            }
+        },
+
+        mutationKey: ["create_technician", form_data],
+    });
+
+    function default_if_none(
+        def: string,
+        onChange: (value: string) => void,
+    ): (e: ChangeEvent<HTMLSelectElement>) => void {
+        return (e: ChangeEvent<HTMLSelectElement>) => {
+            const value = e.target.value === "" ? def : e.target.value;
+            onChange(value);
+        };
     }
-
-    async function onSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        set_is_loading(true);
-
-        const new_tech = await fetch_query({
-            url: "/api/technician/create",
-            method: Method.POST,
-            params: {
-                data: { name: name, color: color_data, active_salon: salon },
-            },
-            to: to_technician,
-        });
-
-        if (!is_data_error(new_tech)) {
-            set_active_techs([new_tech, ...active_techs]);
-        }
-
-        set_is_loading(false);
-    }
-
-    const name_change = (new_name: string) => {
-        set_name(sanitizer(new_name));
-    };
-
-    const handle_text_color_change = (e: ChangeEvent<HTMLSelectElement>) => {
-        const text_color = e.target.value === "" ? "sky" : e.target.value;
-        set_text_color(text_color);
-        update_style(
-            text_color,
-            text_intensity,
-            bg_color,
-            bg_intensity,
-            border_color,
-            border_intensity,
-        );
-    };
-
-    const handle_text_insensity_change = (
-        e: ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const text_intensity = e.target.value === "" ? "300" : e.target.value;
-        set_text_intensity(text_intensity);
-        update_style(
-            text_color,
-            text_intensity,
-            bg_color,
-            bg_intensity,
-            border_color,
-            border_intensity,
-        );
-    };
-
-    const handle_bg_color_change = (e: ChangeEvent<HTMLSelectElement>) => {
-        const bg_color = e.target.value === "" ? "slate" : e.target.value;
-        set_bg_color(bg_color);
-        update_style(
-            text_color,
-            text_intensity,
-            bg_color,
-            bg_intensity,
-            border_color,
-            border_intensity,
-        );
-    };
-
-    const handle_bg_intensity_change = (e: ChangeEvent<HTMLSelectElement>) => {
-        const bg_intensity = e.target.value === "" ? "950" : e.target.value;
-        set_bg_intensity(bg_intensity);
-        update_style(
-            text_color,
-            text_intensity,
-            bg_color,
-            bg_intensity,
-            border_color,
-            border_intensity,
-        );
-    };
-
-    const handle_border_color_change = (e: ChangeEvent<HTMLSelectElement>) => {
-        const border_color = e.target.value === "" ? "sky" : e.target.value;
-        set_border_color(border_color);
-        update_style(
-            text_color,
-            text_intensity,
-            bg_color,
-            bg_intensity,
-            border_color,
-            border_intensity,
-        );
-    };
-
-    const handle_border_intensity_change = (
-        e: ChangeEvent<HTMLSelectElement>,
-    ) => {
-        const border_intensity = e.target.value === "" ? "500" : e.target.value;
-        set_border_intensity(border_intensity);
-        update_style(
-            text_color,
-            text_intensity,
-            bg_color,
-            bg_intensity,
-            border_color,
-            border_intensity,
-        );
-    };
 
     const colors: string[] = [
         "Slate",
@@ -206,9 +141,16 @@ export function NewTechForm({
         <div className="flex h-fit w-full flex-wrap gap-2 p-2">
             <div className="flex h-fit w-full flex-nowrap justify-center border-b border-b-sky-400 p-2">
                 <div className="flex w-1/2 max-w-96 gap-1 border-r border-sky-900 p-3">
-                    <form onSubmit={onSubmit} className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1">
                         <Input
-                            onValueChange={name_change}
+                            onValueChange={(name: string) => {
+                                set_formdata((data) => {
+                                    return {
+                                        ...data,
+                                        name: sanitize_text_input(name),
+                                    };
+                                });
+                            }}
                             isRequired
                             label="Name"
                             placeholder="Tinn"
@@ -216,7 +158,17 @@ export function NewTechForm({
                         <div className="flex w-full gap-1">
                             <Select
                                 defaultSelectedKeys={["Sky"]}
-                                onChange={handle_text_color_change}
+                                onChange={default_if_none(
+                                    "Sky",
+                                    (value: string) => {
+                                        set_formdata((data: FormData) => {
+                                            return {
+                                                ...data,
+                                                text_color: value,
+                                            };
+                                        });
+                                    },
+                                )}
                                 isRequired
                                 label="Text Color"
                             >
@@ -228,7 +180,17 @@ export function NewTechForm({
                             </Select>
                             <Select
                                 defaultSelectedKeys={["300"]}
-                                onChange={handle_text_insensity_change}
+                                onChange={default_if_none(
+                                    "300",
+                                    (value: string) => {
+                                        set_formdata((data: FormData) => {
+                                            return {
+                                                ...data,
+                                                text_intensity: value,
+                                            };
+                                        });
+                                    },
+                                )}
                                 isRequired
                                 label="Text Color Intensity"
                             >
@@ -245,7 +207,17 @@ export function NewTechForm({
                         <div className="flex w-full gap-1">
                             <Select
                                 defaultSelectedKeys={["Slate"]}
-                                onChange={handle_bg_color_change}
+                                onChange={default_if_none(
+                                    "Slate",
+                                    (value: string) => {
+                                        set_formdata((data: FormData) => {
+                                            return {
+                                                ...data,
+                                                bg_color: value,
+                                            };
+                                        });
+                                    },
+                                )}
                                 isRequired
                                 label="Color"
                             >
@@ -257,7 +229,17 @@ export function NewTechForm({
                             </Select>
                             <Select
                                 defaultSelectedKeys={["950"]}
-                                onChange={handle_bg_intensity_change}
+                                onChange={default_if_none(
+                                    "950",
+                                    (value: string) => {
+                                        set_formdata((data: FormData) => {
+                                            return {
+                                                ...data,
+                                                bg_intensity: value,
+                                            };
+                                        });
+                                    },
+                                )}
                                 isRequired
                                 label="Color Intensity"
                             >
@@ -274,7 +256,17 @@ export function NewTechForm({
                         <div className="flex w-full gap-1">
                             <Select
                                 defaultSelectedKeys={["Sky"]}
-                                onChange={handle_border_color_change}
+                                onChange={default_if_none(
+                                    "Sky",
+                                    (value: string) => {
+                                        set_formdata((data: FormData) => {
+                                            return {
+                                                ...data,
+                                                border_color: value,
+                                            };
+                                        });
+                                    },
+                                )}
                                 isRequired
                                 label="Border"
                             >
@@ -286,7 +278,17 @@ export function NewTechForm({
                             </Select>
                             <Select
                                 defaultSelectedKeys={["500"]}
-                                onChange={handle_border_intensity_change}
+                                onChange={default_if_none(
+                                    "500",
+                                    (value: string) => {
+                                        set_formdata((data: FormData) => {
+                                            return {
+                                                ...data,
+                                                border_intensity: value,
+                                            };
+                                        });
+                                    },
+                                )}
                                 isRequired
                                 label="Border Intensity"
                             >
@@ -303,13 +305,14 @@ export function NewTechForm({
                         <Button
                             type="submit"
                             color="primary"
-                            isDisabled={is_loading}
+                            isDisabled={button_set.is_locked}
+                            onPress={button_set.onClick(create_new_tech.mutate)}
                         >
-                            {is_loading ? "Loading..." : "Create"}
+                            {button_set.is_locked ? "Loading..." : "Create"}
                         </Button>
-                    </form>
+                    </div>
                 </div>
-                <TechPreview name={name} color={color_data} />
+                <TechPreview name={form_data.name} color={color_data} />
             </div>
             <TechDisplayBar
                 technicians={active_techs.map((tech) => [tech, null])}
