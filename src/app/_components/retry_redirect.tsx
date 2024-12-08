@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import { get_current_user } from "../api/c_user";
 import SalonSelect from "./salon_select";
+import { currentUser } from "@clerk/nextjs/server";
 
 export default async function RetryRedirect() {
-    let user = await get_current_user();
+    let user = await currentUser();
 
     while (user == null) {
-        user = await get_current_user();
+        user = await currentUser();
     }
 
     if (user.publicMetadata.Role === "tech") {

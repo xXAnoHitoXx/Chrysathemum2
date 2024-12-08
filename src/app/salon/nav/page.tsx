@@ -1,8 +1,9 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { get_current_user } from "~/app/api/c_user";
+import { Role } from "~/app/api/c_user";
 
 export default async function Nav() {
-    const user = await get_current_user();
+    const user = await currentUser();
 
     if (!user) {
         redirect("/");
@@ -21,7 +22,7 @@ export default async function Nav() {
                     Customer Finder
                 </button>
             </div>
-            {AdminTasks(user?.publicMetadata.Role === "admin")}
+            {AdminTasks(user?.publicMetadata.Role === Role.Admin)}
         </div>
     );
 }
