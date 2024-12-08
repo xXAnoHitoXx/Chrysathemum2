@@ -3,7 +3,7 @@ import { data_error, DataError, is_data_error } from "~/server/data_error";
 export function handle_react_query_response<T>(
     to: (t: unknown) => T | DataError,
     handler: (t: T) => void,
-    error_handler: (e: DataError) => void = ()=>{},
+    error_handler: (e: DataError) => void = () => {},
 ): (response: Response) => Promise<void> {
     return async (response) => {
         if (!response.ok) {

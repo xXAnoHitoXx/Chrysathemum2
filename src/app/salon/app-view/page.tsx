@@ -25,12 +25,9 @@ export enum AppViewActivity {
 
 export default function Page() {
     const [activity, set_activity] = useState(AppViewActivity.AppointmentView);
-
     const [appointment_view_save] = useState(appointment_view_default_save);
     const [daily_record_save] = useState(daily_record_default_save);
-
     const [last_customer_save] = useState(last_customer_default_save);
-
     const [customer_history] = useState(customer_history_default_save);
 
     switch (activity) {
@@ -50,7 +47,7 @@ export default function Page() {
                 />
             );
         case AppViewActivity.SummaryView:
-            return <SummaryView/>;
+            return <SummaryView />;
         default:
             return (
                 <AppointmentView

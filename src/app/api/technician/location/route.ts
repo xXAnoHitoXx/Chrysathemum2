@@ -15,8 +15,13 @@ import { retrieve_roster } from "~/server/queries/crud/location/location_roster"
 import { pack } from "~/server/queries/server_queries_monad";
 import { Bisquit } from "~/server/validation/bisquit";
 import { to_technician } from "~/server/validation/db_types/technician_validation";
+import { require_permission, Role } from "../../c_user";
 
 export async function GET() {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(Bisquit.salon_selection)
         .bind(get_bisquit)
         .bind(async (salon, f_db) => {
@@ -52,10 +57,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request): Promise<Response> {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(request)
         .bind(parse_request(to_technician))
-        .bind((t: Technician) => {
-            const salon = get_bisquit(Bisquit.salon_selection);
+        .bind(async (t: Technician) => {
+            const salon = await get_bisquit(Bisquit.salon_selection);
             if (is_data_error(salon))
                 return salon.stack(
                     "Posting Technician",
@@ -72,10 +81,14 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function DELETE(request: Request): Promise<Response> {
+    await require_permission([Role.Operator, Role.Admin]).catch(() => {
+        return Response.error();
+    });
+
     const query = pack(request)
         .bind(parse_request(to_technician))
-        .bind((t: Technician) => {
-            const salon = get_bisquit(Bisquit.salon_selection);
+        .bind(async (t: Technician) => {
+            const salon = await get_bisquit(Bisquit.salon_selection);
             if (is_data_error(salon))
                 return salon.stack(
                     "Posting Technician",

@@ -1,4 +1,4 @@
-import { today } from "@internationalized/date";
+import { CalendarDate, startOfWeek, today } from "@internationalized/date";
 import { is_string } from "../simple_type";
 import { data_error, DataError } from "~/server/data_error";
 
@@ -6,6 +6,11 @@ const Chrysanthemum_Time_Zone = "America/Halifax";
 
 export function current_date() {
     return today(Chrysanthemum_Time_Zone);
+}
+
+export function last_sunday() {
+    const tday: CalendarDate = today(Chrysanthemum_Time_Zone);
+    return startOfWeek(tday, "en-US");
 }
 
 export function valiDate(date: unknown): string | DataError {
