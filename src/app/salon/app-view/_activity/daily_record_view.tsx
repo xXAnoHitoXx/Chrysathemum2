@@ -34,7 +34,6 @@ const useTransactionList = (
 
     const { isFetching } = useQuery({
         queryFn: () => {
-            console.log("fetching");
             return fetch(rec_view_transaction + date, {
                 method: Method.GET,
                 cache: "no-store",

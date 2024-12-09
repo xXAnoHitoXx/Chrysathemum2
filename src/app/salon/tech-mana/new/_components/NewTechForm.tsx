@@ -8,7 +8,6 @@ import { to_technician } from "~/server/validation/db_types/technician_validatio
 import { fetch_query, Method } from "~/app/api/api_query";
 import { is_data_error } from "~/server/data_error";
 import { useMutation } from "@tanstack/react-query";
-import { use_button_controller } from "~/app/_components/button_locker";
 import { ChangeEvent, useEffect, useState } from "react";
 import { sanitize_text_input } from "~/server/validation/text_sanitization";
 
@@ -47,7 +46,7 @@ export function NewTechForm({
         "border-sky-500 bg-slate-950 text-sky-300",
     );
 
-    const button_set = use_button_controller();
+    const [is_loading, set_loading] = useState(false);
 
     useEffect(() => {
         set_color_data(
@@ -87,6 +86,8 @@ export function NewTechForm({
             if (!is_data_error(new_tech)) {
                 set_active_techs([new_tech, ...active_techs]);
             }
+
+            set_loading(false);
         },
 
         mutationKey: ["create_technician", form_data],
@@ -305,10 +306,13 @@ export function NewTechForm({
                         <Button
                             type="submit"
                             color="primary"
-                            isDisabled={button_set.is_locked}
-                            onPress={button_set.onClick(create_new_tech.mutate)}
+                            isDisabled={is_loading}
+                            onPress={() => {
+                                set_loading(true);
+                                create_new_tech.mutate();
+                            }}
                         >
-                            {button_set.is_locked ? "Loading..." : "Create"}
+                            {is_loading ? "Loading..." : "Create"}
                         </Button>
                     </div>
                 </div>
