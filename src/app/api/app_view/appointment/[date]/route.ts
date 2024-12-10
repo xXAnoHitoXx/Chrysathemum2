@@ -21,13 +21,15 @@ import { require_permission, Role } from "~/app/api/c_user";
 
 export async function GET(
     _: Request,
-    { params }: { params: { date: string } },
+    { params }: { params: Promise<{ date: string }> },
 ): Promise<Response> {
+    const { date } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
 
-    const query = pack(params.date)
+    const query = pack(date)
         .bind(valiDate)
         .bind(async (date) => {
             const salon = await get_bisquit(Bisquit.salon_selection);
@@ -53,8 +55,10 @@ export async function GET(
 
 export async function POST(
     request: Request,
-    { params }: { params: { date: string } },
+    { params }: { params: Promise<{ date: string }> },
 ) {
+    const { date } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
@@ -69,7 +73,7 @@ export async function POST(
                     array_query(
                         (app) => ({
                             ...app,
-                            date: params.date,
+                            date: date,
                             salon: salon,
                         }),
                         context,
@@ -86,7 +90,7 @@ export async function POST(
                 )
                 .bind((partial) => {
                     if (partial.error == null)
-                        return { date: params.date, salon: salon };
+                        return { date: date, salon: salon };
                     else return partial.error;
                 })
                 .bind(retrieve_appointments_on_date)
@@ -98,8 +102,10 @@ export async function POST(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { date: string } },
+    { params }: { params: Promise<{ date: string }> },
 ) {
+    const { date } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
@@ -109,7 +115,7 @@ export async function PUT(
         .bind(close_transaction)
         .bind(() => Bisquit.salon_selection)
         .bind(get_bisquit)
-        .bind((salon) => ({ date: params.date, salon: salon }))
+        .bind((salon) => ({ date: date, salon: salon }))
         .bind(retrieve_appointments_on_date)
         .bind(handle_partial_errors);
 
@@ -118,8 +124,10 @@ export async function PUT(
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { date: string } },
+    { params }: { params: Promise<{ date: string }> },
 ) {
+    const { date } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
@@ -139,7 +147,7 @@ export async function PATCH(
                 )
                 .bind((partial) => {
                     if (partial.error == null)
-                        return { date: params.date, salon: salon };
+                        return { date: date, salon: salon };
                     else return partial.error;
                 })
                 .bind(retrieve_appointments_on_date)
@@ -151,8 +159,10 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { date: string } },
+    { params }: { params: Promise<{ date: string }> },
 ) {
+    const { date } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
@@ -169,7 +179,7 @@ export async function DELETE(
         .bind(handle_partial_errors)
         .bind(() => Bisquit.salon_selection)
         .bind(get_bisquit)
-        .bind((salon) => ({ date: params.date, salon: salon }))
+        .bind((salon) => ({ date: date, salon: salon }))
         .bind(retrieve_appointments_on_date)
         .bind(handle_partial_errors);
     return unpack_response(query);

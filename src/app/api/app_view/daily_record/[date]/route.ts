@@ -12,15 +12,17 @@ import { require_permission, Role } from "../../../c_user";
 
 export async function GET(
     _: Request,
-    { params }: { params: { date: string } },
+    { params }: { params: Promise<{ date: string }> },
 ) {
+    const { date } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
 
     const query = pack(Bisquit.salon_selection)
         .bind(get_bisquit)
-        .bind((salon) => ({ salon: salon, date: params.date }))
+        .bind((salon) => ({ salon: salon, date: date }))
         .bind(retrieve_transactions_on_date)
         .bind(handle_partial_errors);
 

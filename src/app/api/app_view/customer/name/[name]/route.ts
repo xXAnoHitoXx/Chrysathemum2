@@ -6,13 +6,15 @@ import { require_permission, Role } from "~/app/api/c_user";
 
 export async function GET(
     _: Request,
-    { params }: { params: { name: string } },
+    { params }: { params: Promise<{ name: string }> },
 ): Promise<Response> {
+    const { name } = await params;
+
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
     });
 
-    const query = pack(params.name)
+    const query = pack(name)
         .bind(customer_name_search)
         .bind(handle_partial_errors);
     return unpack_response(query);
