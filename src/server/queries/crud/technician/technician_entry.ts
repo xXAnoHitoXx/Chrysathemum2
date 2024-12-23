@@ -20,6 +20,7 @@ export const create_technician_entry: Query<
     const technician_entry: Technician = {
         id: id_ref.key,
         ...params,
+        login_claimed: undefined,
     };
 
     const e = await db_query(context, set(id_ref, technician_entry));
@@ -56,6 +57,7 @@ export const update_technician_entry: Query<Technician, void> = async (
             name: technician.name,
             color: technician.color,
             active: technician.active,
+            login_claimed: technician.login_claimed,
         }),
     );
 };

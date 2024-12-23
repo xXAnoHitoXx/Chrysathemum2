@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, User } from "@clerk/nextjs/server";
 
 export enum Role {
     Admin = "admin",
@@ -6,7 +6,7 @@ export enum Role {
     Tech = "tech",
 }
 
-export async function require_permission(roles: Role[]): Promise<void> {
+export async function require_permission(roles: Role[]): Promise<User> {
     const user = await currentUser();
     if (!user) {
         return Promise.reject("not logged in");
@@ -14,7 +14,7 @@ export async function require_permission(roles: Role[]): Promise<void> {
 
     for (const role of roles) {
         if (role === user.publicMetadata.Role) {
-            return;
+            return user;
         }
     }
 

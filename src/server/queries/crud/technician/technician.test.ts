@@ -66,6 +66,7 @@ test("test technician entries CRUD queries", async () => {
         name: "chicken",
         color: "yolo",
         active: true,
+        login_claimed: undefined,
     };
 
     await pack_test(update_target, test_name)

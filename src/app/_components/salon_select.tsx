@@ -5,8 +5,7 @@ import { fetch_query, Method } from "../api/api_query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function SalonSelect({ is_admin }: { is_admin: boolean }) {
-    const next_page: string = is_admin ? "/salon/app-view/" : "/booking";
+export default function SalonSelect({ next_page }: { next_page: string }) {
     const router = useRouter();
     const [is_loading, set_loading] = useState(false);
 
