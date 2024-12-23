@@ -330,7 +330,7 @@ export function AppointmentView(props: {
     }
 
     return (
-        <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="flex flex-1 w-full h-full flex-col overflow-y-auto">
             {current_state !== State.Default && !is_loading ? (
                 <div
                     className={

@@ -14,6 +14,11 @@ export function to_technician(t: unknown): Technician | DataError {
 
     const { id, name, color, active } = t;
 
+    const login_claimed: string | undefined =
+        "login_claimed" in t && is_string(t.login_claimed)
+            ? t.login_claimed
+            : undefined;
+
     if (
         !(
             is_string(id) &&
@@ -25,5 +30,11 @@ export function to_technician(t: unknown): Technician | DataError {
         return data_error("Casting to Technician", "wrong field type");
     }
 
-    return { id: id, name: name, color: color, active: active };
+    return {
+        id: id,
+        name: name,
+        color: color,
+        active: active,
+        login_claimed: login_claimed,
+    };
 }
