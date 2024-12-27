@@ -56,6 +56,7 @@ const useTransactionList = (
                         });
                         set_transactions(transactions);
                         reset_filter();
+                        return true;
                     },
                     (error) => {
                         if (
@@ -66,6 +67,7 @@ const useTransactionList = (
                         ) {
                             router.replace("/");
                         }
+                        return false;
                     },
                 ),
             );
