@@ -131,15 +131,14 @@ export function AppointmentView(props: {
             fetch("/api/technician/location", {
                 method: Method.GET,
                 cache: "no-cache",
-            }).then(() => {
-                    handle_react_query_response(
-                        to_array(to_technician),
-                        (technicians) => {
-                            set_tech(technicians);
-                        },
-                    );
-                    return true;
-                },
+            }).then(
+                handle_react_query_response(
+                    to_array(to_technician),
+                    (technicians) => {
+                        set_tech(technicians);
+                        return true;
+                    },
+                ),
             ),
         queryKey: ["technicians"],
         staleTime: 300000,
