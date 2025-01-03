@@ -17,16 +17,20 @@ export const create_technician_entry: Query<
         return data_error(context, "failed to create technician_entry null id");
     }
 
-    const technician_entry: Technician = {
+    const technician_entry = {
         id: id_ref.key,
         ...params,
-        login_claimed: undefined,
     };
 
     const e = await db_query(context, set(id_ref, technician_entry));
     if (is_data_error(e)) return e;
 
-    return technician_entry;
+    const tech: Technician = {
+        login_claimed: undefined,
+        ...technician_entry,
+    }
+
+    return tech;
 };
 
 export const retrieve_technician_entry: Query<
@@ -53,7 +57,11 @@ export const update_technician_entry: Query<Technician, void> = async (
 ) => {
     return db_query(
         "Updating Technician entry",
-        update(f_db.technician_entries([technician.id]), {
+        update(f_db.technician_entries([technician.id]), technician.login_claimed === undefined? {
+            name: technician.name,
+            color: technician.color,
+            active: technician.active,
+        } : {
             name: technician.name,
             color: technician.color,
             active: technician.active,
