@@ -26,12 +26,12 @@ import {
 } from "~/server/error_messages/messages";
 import { useRouter } from "next/navigation";
 import { to_technician } from "~/server/validation/db_types/technician_validation";
-import { AppViewActivity } from "../page";
 import { Booking } from "./_appointment_view/booking_form";
 import { AppEdit } from "./_appointment_view/app_edit";
 import { Board } from "./_appointment_view/board";
 import { LastCustomerSave } from "../_components/customer_search";
 import { Closing } from "./_appointment_view/closing";
+import { AppViewActivity } from "../_components/app_view_page";
 
 export type AppointmentViewSaveState = {
     data: Appointment[];
@@ -77,6 +77,7 @@ const useAppointmentList = (
                         )
                             save_current_state(appointments);
                         set_appointments(appointments);
+                        return true;
                     },
                     (error) => {
                         if (
@@ -87,6 +88,7 @@ const useAppointmentList = (
                         ) {
                             router.replace("/");
                         }
+                        return false;
                     },
                 ),
             ),
@@ -100,6 +102,7 @@ export function AppointmentView(props: {
     set_activity: Dispatch<SetStateAction<AppViewActivity>>;
     save_state: AppointmentViewSaveState;
     last_customer_save: LastCustomerSave;
+    admin: boolean;
 }) {
     // save without rerender
     function save_current_state(appointments: Appointment[]) {
@@ -133,6 +136,7 @@ export function AppointmentView(props: {
                     to_array(to_technician),
                     (technicians) => {
                         set_tech(technicians);
+                        return true;
                     },
                 ),
             ),
@@ -330,7 +334,7 @@ export function AppointmentView(props: {
     }
 
     return (
-        <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="flex h-full w-full flex-1 flex-col overflow-y-auto">
             {current_state !== State.Default && !is_loading ? (
                 <div
                     className={
@@ -409,34 +413,40 @@ export function AppointmentView(props: {
                         >
                             Customer Finder
                         </button>
-                        <button
-                            disabled={is_loading}
-                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            onClick={() => {
-                                props.set_activity(
-                                    AppViewActivity.DailyRecordView,
-                                );
-                            }}
-                        >
-                            Daily Record
-                        </button>
-                        <button
-                            disabled={is_loading}
-                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            onClick={() => {
-                                props.set_activity(AppViewActivity.SummaryView);
-                            }}
-                        >
-                            Summary
-                        </button>
-                        <a href="/salon/nav/">
-                            <button
-                                disabled={is_loading}
-                                className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            >
-                                Other Actions
-                            </button>
-                        </a>
+                        {props.admin == true ? (
+                            <>
+                                <button
+                                    disabled={is_loading}
+                                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                                    onClick={() => {
+                                        props.set_activity(
+                                            AppViewActivity.DailyRecordView,
+                                        );
+                                    }}
+                                >
+                                    Daily Record
+                                </button>
+                                <button
+                                    disabled={is_loading}
+                                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                                    onClick={() => {
+                                        props.set_activity(
+                                            AppViewActivity.SummaryView,
+                                        );
+                                    }}
+                                >
+                                    Summary
+                                </button>
+                                <a href="/salon/nav/">
+                                    <button
+                                        disabled={is_loading}
+                                        className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                                    >
+                                        Other Actions
+                                    </button>
+                                </a>
+                            </>
+                        ) : null}
                     </div>
                 ) : null}
                 <div className="m-1 flex h-fit w-full flex-row-reverse border-t-2 border-t-sky-900 p-1">

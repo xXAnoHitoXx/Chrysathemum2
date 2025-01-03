@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { ClerkProvider } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"; import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "./providers";
 
 import { Inter } from "next/font/google";
@@ -35,7 +34,7 @@ export default function RootLayout({
             <html lang="en" className="dark">
                 <body className={`font-sans ${inter.variable}`}>
                     <Providers>
-                        <div className="flex h-dvh w-full flex-col">
+                        <div className="flex h-lvh w-full flex-col">
                             <TopNav />
                             {children}
                         </div>
@@ -62,7 +61,6 @@ async function TopNav() {
                           : "Sackville"}
                 </div>
             </a>
-
             <div>
                 <SignedOut>
                     <SignInButton />

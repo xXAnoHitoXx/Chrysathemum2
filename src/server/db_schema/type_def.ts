@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import "es6-shim";
-
 export const DEFAULT_VALUE = "default";
 
 export type CustomerCreationInfo = {
@@ -26,6 +25,7 @@ export type Technician = {
     name: string;
     color: string;
     active: boolean;
+    login_claimed: string | undefined;
 };
 
 export type Location = {

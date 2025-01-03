@@ -1,5 +1,4 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
 import SalonSelect from "./_components/salon_select";
 import RetryRedirect from "./_components/retry_redirect";
 import { currentUser } from "@clerk/nextjs/server";
@@ -11,14 +10,17 @@ export default async function HomePage() {
     const user = await currentUser();
 
     if (user) {
-        if (user.publicMetadata.Role === Role.Tech) {
-            redirect("/tech");
-        }
-
         const is_manager =
             user.publicMetadata.Role === Role.Admin ||
             user.publicMetadata.Role === Role.Operator;
-        return <SalonSelect is_admin={is_manager} />;
+
+        const next_page =
+            user.publicMetadata.Role === Role.Tech
+                ? "/tech/inf"
+                : is_manager
+                  ? "/salon/app-view"
+                  : "/booking";
+        return <SalonSelect next_page={next_page} />;
     }
 
     return (
