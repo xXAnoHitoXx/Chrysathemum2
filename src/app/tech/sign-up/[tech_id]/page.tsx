@@ -1,4 +1,4 @@
-import { SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedOut, SignUpButton } from "@clerk/nextjs";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Role } from "~/app/api/c_user";
@@ -16,23 +16,28 @@ export default async function Page({
 }) {
     const user = await currentUser();
 
+    const { tech_id }: { tech_id: string } = await params;
+
     if (user == null) {
         return (
             <div className="flex h-full w-full justify-center">
                 <div className="m-auto grid grid-cols-1 justify-items-center">
                     <SignedOut>
-                        <SignInButton mode="modal">
+                        <SignUpButton
+                            mode="modal"
+                            fallbackRedirectUrl={`/tech/sign-up/${tech_id}`}
+                            signInFallbackRedirectUrl={`/tech/sign-up/${tech_id}`}
+                        >
                             <button className="h-20 w-32 rounded-full border-4 border-sky-900">
-                                Sign In
+                                Sign Up
                             </button>
-                        </SignInButton>
+                        </SignUpButton>
                     </SignedOut>
                 </div>
             </div>
         );
     }
 
-    const { tech_id }: { tech_id: string } = await params;
     const tech = await pack({ id: tech_id })
         .bind(retrieve_technician_entry)
         .unpack();
