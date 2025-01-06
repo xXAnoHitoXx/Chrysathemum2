@@ -8,7 +8,7 @@ import {
     lotta_errors,
     PartialResult,
 } from "~/server/data_error";
-import { get, push, remove, runTransaction, set, update } from "firebase/database";
+import { get, push, remove, set, update } from "firebase/database";
 import {
     PATH_APPOINTMENTS,
     PATH_DATES,
@@ -134,15 +134,17 @@ export const retrieve_appointment_entry: Query<
 };
 
 export const update_appointment_entry: Query<
-    AppointmentEntry,
-    boolean
+    {
+        date: string;
+        salon: string;
+        id: string;
+        record: Record<string, unknown>;
+    },
+    void
 > = async ({ date, salon, id, record }, f_db) => {
-        update()), record),
-    const res = db_query(
+    return db_query(
         "Update AppointmentEntry Entry",
-        runTransaction(f_db.access(appointment_entry(date, salon, id)), (current_record) => {
-            cosnt 
-        });
+        update(f_db.access(appointment_entry(date, salon, id)), record),
     );
 };
 
