@@ -25,7 +25,7 @@ export function SummaryView() {
 
     const summary_api = "/api/app_view/summary/";
     const query = useQuery({
-        queryFn: async () => {
+        queryFn: () => {
             if (date_to_load == null) {
                 return 0;
             }
@@ -34,7 +34,7 @@ export function SummaryView() {
                 set_entries((_) => []);
             }
 
-            await fetch(summary_api + date_to_load.toString(), {
+            fetch(summary_api + date_to_load.toString(), {
                 method: Method.GET,
                 cache: "no-store",
             }).then(
@@ -49,14 +49,13 @@ export function SummaryView() {
 
                                 return a.date.localeCompare(b.date);
                             });
+                            const next_day = date_to_load.add({ days: 1 });
+
+                            if (next_day.compare(date_range.end) <= 0) {
+                                load_date(next_day);
+                            }
                             return next;
                         });
-
-                        const next_day = date_to_load.add({ days: 1 });
-
-                        if (next_day.compare(date_range.end) <= 0) {
-                            load_date(next_day);
-                        }
                     },
                 ),
             );
@@ -72,7 +71,7 @@ export function SummaryView() {
                 dates={date_range}
                 set_date={set_date_range}
             />
-            {query.isLoading ? "Loading..." : null}
+            {query.isLoading ? `Loading: [${date_to_load}]...` : null}
             <AccountDisplay accounts={entries} />
         </div>
     );

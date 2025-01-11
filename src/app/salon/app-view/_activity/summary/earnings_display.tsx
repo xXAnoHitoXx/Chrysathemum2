@@ -28,7 +28,7 @@ export function AccountDisplay(props: {
         if (tech_total.tech.id != account.tech.id) {
             to_display.push(tech_total);
             tech_total = {
-                date: "",
+                date: "Total",
                 tech: account.tech,
                 account: {
                     amount: account.account.amount,
@@ -40,12 +40,17 @@ export function AccountDisplay(props: {
             tech_total.account.tip += account.account.tip;
         }
 
+        shop.account.amount += account.account.amount;
+        shop.account.tip += account.account.tip;
         to_display.push(account);
     }
+
+    to_display.push(tech_total);
 
     return (
         <div className="flex w-full h-fit flex-col overflow-x-auto border-4 border-sky-900">
             <Row
+                key="label"
                 color="border-b-3 border-b-sky-800 bg-sky-100 text-zinc-950"
                 data={[
                     { width: full, text: "Date" },
@@ -55,10 +60,11 @@ export function AccountDisplay(props: {
             />
 
             <div className="flex w-fit flex-1 border-4 border-sky-900">
-                <div className="flex h-full w-fit flex-col-reverse">
+                <div className="flex h-full w-fit flex-col">
                     {to_display.map((account) => {
                         return (
                             <Row
+                                key = {account.date+"-"+account.tech.id}
                                 color={account.tech.color}
                                 data={[
                                     {
@@ -90,6 +96,7 @@ export function AccountDisplay(props: {
 
 function Row(props: {
     color: string;
+    key: string;
     data: { text: string; width: string }[];
 }) {
     return (
@@ -99,6 +106,7 @@ function Row(props: {
                 " " +
                 props.color
             }
+            key={props.key}
         >
             {props.data.map((data) => (
                 <div className={data.width + " " + "h-10"}>{data.text}</div>
