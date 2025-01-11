@@ -77,7 +77,7 @@ export function SummaryView(props: { salon: string }) {
                 set_date={set_date_range}
             />
             <AccountDisplay accounts={entries} />
-            {query.isLoading ? `Loading: [${date_to_load}]...` : null}
+            {query.isLoading ? `Loading: [${date_to_load}]...` : `Loaded up to: [${date_to_load}]`}
         </div>
     );
 }
