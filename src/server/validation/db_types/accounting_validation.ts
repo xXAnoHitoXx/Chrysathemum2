@@ -3,9 +3,10 @@ import {
     Account,
     Appointment,
     Closing,
+    EarningEntry,
     Transaction,
 } from "~/server/db_schema/type_def";
-import { is_number, is_object } from "../simple_type";
+import { is_number, is_object, is_string } from "../simple_type";
 import { to_appointment } from "./appointment_validation";
 import { to_transaction } from "./transaction_validation";
 
@@ -44,6 +45,32 @@ export function to_closing(t: unknown): Closing | DataError {
         return data_error(context, "wrong field types");
 
     return { machine: machine, cash: cash, gift: gift, discount: discount };
+}
+
+export function to_earning_entry(t: unknown): EarningEntry | DataError {
+    const context = "casting to EarningEntry";
+    if (!is_object(t)) return data_error(context, "not an object");
+
+    if (!("date" in t && "salon" in t && "entity" in t && "account" in t))
+        return data_error(context, "missing fields");
+
+    const { salon, date, entity, account } = t;
+
+    if (!(is_string(salon) && is_string(date) && is_string(entity)))
+        return data_error(context, "wrong field types");
+
+    const account_casted = to_account(account);
+
+    if (is_data_error(account_casted)) {
+        return account_casted.stack(context, "...");
+    }
+
+    return {
+        salon: salon,
+        date: date,
+        entity: entity,
+        account: account_casted,
+    };
 }
 
 export function to_closing_info(

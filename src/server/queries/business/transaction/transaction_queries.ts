@@ -28,7 +28,6 @@ import {
 } from "../../crud/transaction/customer_transaction_entry";
 import { get_all_technicians } from "../technician/technician_queries";
 import { retrieve_customer_entry } from "../../crud/customer/customer_entry";
-import { register_earnings } from "../../crud/accounting/earning";
 import { iter, take } from "itertools";
 import { quick_sort } from "~/util/ano_quick_sort";
 
@@ -70,15 +69,6 @@ export const close_transaction: Query<
         },
         f_db,
     );
-    const register_earnings_query = register_earnings(
-        {
-            salon: entry.salon,
-            date: entry.date,
-            entity: entry.technician_id,
-            account: { amount: entry.amount, tip: entry.tip },
-        },
-        f_db,
-    );
 
     const del = await del_appointment;
     if (is_data_error(del))
@@ -89,9 +79,6 @@ export const close_transaction: Query<
 
     const history = await create_history_query;
     if (is_data_error(history)) return history.stack(context, "...");
-
-    const register = await register_earnings_query;
-    if (is_data_error(register)) return register.stack(context, "...");
 };
 
 export const retrieve_customer_history: Query<
@@ -233,26 +220,11 @@ export const update_transaction: Query<
     };
 
     const update_transaction_query = update_transaction_date_entry(entry, f_db);
-    const register_earnings_query = register_earnings(
-        {
-            salon: entry.salon,
-            date: entry.date,
-            entity: entry.technician_id,
-            account: {
-                amount: account.amount - transaction.amount,
-                tip: account.tip - transaction.tip,
-            },
-        },
-        f_db,
-    );
 
     const context = `Updating transaction ${transaction.id}`;
 
     const update = await update_transaction_query;
     if (is_data_error(update)) return update.stack(context, "...");
-
-    const earnings = await register_earnings_query;
-    if (is_data_error(earnings)) return earnings.stack(context, "...");
 };
 
 export const retrieve_transactions_on_date: Query<
