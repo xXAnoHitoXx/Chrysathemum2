@@ -5,7 +5,6 @@ export function AccountDisplay(props: {
     accounts: TechAccount[];
 }) {
     const full = "w-60";
-    const half = "w-32";
 
     const to_display: TechAccount[] = [];
     const shop: TechAccount = {
@@ -68,7 +67,7 @@ export function AccountDisplay(props: {
                                 color={account.tech.color}
                                 data={[
                                     {
-                                        width: half,
+                                        width: full,
                                         text: account.date,
                                     },
                                     {
