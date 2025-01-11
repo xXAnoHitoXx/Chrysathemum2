@@ -2,8 +2,7 @@ import { CalendarDate, RangeValue } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { BoardDateRangePicker } from "../_components/date_range_picker";
 import {
-    current_date,
-    last_saturday,
+    last_monday,
     last_sunday,
 } from "~/server/validation/semantic/date";
 import { useQuery } from "@tanstack/react-query";
@@ -15,9 +14,11 @@ import { bubble_sort } from "~/util/ano_bubble_sort";
 import { AccountDisplay } from "./summary/earnings_display";
 
 export function SummaryView(props: { salon: string }) {
+    const start = props.salon === "SCVL" ? last_monday() : last_sunday();
+
     const [date_range, set_date_range] = useState<RangeValue<CalendarDate>>({
-        start: props.salon === "SCVL" ? last_saturday() : last_sunday(),
-        end: current_date().subtract({ days: 1 }),
+        start: start,
+        end: start.add({ days: 6 }),
     });
 
     const [date_to_load, load_date] = useState<CalendarDate | null>(null);
