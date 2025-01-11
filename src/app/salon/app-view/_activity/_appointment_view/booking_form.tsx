@@ -71,6 +71,7 @@ export function Booking(props: {
                         name: "Booking",
                         color: "border-neutral-400 text-neutral-900 bg-red-400",
                         active: true,
+                        login_claimed: undefined,
                     },
                     time: hour_to_time(props.booking_time_hour),
                     duration: 4,
