@@ -79,7 +79,7 @@ const extract_earning_information: Query<Transaction[], EntityAccount[]> = (
         shop.account.amount += transaction.amount;
         shop.account.tip += transaction.tip;
 
-        const entry = entries_map[transaction.id];
+        const entry = entries_map[transaction.technician.id];
         if (entry == undefined) {
             const account = {
                 id: transaction.technician.id,
@@ -89,7 +89,7 @@ const extract_earning_information: Query<Transaction[], EntityAccount[]> = (
                 },
             };
 
-            entries_map[transaction.id] = account;
+            entries_map[transaction.technician.id] = account;
             earnings.push(account);
         } else {
             const account = entry.account;
