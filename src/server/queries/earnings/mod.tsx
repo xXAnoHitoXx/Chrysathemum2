@@ -1,5 +1,5 @@
 import { db_query, pack_nested, Query } from "../server_queries_monad";
-import { get, set } from "firebase/database";
+import { get, remove, set } from "firebase/database";
 import { handle_partial_errors, is_data_error } from "~/server/data_error";
 import { PATH_ACCOUNTING } from "~/server/db_schema/fb_schema";
 import { EntityAccount, to_entity_account } from "./types";
@@ -7,7 +7,7 @@ import { to_array } from "~/server/validation/simple_type";
 import { retrieve_transactions_on_date } from "../business/transaction/transaction_queries";
 import { Transaction } from "~/server/db_schema/type_def";
 
-export function accounting_entry(salon: string, date: string): string[] {
+function accounting_entry(salon: string, date: string): string[] {
     const a = [PATH_ACCOUNTING, salon, date];
     return a;
 }
@@ -56,6 +56,20 @@ export const retrieve_earnings_information_of_date: Query<
             return accounts;
         });
     return query.unpack();
+};
+
+export const invalidate_earnings_information_of_date: Query<
+    { salon: string; date: string },
+    void
+> = async ({ salon, date }, f_db) => {
+    const ref = f_db.access(accounting_entry(salon, date));
+
+    const e = await db_query(
+        `invalidating earnings of date {${date}}`,
+        remove(ref),
+    );
+
+    if (is_data_error(e)) return e;
 };
 
 const extract_earning_information: Query<Transaction[], EntityAccount[]> = (

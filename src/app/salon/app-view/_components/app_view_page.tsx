@@ -23,7 +23,7 @@ export enum AppViewActivity {
     SummaryView,
 }
 
-export function AppView(props : { admin: boolean }) {
+export function AppView(props : { admin: boolean, salon: string }) {
     const [activity, set_activity] = useState(AppViewActivity.AppointmentView);
     const [appointment_view_save] = useState(appointment_view_default_save);
     const [daily_record_save] = useState(daily_record_default_save);
@@ -47,7 +47,7 @@ export function AppView(props : { admin: boolean }) {
                 />
             );
         case AppViewActivity.SummaryView:
-            return <SummaryView />;
+            return <SummaryView salon={props.salon}/>;
         default:
             return (
                 <AppointmentView

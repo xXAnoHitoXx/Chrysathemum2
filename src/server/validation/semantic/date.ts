@@ -1,4 +1,4 @@
-import { CalendarDate, startOfWeek, today } from "@internationalized/date";
+import { CalendarDate, getDayOfWeek, startOfWeek, today } from "@internationalized/date";
 import { is_string } from "../simple_type";
 import { data_error, DataError } from "~/server/data_error";
 
@@ -10,7 +10,20 @@ export function current_date() {
 
 export function last_sunday() {
     const tday: CalendarDate = today(Chrysanthemum_Time_Zone);
-    return startOfWeek(tday, "en-US");
+    if (getDayOfWeek(tday, "en-US") != 0) {
+        return startOfWeek(tday, "en-US");
+    }
+
+    return tday.subtract({ weeks: 1 });
+}
+
+export function last_saturday() {
+    const tday: CalendarDate = today(Chrysanthemum_Time_Zone);
+    if (getDayOfWeek(tday, "en-US") != 0) {
+        return startOfWeek(tday, "en-US").subtract({ days: 1 });
+    }
+
+    return tday.subtract({ weeks: 1, days: 1 });
 }
 
 export function valiDate(date: unknown): string | DataError {

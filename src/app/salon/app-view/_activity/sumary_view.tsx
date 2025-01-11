@@ -1,7 +1,11 @@
 import { CalendarDate, RangeValue } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { BoardDateRangePicker } from "../_components/date_range_picker";
-import { last_sunday } from "~/server/validation/semantic/date";
+import {
+    current_date,
+    last_saturday,
+    last_sunday,
+} from "~/server/validation/semantic/date";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
@@ -10,10 +14,10 @@ import { TechAccount, to_tech_account } from "~/server/queries/earnings/types";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 import { AccountDisplay } from "./summary/earnings_display";
 
-export function SummaryView() {
+export function SummaryView(props: { salon: string }) {
     const [date_range, set_date_range] = useState<RangeValue<CalendarDate>>({
-        start: last_sunday().subtract({ weeks: 1 }),
-        end: last_sunday(),
+        start: props.salon === "SCVL" ? last_saturday() : last_sunday(),
+        end: current_date().subtract({ days: 1 }),
     });
 
     const [date_to_load, load_date] = useState<CalendarDate | null>(null);
@@ -71,8 +75,8 @@ export function SummaryView() {
                 dates={date_range}
                 set_date={set_date_range}
             />
-            {query.isLoading ? `Loading: [${date_to_load}]...` : null}
             <AccountDisplay accounts={entries} />
+            {query.isLoading ? `Loading: [${date_to_load}]...` : null}
         </div>
     );
 }

@@ -5,15 +5,11 @@ import {
     update_transaction,
 } from "~/server/queries/business/transaction/transaction_queries";
 import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { array_query, pack } from "~/server/queries/server_queries_monad";
+import { pack, pack_nested } from "~/server/queries/server_queries_monad";
 import { Bisquit } from "~/server/validation/bisquit";
-import {
-    to_earning_entry,
-    to_transaction_update_info,
-} from "~/server/validation/db_types/accounting_validation";
+import { to_transaction_update_info } from "~/server/validation/db_types/accounting_validation";
 import { require_permission, Role } from "../../../c_user";
-import { to_array } from "~/server/validation/simple_type";
-import { register_earnings } from "~/server/queries/crud/accounting/earning";
+import { invalidate_earnings_information_of_date } from "~/server/queries/earnings/mod";
 
 export async function GET(
     _: Request,
@@ -34,28 +30,6 @@ export async function GET(
     return unpack_response(query);
 }
 
-export async function POST(
-    request: Request,
-    _: { params: Promise<{ date: string }> },
-) {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
-
-    const query = pack(request)
-        .bind(to_array(to_earning_entry))
-        .bind(
-            array_query(register_earnings, "daily record POST request", "..."),
-        )
-        .bind((result) => {
-            if (result.error != null) {
-                return result.error;
-            }
-        });
-
-    return unpack_response(query);
-}
-
 export async function PATCH(request: Request) {
     await require_permission([Role.Operator, Role.Admin]).catch(() => {
         return Response.error();
@@ -63,6 +37,17 @@ export async function PATCH(request: Request) {
 
     const query = pack(request)
         .bind(parse_request(to_transaction_update_info))
-        .bind(update_transaction);
+        .bind((update_info, f_db) => {
+            return pack_nested(update_info, f_db)
+                .bind(update_transaction)
+                .bind((_) => {
+                    return {
+                        salon: update_info.transaction.salon,
+                        date: update_info.transaction.date,
+                    };
+                })
+                .bind(invalidate_earnings_information_of_date)
+                .unpack();
+        });
     return unpack_response(query);
 }
