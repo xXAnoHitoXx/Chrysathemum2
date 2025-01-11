@@ -1,4 +1,4 @@
-import { Account } from "~/server/db_schema/type_def";
+import { Account, EarningEntry } from "~/server/db_schema/type_def";
 import { db_query, Query } from "../../server_queries_monad";
 import { get, increment, update } from "firebase/database";
 import { is_data_error } from "~/server/data_error";
@@ -21,13 +21,14 @@ export function accounting_entry(
     return a;
 }
 
+export const replace_earnings_of_date: Query<
+    { date: string, entries: EarningEntry[] },
+    void
+> = async () => {
+}
+
 export const register_earnings: Query<
-    {
-        salon: string;
-        entity: string;
-        date: string;
-        account: Account;
-    },
+    EarningEntry,
     void
 > = async ({ salon, entity, date, account: { amount, tip } }, f_db) => {
     const context = `register earnings for { ${entity} } on { ${date} } of { ${amount}(${tip}) }`;

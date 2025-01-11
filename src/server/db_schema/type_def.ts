@@ -84,7 +84,7 @@ export type Transaction = {
     cash: number;
     gift: number;
     discount: number;
-}
+};
 
 export type TransactionEntry = {
     id: string;
@@ -111,6 +111,13 @@ export type Closing = {
     cash: number;
     gift: number;
     discount: number;
+};
+
+export type EarningEntry = {
+    salon: string;
+    entity: string;
+    date: string;
+    account: Account;
 };
 
 export type Hour = { open: number; close: number };

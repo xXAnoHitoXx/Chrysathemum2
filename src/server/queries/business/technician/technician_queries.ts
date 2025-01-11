@@ -60,6 +60,7 @@ export const mark_technician_active: Query<Technician, Technician> = async (
         name: technician.name,
         color: technician.color,
         active: true,
+        login_claimed: undefined,
     };
 
     const update = await update_technician_entry(active_tech, f_db);
@@ -81,6 +82,7 @@ export const mark_technician_inactive: Query<Technician, Technician> = async (
         name: technician.name,
         color: technician.color,
         active: false,
+        login_claimed: undefined,
     };
 
     const update = await update_technician_entry(inactive_tech, f_db);

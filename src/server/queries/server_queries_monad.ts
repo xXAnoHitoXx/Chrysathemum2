@@ -40,6 +40,10 @@ export function pack_test<T>(data: T, test_name: string): ServerQueryData<T> {
     return new SimpleQueryData(data, new FireDB(test_name), true);
 }
 
+export function pack_nested<T>(data: T, f_db: FireDB): ServerQueryData<T> {
+    return new SimpleQueryData(data, f_db, false);
+}
+
 export async function db_query<T>(
     context: string,
     promise: Promise<T>,

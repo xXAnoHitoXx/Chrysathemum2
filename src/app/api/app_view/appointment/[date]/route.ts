@@ -1,4 +1,8 @@
-import { array_query, pack } from "~/server/queries/server_queries_monad";
+import {
+    array_query,
+    pack,
+    pack_nested,
+} from "~/server/queries/server_queries_monad";
 import { valiDate } from "~/server/validation/semantic/date";
 import {
     create_new_appointment,
@@ -18,6 +22,7 @@ import {
 import { to_closing_info } from "~/server/validation/db_types/accounting_validation";
 import { close_transaction } from "~/server/queries/business/transaction/transaction_queries";
 import { require_permission, Role } from "~/app/api/c_user";
+import { invalidate_earnings_information_of_date } from "~/server/queries/earnings/mod";
 
 export async function GET(
     _: Request,
@@ -116,6 +121,12 @@ export async function PUT(
         .bind(() => Bisquit.salon_selection)
         .bind(get_bisquit)
         .bind((salon) => ({ date: date, salon: salon }))
+        .bind((data, f_db) => {
+            return pack_nested(data, f_db)
+                .bind(invalidate_earnings_information_of_date)
+                .bind((_) => data)
+                .unpack();
+        })
         .bind(retrieve_appointments_on_date)
         .bind(handle_partial_errors);
 
