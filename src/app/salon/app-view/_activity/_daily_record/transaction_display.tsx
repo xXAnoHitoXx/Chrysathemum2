@@ -120,7 +120,7 @@ export function TransactionDisplay(props: {
     }
 
     return (
-        <div className="flex w-full h-fit flex-col overflow-x-auto border-4 border-sky-900">
+        <div className="flex h-fit w-full flex-col overflow-x-auto border-4 border-sky-900 bg-white">
             <Row
                 on_click={() => {}}
                 color="border-b-3 border-b-sky-800 bg-sky-100 text-zinc-950"

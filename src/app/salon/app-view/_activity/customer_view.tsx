@@ -89,14 +89,14 @@ export function CustomerView(props: {
                 <Button
                     color="danger"
                     isLoading={is_loading}
-                    onClick={props.return}
+                    onPress={props.return}
                 >
                     Return
                 </Button>
                 <Button
                     color={edit_mode ? "primary" : "secondary"}
                     isLoading={is_loading}
-                    onClick={() => set_edit_mode(!edit_mode)}
+                    onPress={() => set_edit_mode(!edit_mode)}
                 >
                     {edit_mode ? "View History" : "Edit Customer"}
                 </Button>

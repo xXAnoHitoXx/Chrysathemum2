@@ -88,7 +88,7 @@ export function Booking(props: {
                     <div className="w-full">Time</div>
                     <Button
                         size="sm"
-                        onClick={() => {
+                        onPress={() => {
                             change_time_all(-1);
                             props.on_change();
                         }}
@@ -97,7 +97,7 @@ export function Booking(props: {
                     </Button>
                     <Button
                         size="sm"
-                        onClick={() => {
+                        onPress={() => {
                             change_time_all(1);
                             props.on_change();
                         }}
@@ -109,7 +109,7 @@ export function Booking(props: {
                     <div className="w-full">Duration</div>
                     <Button
                         size="sm"
-                        onClick={() => {
+                        onPress={() => {
                             change_duration_all(-1);
                             props.on_change();
                         }}
@@ -118,7 +118,7 @@ export function Booking(props: {
                     </Button>
                     <Button
                         size="sm"
-                        onClick={() => {
+                        onPress={() => {
                             change_duration_all(1);
                             props.on_change();
                         }}
@@ -128,7 +128,7 @@ export function Booking(props: {
                 </div>
                 <div className="flex w-1/3 justify-items-center gap-3 p-1">
                     <Button
-                        onClick={() => {
+                        onPress={() => {
                             set_is_loading(true);
                             const p0 = props.phantom[0];
                             if (p0 != undefined) {
@@ -151,7 +151,7 @@ export function Booking(props: {
                         +1 more
                     </Button>
                     <Button
-                        onClick={() => {
+                        onPress={() => {
                             set_is_loading(true);
                             props.on_complete();
                         }}
@@ -169,7 +169,7 @@ export function Booking(props: {
                         <div className="w-full">Time</div>
                         <Button
                             size="sm"
-                            onClick={() => {
+                            onPress={() => {
                                 change_time(data, -1);
                                 props.on_change();
                             }}
@@ -178,7 +178,7 @@ export function Booking(props: {
                         </Button>
                         <Button
                             size="sm"
-                            onClick={() => {
+                            onPress={() => {
                                 change_time(data, 1);
                                 props.on_change();
                             }}
@@ -190,7 +190,7 @@ export function Booking(props: {
                         <div className="w-full">Duration</div>
                         <Button
                             size="sm"
-                            onClick={() => {
+                            onPress={() => {
                                 change_duration(data, -1);
                                 props.on_change();
                             }}
@@ -199,7 +199,7 @@ export function Booking(props: {
                         </Button>
                         <Button
                             size="sm"
-                            onClick={() => {
+                            onPress={() => {
                                 change_duration(data, 1);
                                 props.on_change();
                             }}

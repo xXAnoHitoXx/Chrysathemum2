@@ -201,7 +201,7 @@ export function DailyRecordView(props: {
                                     filter.length === 0 &&
                                     selection.length === 0
                                 }
-                                onClick={props.return}
+                                onPress={props.return}
                             >
                                 Return
                             </Button>
@@ -212,7 +212,7 @@ export function DailyRecordView(props: {
                                     filter.length === 0 &&
                                     selection.length === 0
                                 }
-                                onClick={
+                                onPress={
                                     filter.length === 0
                                         ? () => {
                                               set_filter(selection);
@@ -234,7 +234,7 @@ export function DailyRecordView(props: {
                         <Button
                             color="danger"
                             size="md"
-                            onClick={() => {
+                            onPress={() => {
                                 set_editing(null);
                             }}
                         >

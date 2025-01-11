@@ -11,7 +11,7 @@ export default async function Page() {
     const is_admin = user!.publicMetadata.Role === Role.Admin;
 
     const salon = await get_bisquit(Bisquit.salon_selection);
-    if(is_data_error(salon)) redirect("/");
+    if (is_data_error(salon)) redirect("/");
 
-    return <AppView admin={is_admin} salon={salon}/>;
+    return <AppView admin={is_admin} salon={salon} />;
 }

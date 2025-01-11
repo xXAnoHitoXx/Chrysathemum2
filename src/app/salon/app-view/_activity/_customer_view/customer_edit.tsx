@@ -132,7 +132,7 @@ export function CustomerEdit(props: {
                     color="primary"
                     size="md"
                     isLoading={loading}
-                    onClick={update}
+                    onPress={update}
                 >
                     Update
                 </Button>

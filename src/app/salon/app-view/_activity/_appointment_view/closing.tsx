@@ -41,7 +41,7 @@ export function Closing(props: {
         if (bill.note != undefined) {
             const total = discounted
                 ? bill.values[0] + bill.values[1]
-                : bill.values[0] * TaxRate + bill.values[1];
+                : Math.round(bill.values[0] * TaxRate) + bill.values[1];
             switch (bill.note) {
                 case "g":
                     data.push(0);
@@ -88,7 +88,12 @@ export function Closing(props: {
                     cash: cash,
                     gift: gift,
                     discount: discount,
-                    machine: amount * TaxRate + tip - cash - gift - discount,
+                    machine:
+                        Math.round(amount * TaxRate) +
+                        tip -
+                        cash -
+                        gift -
+                        discount,
                 },
             });
         } else {
@@ -162,7 +167,7 @@ export function Closing(props: {
                 <Button
                     isLoading={is_loading}
                     color="primary"
-                    onClick={close_appointment}
+                    onPress={close_appointment}
                 >
                     Confirm
                 </Button>

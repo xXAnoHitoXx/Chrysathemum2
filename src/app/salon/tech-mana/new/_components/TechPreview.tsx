@@ -13,6 +13,7 @@ export default function TechPreview({
         name: name,
         color: color,
         active: true,
+        login_claimed: undefined,
     };
     return (
         <div className="h-grow flex w-1/2 max-w-96 justify-center">

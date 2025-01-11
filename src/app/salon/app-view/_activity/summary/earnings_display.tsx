@@ -1,9 +1,7 @@
 import { TechAccount } from "~/server/queries/earnings/types";
 import { money } from "~/server/validation/semantic/money";
 
-export function AccountDisplay(props: {
-    accounts: TechAccount[];
-}) {
+export function AccountDisplay(props: { accounts: TechAccount[] }) {
     const full = "w-60";
 
     const to_display: TechAccount[] = [];
@@ -19,8 +17,8 @@ export function AccountDisplay(props: {
         account: {
             amount: 0,
             tip: 0,
-        }
-    }
+        },
+    };
     let tech_total: TechAccount = shop;
 
     for (const account of props.accounts) {
@@ -32,8 +30,8 @@ export function AccountDisplay(props: {
                 account: {
                     amount: account.account.amount,
                     tip: account.account.tip,
-                }
-            }
+                },
+            };
         } else {
             tech_total.account.amount += account.account.amount;
             tech_total.account.tip += account.account.tip;
@@ -47,7 +45,7 @@ export function AccountDisplay(props: {
     to_display.push(tech_total);
 
     return (
-        <div className="flex w-full h-fit flex-col overflow-x-auto border-4 border-sky-900">
+        <div className="flex h-fit w-full flex-col overflow-x-auto border-4 border-sky-900 bg-white">
             <Row
                 key="label"
                 color="border-b-3 border-b-sky-800 bg-sky-100 text-zinc-950"
@@ -63,7 +61,7 @@ export function AccountDisplay(props: {
                     {to_display.map((account) => {
                         return (
                             <Row
-                                key = {account.date+"-"+account.tech.id}
+                                key={account.date + "-" + account.tech.id}
                                 color={account.tech.color}
                                 data={[
                                     {
