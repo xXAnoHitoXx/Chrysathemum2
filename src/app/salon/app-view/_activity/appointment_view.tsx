@@ -456,14 +456,14 @@ export function AppointmentView(props: {
                                 <Button
                                     color="primary"
                                     isLoading={is_loading}
-                                    onClick={app_edit_confirm}
+                                    onPress={app_edit_confirm}
                                 >
                                     Confirm
                                 </Button>
                                 <Button
                                     color="danger"
                                     isLoading={is_loading}
-                                    onClick={delete_appointments}
+                                    onPress={delete_appointments}
                                 >
                                     Delete
                                 </Button>
@@ -473,7 +473,7 @@ export function AppointmentView(props: {
                             <Button
                                 color="danger"
                                 isLoading={is_loading}
-                                onClick={
+                                onPress={
                                     current_state === State.Booking
                                         ? to_default_state
                                         : () => {

@@ -110,7 +110,7 @@ export default function SelectionDisplay(props: {
                     color="danger"
                     size="md"
                     disabled={is_loading}
-                    onClick={props.on_return}
+                    onPress={props.on_return}
                 >
                     Return
                 </Button>

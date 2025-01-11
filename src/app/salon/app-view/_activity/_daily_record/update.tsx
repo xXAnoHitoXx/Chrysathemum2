@@ -109,7 +109,7 @@ export function TransactionUpdate(props: {
                 <Button
                     isLoading={is_loading}
                     color="primary"
-                    onClick={close_appointment}
+                    onPress={close_appointment}
                 >
                     Confirm
                 </Button>

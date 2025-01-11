@@ -52,7 +52,7 @@ export function AppEdit(props: {
                                     <div className="w-full">Time</div>
                                     <Button
                                         size="sm"
-                                        onClick={() => {
+                                        onPress={() => {
                                             change_time(-1);
                                         }}
                                     >
@@ -60,7 +60,7 @@ export function AppEdit(props: {
                                     </Button>
                                     <Button
                                         size="sm"
-                                        onClick={() => {
+                                        onPress={() => {
                                             change_time(1);
                                         }}
                                     >
@@ -71,7 +71,7 @@ export function AppEdit(props: {
                                     <div className="w-full">Duration</div>
                                     <Button
                                         size="sm"
-                                        onClick={() => {
+                                        onPress={() => {
                                             change_duration(-1);
                                         }}
                                     >
@@ -79,7 +79,7 @@ export function AppEdit(props: {
                                     </Button>
                                     <Button
                                         size="sm"
-                                        onClick={() => {
+                                        onPress={() => {
                                             change_duration(1);
                                         }}
                                     >
