@@ -6,10 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
 import { to_array } from "~/server/validation/simple_type";
-import {
-    TechAccount,
-    to_tech_account,
-} from "~/server/queries/earnings/types";
+import { TechAccount, to_tech_account } from "~/server/queries/earnings/types";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 import { AccountDisplay } from "./summary/earnings_display";
 
@@ -33,6 +30,10 @@ export function SummaryView() {
                 return 0;
             }
 
+            if (date_to_load.compare(date_range.start) == 0) {
+                set_entries((_) => []);
+            }
+
             await fetch(summary_api + date_to_load.toString(), {
                 method: Method.GET,
                 cache: "no-store",
@@ -50,6 +51,12 @@ export function SummaryView() {
                             });
                             return next;
                         });
+
+                        const next_day = date_to_load.add({ days: 1 });
+
+                        if (next_day.compare(date_range.end) <= 0) {
+                            load_date(next_day);
+                        }
                     },
                 ),
             );
