@@ -9,7 +9,7 @@ import { pack, pack_nested } from "~/server/queries/server_queries_monad";
 import { Bisquit } from "~/server/validation/bisquit";
 import { to_transaction_update_info } from "~/server/validation/db_types/accounting_validation";
 import { require_permission, Role } from "../../../c_user";
-import { invalidate_earnings_information_of_date } from "~/server/queries/earnings/mod";
+import { invalidate_earnings_information_of_date } from "~/server/queries/salon/earnings/mod";
 
 export async function GET(
     _: Request,

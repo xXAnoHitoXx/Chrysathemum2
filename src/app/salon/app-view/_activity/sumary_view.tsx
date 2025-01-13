@@ -9,9 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
 import { to_array } from "~/server/validation/simple_type";
-import { TechAccount, to_tech_account } from "~/server/queries/earnings/types";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 import { AccountDisplay } from "./summary/earnings_display";
+import { TechAccount, to_tech_account } from "~/server/queries/salon/earnings/types";
 
 export function SummaryView(props: { salon: string }) {
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();
