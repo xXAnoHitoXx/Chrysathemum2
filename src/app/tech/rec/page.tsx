@@ -24,5 +24,13 @@ export default async function Page() {
         return <div>tech entry error - tell Tinn 2 fix</div>;
     }
 
-    return <TechDataDisplay tech={technician} />;
+    return (
+        <TechDataDisplay tech={technician}>
+            <a href={"/tech/nav"}>
+                <button className="h-full w-32 rounded-full border-4 border-sky-900">
+                    Return
+                </button>
+            </a>
+        </TechDataDisplay>
+    );
 }

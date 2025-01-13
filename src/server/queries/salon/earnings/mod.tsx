@@ -1,11 +1,12 @@
-import { db_query, pack_nested, Query } from "../server_queries_monad";
 import { get, remove, set } from "firebase/database";
 import { handle_partial_errors, is_data_error } from "~/server/data_error";
 import { PATH_ACCOUNTING } from "~/server/db_schema/fb_schema";
 import { EntityAccount, to_entity_account } from "./types";
 import { to_array } from "~/server/validation/simple_type";
-import { retrieve_transactions_on_date } from "../business/transaction/transaction_queries";
 import { Transaction } from "~/server/db_schema/type_def";
+import { db_query, pack_nested, Query } from "../../server_queries_monad";
+import { retrieve_transactions_on_date } from "../../business/transaction/transaction_queries";
+import { TaxRate } from "~/constants";
 
 function accounting_entry(salon: string, date: string): string[] {
     const a = [PATH_ACCOUNTING, salon, date];
@@ -75,24 +76,11 @@ export const invalidate_earnings_information_of_date: Query<
 const extract_earning_information: Query<Transaction[], EntityAccount[]> = (
     transactions,
 ) => {
-    const shop = {
-        id: "shop",
-        account: {
-            amount: 0,
-            tip: 0,
-        },
-    };
+    const entries_map: Record<string, EntityAccount> = {};
 
-    const entries_map: Record<string, EntityAccount> = {
-        shop: shop,
-    };
-
-    const earnings: EntityAccount[] = [shop];
+    const earnings: EntityAccount[] = [];
 
     for (const transaction of transactions) {
-        shop.account.amount += transaction.amount;
-        shop.account.tip += transaction.tip;
-
         const entry = entries_map[transaction.technician.id];
         if (entry == undefined) {
             const account = {
@@ -100,6 +88,17 @@ const extract_earning_information: Query<Transaction[], EntityAccount[]> = (
                 account: {
                     amount: transaction.amount,
                     tip: transaction.tip,
+                },
+                closing: {
+                    machine:
+                        Math.floor(transaction.amount * TaxRate) +
+                        transaction.tip -
+                        transaction.cash -
+                        transaction.gift -
+                        transaction.discount,
+                    cash: transaction.cash,
+                    gift: transaction.gift,
+                    discount: transaction.discount,
                 },
             };
 

@@ -19,7 +19,7 @@ export function BoardDateRangePicker(props: {
     });
 
     return (
-        <div className="flex w-3/4 flex-wrap gap-1">
+        <div className="flex w-fit flex-wrap gap-1">
             <Popover
                 placement="bottom"
                 onClose={() => {

@@ -1,7 +1,6 @@
 import { CalendarDate } from "@internationalized/date";
 import {
-    Button,
-    Calendar,
+    Button, Calendar,
     Popover,
     PopoverContent,
     PopoverTrigger,

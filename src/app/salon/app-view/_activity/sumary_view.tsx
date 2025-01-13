@@ -1,17 +1,17 @@
 import { CalendarDate, RangeValue } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { BoardDateRangePicker } from "../_components/date_range_picker";
-import {
-    last_monday,
-    last_sunday,
-} from "~/server/validation/semantic/date";
+import { last_monday, last_sunday } from "~/server/validation/semantic/date";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
 import { to_array } from "~/server/validation/simple_type";
-import { TechAccount, to_tech_account } from "~/server/queries/earnings/types";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 import { AccountDisplay } from "./summary/earnings_display";
+import {
+    TechAccount,
+    to_tech_account,
+} from "~/server/queries/salon/earnings/types";
 
 export function SummaryView(props: { salon: string }) {
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();
@@ -71,13 +71,17 @@ export function SummaryView(props: { salon: string }) {
     });
 
     return (
-        <div>
-            <BoardDateRangePicker
-                dates={date_range}
-                set_date={set_date_range}
-            />
+        <div className="flex w-full flex-col">
+            <div className="flex h-fit w-full justify-between p-2">
+                <BoardDateRangePicker
+                    dates={date_range}
+                    set_date={set_date_range}
+                />
+                {query.isLoading
+                    ? `Loading: [${date_to_load}]...`
+                    : `Loaded up to: [${date_to_load}]`}
+            </div>
             <AccountDisplay accounts={entries} />
-            {query.isLoading ? `Loading: [${date_to_load}]...` : `Loaded up to: [${date_to_load}]`}
         </div>
     );
 }

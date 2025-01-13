@@ -3,7 +3,7 @@
 import { Technician } from "~/server/db_schema/type_def";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
 import { BoardDatePicker } from "~/app/salon/app-view/_components/date_picker";
@@ -20,7 +20,10 @@ import { TransactionDisplay } from "./transaction_display";
 
 const rec_view_transaction = "/api/tech_view/";
 
-export function TechDataDisplay(props: { tech: Technician }) {
+export function TechDataDisplay(props: {
+    tech: Technician;
+    children: ReactNode;
+}) {
     const [date, set_date] = useState(current_date());
 
     const [transactions, set_transactions] = useState<Transaction[]>([]);
@@ -63,8 +66,11 @@ export function TechDataDisplay(props: { tech: Technician }) {
 
     return (
         <div className="flex h-fit w-full flex-col">
-            <div className="flex w-full">
+            <div className="flex w-full p-2">
                 <BoardDatePicker date={date} set_date={set_date} />
+                <div className="flex flex-1 flex-row-reverse">
+                    {props.children}
+                </div>
             </div>
             {isFetching ? <div>LOADING DATA...</div> : null}
             <TransactionDisplay

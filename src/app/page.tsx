@@ -16,7 +16,7 @@ export default async function HomePage() {
 
         const next_page =
             user.publicMetadata.Role === Role.Tech
-                ? "/tech/inf"
+                ? "/tech/nav"
                 : is_manager
                   ? "/salon/app-view"
                   : "/booking";

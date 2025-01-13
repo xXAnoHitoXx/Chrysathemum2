@@ -22,7 +22,7 @@ import {
 import { to_closing_info } from "~/server/validation/db_types/accounting_validation";
 import { close_transaction } from "~/server/queries/business/transaction/transaction_queries";
 import { require_permission, Role } from "~/app/api/c_user";
-import { invalidate_earnings_information_of_date } from "~/server/queries/earnings/mod";
+import { invalidate_earnings_information_of_date } from "~/server/queries/salon/earnings/mod";
 
 export async function GET(
     _: Request,
