@@ -1,12 +1,12 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { data_error, is_data_error } from "~/server/data_error";
 import { is_string } from "~/server/validation/simple_type";
 import { TechDataDisplay } from "./_components/client_component";
 import { retrieve_technician_entry } from "~/server/queries/crud/technician/technician_entry";
 import { pack } from "~/server/queries/server_queries_monad";
+import { require_permission, Role } from "~/app/api/c_user";
 
 export default async function Page() {
-    const user = await currentUser();
+    const user = await require_permission([Role.Tech]);
 
     const tech_id = user?.publicMetadata.Tech_id;
 
