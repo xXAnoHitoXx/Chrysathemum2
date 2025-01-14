@@ -18,7 +18,7 @@ import { to_array } from "~/server/validation/simple_type";
 import { quick_sort } from "~/util/ano_quick_sort";
 import { TransactionDisplay } from "./transaction_display";
 
-const rec_view_transaction = "/api/tech_view/";
+const rec_view_transaction = "/api/tech_view/record/";
 
 export function TechDataDisplay(props: {
     tech: Technician;

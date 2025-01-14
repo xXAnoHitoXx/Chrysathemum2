@@ -1,10 +1,11 @@
+import { TaxRate } from "~/constants";
 import { TechAccount } from "~/server/queries/salon/earnings/types";
 import { money } from "~/server/validation/semantic/money";
 import { bubble_sort } from "~/util/ano_bubble_sort";
 
 export function AccountDisplay(props: { accounts: TechAccount[] }) {
-    const full = "w-60";
-    const half = "w-32";
+    const full = "w-56";
+    const half = "w-28";
 
     const shop_accounts: {
         date: string;
@@ -57,6 +58,23 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
     };
 
     for (const account of props.accounts) {
+        if(to_display.length === 0) {
+            tech_total = {
+                date: "Total",
+                tech: account.tech,
+                account: {
+                    amount: account.account.amount,
+                    tip: account.account.tip,
+                },
+                closing: {
+                    machine: 0,
+                    cash: 0,
+                    gift: 0,
+                    discount: 0,
+                },
+            };
+        }
+
         if (tech_total.tech.id != account.tech.id) {
             to_display.push(tech_total);
             tech_total = {
@@ -129,8 +147,8 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
     });
 
     return (
-        <div className="flex h-fit w-fit flex-wrap">
-            <div className="flex h-fit w-fit flex-col border-4 border-sky-900 bg-white">
+        <div className="flex h-fit w-full flex-wrap bg-white">
+            <div className="flex h-fit w-fit flex-col border-4 border-sky-900">
                 <Row
                     key="label"
                     color="border-b-3 border-b-sky-800 bg-sky-100 text-zinc-950"
@@ -192,14 +210,16 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
                     </div>
                 </div>
             </div>
-            <div className="flex h-fit w-fit flex-col border-4 border-sky-900 bg-white">
+            <div className="flex h-fit w-fit flex-col border-4 border-sky-900">
                 <Row
                     key="label"
                     color="border-b-3 border-b-sky-800 bg-sky-100 text-zinc-950"
                     data={[
                         { width: half, text: "Date" },
                         { width: full, text: "Technician" },
-                        { width: full, text: "Amount (tip)" },
+                        { width: half, text: "Amount" },
+                        { width: half, text: "tip" },
+                        { width: half, text: "tip -15%" },
                     ]}
                 />
 
@@ -220,13 +240,16 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
                                             text: account.tech.name,
                                         },
                                         {
-                                            width: full,
-                                            text:
-                                                money(account.account.amount) +
-                                                " " +
-                                                "(" +
-                                                money(account.account.tip) +
-                                                ")",
+                                            width: half,
+                                            text: money(account.account.amount),
+                                        },
+                                        {
+                                            width: half,
+                                            text: money(account.account.tip),
+                                        },
+                                        {
+                                            width: half,
+                                            text: money(Math.floor(account.account.tip / TaxRate)),
                                         },
                                     ]}
                                 />

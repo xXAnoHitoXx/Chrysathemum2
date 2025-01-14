@@ -1,19 +1,20 @@
+"use client";
+
 import { CalendarDate, RangeValue } from "@nextui-org/react";
-import { useEffect, useState } from "react";
-import { BoardDateRangePicker } from "../_components/date_range_picker";
-import { last_monday, last_sunday } from "~/server/validation/semantic/date";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";
-import { to_array } from "~/server/validation/simple_type";
-import { bubble_sort } from "~/util/ano_bubble_sort";
-import { AccountDisplay } from "./_summary/earnings_display";
+import { BoardDateRangePicker } from "~/app/salon/app-view/_components/date_range_picker";
 import {
     TechAccount,
     to_tech_account,
 } from "~/server/queries/salon/earnings/types";
+import { last_monday, last_sunday } from "~/server/validation/semantic/date";
+import { bubble_sort } from "~/util/ano_bubble_sort";
+import { TechAccountDisplay } from "./tech_account_display";
 
-export function SummaryView(props: { salon: string }) {
+export function TechSummaryView(props: { salon: string }) {
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();
 
     const [date_range, set_date_range] = useState<RangeValue<CalendarDate>>({
@@ -28,7 +29,7 @@ export function SummaryView(props: { salon: string }) {
         load_date(date_range.start);
     }, [date_range]);
 
-    const summary_api = "/api/app_view/summary/";
+    const summary_api = "/api/tech_view/summary/";
     const query = useQuery({
         queryFn: () => {
             if (date_to_load == null) {
@@ -43,26 +44,20 @@ export function SummaryView(props: { salon: string }) {
                 method: Method.GET,
                 cache: "no-store",
             }).then(
-                handle_react_query_response(
-                    to_array(to_tech_account),
-                    (tech_acc) => {
-                        set_entries((prev) => {
-                            const next = [...prev, ...tech_acc];
-                            bubble_sort(next, (a, b) => {
-                                const comp = a.tech.id.localeCompare(b.tech.id);
-                                if (comp != 0) return comp;
-
-                                return a.date.localeCompare(b.date);
-                            });
-                            const next_day = date_to_load.add({ days: 1 });
-
-                            if (next_day.compare(date_range.end) <= 0) {
-                                load_date(next_day);
-                            }
-                            return next;
+                handle_react_query_response(to_tech_account, (tech_acc) => {
+                    set_entries((prev) => {
+                        const next = [...prev, tech_acc];
+                        bubble_sort(next, (a, b) => {
+                            return a.date.localeCompare(b.date);
                         });
-                    },
-                ),
+                        const next_day = date_to_load.add({ days: 1 });
+
+                        if (next_day.compare(date_range.end) <= 0) {
+                            load_date(next_day);
+                        }
+                        return next;
+                    });
+                }),
             );
 
             return 0;
@@ -81,7 +76,7 @@ export function SummaryView(props: { salon: string }) {
                     ? `Loading: [${date_to_load}]...`
                     : `Loaded up to: [${date_to_load}]`}
             </div>
-            <AccountDisplay accounts={entries} />
+            <TechAccountDisplay accounts={entries} />
         </div>
     );
 }
