@@ -18,7 +18,7 @@ export function TransactionUpdate(props: {
 
         if (data.values[0] != undefined) {
             if (discounted)
-                props.transaction.amount = Math.floor(data.values[0] / TaxRate);
+                props.transaction.amount = Math.round(data.values[0] / TaxRate);
             else props.transaction.amount = data.values[0];
         } else {
             props.transaction.amount = initial_values.amount;

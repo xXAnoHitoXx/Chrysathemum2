@@ -68,7 +68,7 @@ export function TechAccountDisplay(props: { accounts: TechAccount[] }) {
                                         {
                                             width: half,
                                             text: money(
-                                                Math.floor(
+                                                Math.round(
                                                     account.account.tip /
                                                         TaxRate,
                                                 ),
