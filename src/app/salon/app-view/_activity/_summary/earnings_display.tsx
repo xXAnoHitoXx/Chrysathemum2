@@ -249,7 +249,7 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
                                         },
                                         {
                                             width: half,
-                                            text: money(Math.floor(account.account.tip / TaxRate)),
+                                            text: money(Math.round(account.account.tip / TaxRate)),
                                         },
                                     ]}
                                 />
