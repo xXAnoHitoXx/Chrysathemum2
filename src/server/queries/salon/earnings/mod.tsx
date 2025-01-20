@@ -110,6 +110,18 @@ const extract_earning_information: Query<Transaction[], EntityAccount[]> = (
                 amount: account.amount + transaction.amount,
                 tip: account.tip + transaction.tip,
             };
+            entry.closing = {
+                    machine:
+                        entry.closing.machine +
+                        Math.floor(transaction.amount * TaxRate) +
+                        transaction.tip -
+                        transaction.cash -
+                        transaction.gift -
+                        transaction.discount,
+                    cash: entry.closing.cash + transaction.cash,
+                    gift: entry.closing.gift + transaction.gift,
+                    discount: entry.closing.discount + transaction.discount,
+            }
         }
     }
 

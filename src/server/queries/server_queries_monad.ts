@@ -14,34 +14,32 @@ export type Query<T, U> = (
 
 export abstract class ServerQueryData<T> {
     protected fire_db: FireDB;
-    protected is_test: boolean;
 
     abstract unpack(): Promise<T | DataError>;
 
-    constructor(fire_db: FireDB, is_test: boolean) {
+    constructor(fire_db: FireDB) {
         this.fire_db = fire_db;
-        this.is_test = is_test;
     }
 
     bind<U>(query: Query<T, U>): ServerQueryData<U> {
-        return new ChainedQueryData(this, query, this.fire_db, this.is_test);
+        return new ChainedQueryData(this, query, this.fire_db);
     }
 
     err_bind<U>(query: Query<DataError, U>): ServerQueryData<T | U> {
-        return new ErrQueryData(this, query, this.fire_db, this.is_test);
+        return new ErrQueryData(this, query, this.fire_db);
     }
 }
 
 export function pack<T>(data: T): ServerQueryData<T> {
-    return new SimpleQueryData(data, new FireDB(), false);
+    return new SimpleQueryData(data, new FireDB());
 }
 
 export function pack_test<T>(data: T, test_name: string): ServerQueryData<T> {
-    return new SimpleQueryData(data, new FireDB(test_name), true);
+    return new SimpleQueryData(data, new FireDB(test_name));
 }
 
 export function pack_nested<T>(data: T, f_db: FireDB): ServerQueryData<T> {
-    return new SimpleQueryData(data, f_db, false);
+    return new SimpleQueryData(data, f_db);
 }
 
 export async function db_query<T>(
@@ -100,11 +98,10 @@ export function array_query<T, U>(
 class SimpleQueryData<T> extends ServerQueryData<T> {
     private data: T | DataError;
 
-    constructor(data: T | DataError, fire_db: FireDB, is_test: boolean) {
-        super(fire_db, is_test);
+    constructor(data: T | DataError, fire_db: FireDB) {
+        super(fire_db);
         this.data = data;
         this.fire_db = fire_db;
-        this.is_test = is_test;
     }
 
     async unpack(): Promise<T | DataError> {
@@ -119,17 +116,11 @@ class ChainedQueryData<S, T> extends ServerQueryData<T> {
     private query: Query<S, T>;
     private output: T | DataError | NOTHING;
 
-    constructor(
-        data: ServerQueryData<S>,
-        query: Query<S, T>,
-        fire_db: FireDB,
-        is_test: boolean,
-    ) {
-        super(fire_db, is_test);
+    constructor(data: ServerQueryData<S>, query: Query<S, T>, fire_db: FireDB) {
+        super(fire_db);
         this.data = data;
         this.query = query;
         this.fire_db = fire_db;
-        this.is_test = is_test;
         this.output = new NOTHING();
     }
 
@@ -159,9 +150,8 @@ class ErrQueryData<S, T> extends ServerQueryData<T | S> {
         data: ServerQueryData<T>,
         query: Query<DataError, S>,
         f_db: FireDB,
-        is_test: boolean,
     ) {
-        super(f_db, is_test);
+        super(f_db);
         this.data = data;
         this.query = query;
         this.output = new NOTHING();
