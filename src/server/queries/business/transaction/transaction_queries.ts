@@ -186,9 +186,9 @@ export const retrieve_customer_history: Query<
     }
 
     quick_sort(transactions, (t_a, t_b) => {
-        const comp = t_a.date.localeCompare(t_b.date);
+        const comp = t_b.date.localeCompare(t_a.date);
         if (comp !== 0) return comp;
-        return t_a.time - t_b.time;
+        return t_b.time - t_a.time;
     });
 
     return {

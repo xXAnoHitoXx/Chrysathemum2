@@ -4,9 +4,15 @@ import { f_db } from "~/server/db_schema";
 
 export const PATH_ENTRIES = "id/";
 export const MIGRATION_INDEX = "legacy_id/";
+export const LOGIN =  "login/";
 
 export const CUSTOMER_ROOT = "customers/";
 export const PHONE_INDEX = "phone_number/";
+
+export const TECHNICIAN_ROOT = "technicians/";
+
+export const LOCATION_ROOT = "locations/";
+export const ROSTER =  "roster/";
 
 // --------------------------------------------------------------------------------------
 const prod = "production";

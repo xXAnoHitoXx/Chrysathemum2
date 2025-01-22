@@ -1,22 +1,19 @@
 import { FireDB } from "~/_server/fire_db";
-import { ServerQueryData } from "~/_server/server_query";
 import {
     create_customer_migration_index,
     delete_customer_migration_index,
     retrieve_customer_id_from_legacy_id,
 } from "./migration_index";
-import { is_data_error } from "~/_server/generic_query/data_error";
+import { is_data_error } from "~/_server/data_error";
 import { wipe_test_data } from "~/_server/test_util";
 
 const test_suit = "customer_migration";
 
 afterAll(async () => {
-    const clean_up = await ServerQueryData.pack(
+    const clean_up = await wipe_test_data.call(
         test_suit,
         FireDB.test(test_suit),
-    )
-        .bind(wipe_test_data)
-        .unpack();
+    );
 
     if (is_data_error(clean_up)) {
         clean_up.log();
@@ -29,12 +26,10 @@ test("test customer_migration_index CRUDs querries", async () => {
 
     const test_ids = { id: "BaNaNa", legacy_id: "banana" };
 
-    let conversion = await ServerQueryData.pack(
+    let conversion = await retrieve_customer_id_from_legacy_id.call(
         { legacy_id: test_ids.legacy_id },
         test_db,
-    )
-        .bind(retrieve_customer_id_from_legacy_id)
-        .unpack();
+    );
 
     if (!is_data_error(conversion)) {
         expect(conversion.customer_id).toBeNull();
@@ -42,19 +37,15 @@ test("test customer_migration_index CRUDs querries", async () => {
         fail();
     }
 
-    await ServerQueryData.pack(
+    await create_customer_migration_index.call(
         { customer_id: test_ids.id, legacy_id: test_ids.legacy_id },
         test_db,
-    )
-        .bind(create_customer_migration_index)
-        .unpack();
+    );
 
-    conversion = await ServerQueryData.pack(
+    conversion = await retrieve_customer_id_from_legacy_id.call(
         { legacy_id: test_ids.legacy_id },
         test_db,
-    )
-        .bind(retrieve_customer_id_from_legacy_id)
-        .unpack();
+    );
 
     if (!is_data_error(conversion)) {
         expect(conversion.customer_id).toBe(test_ids.id);
@@ -62,24 +53,16 @@ test("test customer_migration_index CRUDs querries", async () => {
         fail();
     }
 
-    await ServerQueryData.pack({ legacy_id: test_ids.legacy_id }, test_db)
-        .bind(delete_customer_migration_index)
-        .unpack();
+    await delete_customer_migration_index.call({ legacy_id: test_ids.legacy_id }, test_db);
 
-    conversion = await ServerQueryData.pack(
+    conversion = await retrieve_customer_id_from_legacy_id.call(
         { legacy_id: test_ids.legacy_id },
         test_db,
-    )
-        .bind(retrieve_customer_id_from_legacy_id)
-        .unpack();
+    );
 
     if (!is_data_error(conversion)) {
         expect(conversion.customer_id).toBeNull();
     } else {
         fail();
     }
-
-    await ServerQueryData.pack(test_name, test_db)
-        .bind(wipe_test_data)
-        .unpack();
 });
