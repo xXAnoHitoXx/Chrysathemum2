@@ -1,4 +1,4 @@
-import { CalendarDate, RangeValue } from "@nextui-org/react";
+import { CalendarDate, RangeValue } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { BoardDateRangePicker } from "../_components/date_range_picker";
 import { last_monday, last_sunday } from "~/server/validation/semantic/date";

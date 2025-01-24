@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { Technician } from "~/server/db_schema/type_def";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useState, FormEvent } from "react";
@@ -12,7 +12,7 @@ import {
     ModalFooter,
     ModalHeader,
     useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { fetch_query, Method } from "~/app/api/api_query";
 import { DataError } from "~/server/data_error";
 

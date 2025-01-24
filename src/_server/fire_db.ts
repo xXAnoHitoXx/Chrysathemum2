@@ -14,6 +14,10 @@ export const TECHNICIAN_ROOT = "technicians/";
 export const LOCATION_ROOT = "locations/";
 export const ROSTER =  "roster/";
 
+export const DATES = "dates/";
+
+export const APPOINTMENTS_ROOT = "appointments/";
+
 // --------------------------------------------------------------------------------------
 const prod = "production";
 const dev = "development";

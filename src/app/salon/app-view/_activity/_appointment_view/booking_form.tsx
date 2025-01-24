@@ -4,7 +4,7 @@ import {
     CustomerSearch,
     LastCustomerSave,
 } from "../../_components/customer_search";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import {
     DURATION_30_MINUTES,
     hour_to_time,

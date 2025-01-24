@@ -4,7 +4,7 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { current_date } from "~/server/validation/semantic/date";
 

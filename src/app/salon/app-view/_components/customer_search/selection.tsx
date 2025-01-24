@@ -1,4 +1,4 @@
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { Customer } from "~/server/db_schema/type_def";
 import { LastCustomerSave } from "../customer_search";

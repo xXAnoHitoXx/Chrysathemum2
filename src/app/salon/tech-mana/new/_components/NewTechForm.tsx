@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Select, SelectItem } from "@nextui-org/react";
+import { Button, Input, Select, SelectItem } from "@heroui/react";
 import TechPreview from "./TechPreview";
 import type { Technician } from "~/server/db_schema/type_def";
 import TechDisplayBar from "./TechDisplayBar";

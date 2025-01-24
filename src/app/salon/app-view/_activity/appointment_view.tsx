@@ -14,7 +14,7 @@ import { handle_react_query_response } from "~/app/api/response_parser";
 import { current_date } from "~/server/validation/semantic/date";
 import { BoardDatePicker } from "../_components/date_picker";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import {
     BOARD_STARTING_HOUR,
     TIME_INTERVALS_PER_HOUR,

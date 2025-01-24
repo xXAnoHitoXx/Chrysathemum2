@@ -1,4 +1,4 @@
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { LastCustomerSave } from "../customer_search";
 import { format_phone_input } from "~/server/validation/semantic/phone_format";

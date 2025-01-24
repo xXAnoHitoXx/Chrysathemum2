@@ -9,7 +9,7 @@ import {
     Transaction,
 } from "~/server/db_schema/type_def";
 import { CustomerEdit } from "./_customer_view/customer_edit";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
 import { handle_react_query_response } from "~/app/api/response_parser";

@@ -3,7 +3,7 @@
 import { BoardDatePicker } from "../_components/date_picker";
 import { current_date } from "~/server/validation/semantic/date";
 import { Technician, Transaction } from "~/server/db_schema/type_def";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";

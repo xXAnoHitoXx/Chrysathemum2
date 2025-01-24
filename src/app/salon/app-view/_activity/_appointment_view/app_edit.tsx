@@ -1,8 +1,8 @@
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { Appointment, Technician } from "~/server/db_schema/type_def";
 import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { TechSelectBar } from "./tech_select";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { NoTechColor } from "~/constants";
 
 export function AppEdit(props: {

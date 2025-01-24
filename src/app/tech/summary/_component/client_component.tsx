@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDate, RangeValue } from "@nextui-org/react";
+import { CalendarDate, RangeValue } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Method } from "~/app/api/api_query";

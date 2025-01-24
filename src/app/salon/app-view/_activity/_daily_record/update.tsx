@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input } from "@nextui-org/react";
+import { Button, Checkbox, Input } from "@heroui/react";
 import { useState } from "react";
 import { TaxRate } from "~/constants";
 import { Transaction } from "~/server/db_schema/type_def";
