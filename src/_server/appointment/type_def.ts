@@ -2,6 +2,14 @@ import { z } from "zod";
 import { Customer } from "../customer/type_def";
 import { Technician } from "../technician/type_def";
 
+export const CustomerAppointmentIndex = z.object({
+    customer_id: z.string(),
+    date: z.string(),
+    salon: z.string(),
+    appointment_id: z.string(),
+});
+export type CustomerAppointmentIndex = z.infer<typeof CustomerAppointmentIndex>;
+
 export const AppointmentRecordID = z.object({
     date: z.string(),
     salon: z.string(),

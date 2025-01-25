@@ -11,7 +11,13 @@ import {
 import {
     AppointmentEntryCreationInfo,
     AppointmentEntryUpdateInfo,
+    CustomerAppointmentIndex,
 } from "../type_def";
+import {
+    create_customers_appointments_entry,
+    delete_customers_appointment_entry,
+    retrieve_customer_appointments_index,
+} from "./customer_appointments";
 
 const test_suit = "aappointment_cruds";
 
@@ -205,4 +211,78 @@ test("test appointment_entries CRUDs querries", async () => {
     expect(appointments).toHaveLength(1);
     expect(appointments).toContainEqual(app_2);
     expect(appointments).not.toContainEqual(updated_appointment);
+});
+
+test("test customer appointment list entries CRUDs querries", async () => {
+    const test_name = test_suit + "/test_customer_appointment_list/";
+    const test_db = FireDB.test(test_name);
+
+    const index_1: CustomerAppointmentIndex = {
+        customer_id: "bruh",
+        appointment_id: "q;wyfupl",
+        date: "20 2 2085",
+        salon: "5CBL",
+    };
+
+    const index_2: CustomerAppointmentIndex = {
+        customer_id: "bruh",
+        appointment_id: "aorsoetna",
+        date: "20 2 2085",
+        salon: "5CBL",
+    };
+
+    const create_index_1 = await create_customers_appointments_entry.call(
+        index_1,
+        test_db,
+    );
+
+    if (is_data_error(create_index_1)) {
+        create_index_1.log();
+        fail();
+    }
+
+    const create_index_2 = await create_customers_appointments_entry.call(
+        index_2,
+        test_db,
+    );
+
+    if (is_data_error(create_index_2)) {
+        create_index_2.log();
+        fail();
+    }
+
+    let customer_history = await retrieve_customer_appointments_index.call(
+        { customer_id: index_1.customer_id },
+        test_db,
+    );
+
+    if (is_data_error(customer_history)) {
+        customer_history.log();
+        fail();
+    }
+
+    expect(customer_history).toHaveLength(2);
+    expect(customer_history).toContainEqual(index_1);
+    expect(customer_history).toContainEqual(index_2);
+
+    const del = await delete_customers_appointment_entry.call(index_1, test_db);
+
+    if (is_data_error(del)) {
+        del.log();
+        fail();
+    }
+
+    customer_history = await retrieve_customer_appointments_index.call(
+        { customer_id: index_1.customer_id },
+        test_db,
+    );
+
+    if (is_data_error(customer_history)) {
+        customer_history.log();
+        fail();
+    }
+
+    expect(customer_history).toHaveLength(1);
+    expect(customer_history).not.toContainEqual(index_1);
+    expect(customer_history).toContainEqual(index_2);
 });
