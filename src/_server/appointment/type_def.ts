@@ -58,6 +58,18 @@ export const AppointmentEntry = z.object({
 });
 export type AppointmentEntry = z.infer<typeof AppointmentEntry>;
 
+export const AppointmentCreationInfo = z.object({
+    customer: Customer,
+    date: z.string(),
+    time: z.number(),
+    duration: z.number(),
+    details: z.string(),
+    salon: z.string(),
+});
+export type AppointmentCreationInfo = z.infer<
+    typeof AppointmentCreationInfo
+>;
+
 export const Appointment = z.object({
     id: z.string(),
     customer: Customer,
