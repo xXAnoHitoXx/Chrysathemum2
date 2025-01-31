@@ -17,6 +17,7 @@ export const ROSTER =  "roster/";
 export const DATES = "dates/";
 
 export const APPOINTMENTS_ROOT = "appointments/";
+export const TRANSACTION_ROOT =  "transactions/";
 
 // --------------------------------------------------------------------------------------
 const prod = "production";

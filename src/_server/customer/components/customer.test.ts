@@ -46,16 +46,12 @@ test("test customer_entries CRUDs querries", async () => {
         test_db,
     );
 
-    if (!is_data_error(created_customer_entry)) {
-        expect(created_customer_entry.id).toBe(test_customer_entry.id);
-        expect(created_customer_entry.name).toBe(test_customer_entry.name);
-        expect(created_customer_entry.phone_number).toBe(
-            test_customer_entry.phone_number,
-        );
-    } else {
+    if (is_data_error(created_customer_entry)) {
         created_customer_entry.log();
         fail();
     }
+
+    expect(created_customer_entry).toEqual(test_customer_entry);
 
     const update_target: Customer = {
         id: test_customer_entry.id,
@@ -71,17 +67,12 @@ test("test customer_entries CRUDs querries", async () => {
         test_db,
     );
 
-    if (!is_data_error(updated_customer_entry)) {
-        expect(updated_customer_entry.id).toBe(update_target.id);
-        expect(updated_customer_entry.name).toBe(update_target.name);
-        expect(updated_customer_entry.phone_number).toBe(
-            update_target.phone_number,
-        );
-        expect(updated_customer_entry.notes).toBe(update_target.notes);
-    } else {
+    if (is_data_error(updated_customer_entry)) {
         updated_customer_entry.log();
         fail();
     }
+
+    expect(updated_customer_entry).toEqual(update_target);
 
     await delete_customer_entry.call(
         { customer_id: test_customer_entry.id },

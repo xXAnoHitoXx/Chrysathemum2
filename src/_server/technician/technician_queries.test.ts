@@ -65,6 +65,8 @@ test("test new technician querry", async () => {
     expect(created.color).toBe(test_input.color);
     expect(created.active).toBe(true);
 
+    expect(created).toEqual(technician);
+
     const roster = await retrieve_roster.call(
         { location_id: salon.id },
         test_db,
@@ -77,13 +79,14 @@ test("test new technician querry", async () => {
 
     expect(roster.length).toBe(1);
     const entry = roster[0]!;
+
     if (is_data_error(entry)) {
         entry.log();
         fail();
-    } else {
-        expect(entry.technician_id).toBe(technician.id);
-        expect(entry.location_id).toBe(salon.id);
     }
+    expect(entry.technician_id).toBe(technician.id);
+    expect(entry.location_id).toBe(salon.id);
+    
 });
 
 test("test change technician activity querry", async () => {

@@ -56,10 +56,7 @@ test("appointment creation", async () => {
         fail();
     }
 
-    expect(appointment.customer.name).toBe(customer.name);
-    expect(appointment.customer.phone_number).toBe(customer.phone_number);
-    expect(appointment.customer.id).toBe(customer.id);
-    expect(appointment.customer.notes).toBe(customer.notes);
+    expect(appointment.customer).toEqual(customer);
 
     expect(appointment.date).toBe(appointment_info.date);
     expect(appointment.duration).toBe(appointment_info.duration);
@@ -133,10 +130,7 @@ test("appointment update", async () => {
         fail();
     }
 
-    expect(appointment.customer.name).toBe(customer.name);
-    expect(appointment.customer.phone_number).toBe(customer.phone_number);
-    expect(appointment.customer.id).toBe(customer.id);
-    expect(appointment.customer.notes).toBe(customer.notes);
+    expect(appointment.customer).toEqual(customer);
 
     expect(appointment.date).toBe(appointment_info.date);
     expect(appointment.duration).toBe(appointment_info.duration);

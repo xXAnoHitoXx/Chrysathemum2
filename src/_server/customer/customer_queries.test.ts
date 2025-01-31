@@ -113,12 +113,10 @@ test("update customer name", async () => {
         fail();
     }
 
-    expect(name_changed_entry.id).toBe(starting_customer.id);
-    expect(name_changed_entry.name).toBe(name_change_info.name);
-    expect(name_changed_entry.phone_number).toBe(
-        starting_customer.phone_number,
-    );
-    expect(name_changed_entry.notes).toBe(starting_customer.notes);
+    expect(name_changed_entry).toEqual({
+        ...starting_customer,
+        name: name_change_info.name,
+    });
 });
 
 test("update customer phone_number", async () => {

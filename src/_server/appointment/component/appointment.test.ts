@@ -78,13 +78,7 @@ test("test appointment_entries CRUDs querries", async () => {
         fail();
     }
 
-    expect(appointment_in_db.id).toBe(appointment.id);
-    expect(appointment_in_db.technician_id).toBeUndefined();
-    expect(appointment_in_db.customer_id).toBe(appointment.customer_id);
-    expect(appointment_in_db.date).toBe(app_detail.date);
-    expect(appointment_in_db.time).toBe(app_detail.time);
-    expect(appointment_in_db.duration).toBe(app_detail.duration);
-    expect(appointment_in_db.details).toBe(appointment.details);
+    expect(appointment_in_db).toEqual(appointment);
 
     let update_target: AppointmentEntryUpdateInfo = {
         id: id,

@@ -31,11 +31,11 @@ test("test customer_migration_index CRUDs querries", async () => {
         test_db,
     );
 
-    if (!is_data_error(conversion)) {
-        expect(conversion.customer_id).toBeNull();
-    } else {
+    if(is_data_error(conversion)) {
+        conversion.log();
         fail();
     }
+    expect(conversion.customer_id).toBeNull();
 
     await create_customer_migration_index.call(
         { customer_id: test_ids.id, legacy_id: test_ids.legacy_id },
@@ -47,11 +47,11 @@ test("test customer_migration_index CRUDs querries", async () => {
         test_db,
     );
 
-    if (!is_data_error(conversion)) {
-        expect(conversion.customer_id).toBe(test_ids.id);
-    } else {
+    if(is_data_error(conversion)) {
+        conversion.log();
         fail();
     }
+        expect(conversion.customer_id).toBe(test_ids.id);
 
     await delete_customer_migration_index.call({ legacy_id: test_ids.legacy_id }, test_db);
 
@@ -60,9 +60,9 @@ test("test customer_migration_index CRUDs querries", async () => {
         test_db,
     );
 
-    if (!is_data_error(conversion)) {
-        expect(conversion.customer_id).toBeNull();
-    } else {
+    if(is_data_error(conversion)) {
+        conversion.log();
         fail();
     }
+        expect(conversion.customer_id).toBeNull();
 });

@@ -47,19 +47,12 @@ test("test technician entries CRUD queries", async () => {
         test_db,
     );
 
-    if (!is_data_error(created_technician_entry)) {
-        expect(created_technician_entry.id).toBe(test_technician_entry.id);
-        expect(created_technician_entry.name).toBe(test_technician_entry.name);
-        expect(created_technician_entry.color).toBe(
-            test_technician_entry.color,
-        );
-        expect(created_technician_entry.active).toBe(
-            test_technician_entry.active,
-        );
-    } else {
+    if (is_data_error(created_technician_entry)) {
         created_technician_entry.log();
         fail();
     }
+
+    expect(created_technician_entry).toEqual(test_technician_entry);
 
     const update_target: Technician = {
         id: test_technician_entry.id,
@@ -76,15 +69,12 @@ test("test technician entries CRUD queries", async () => {
         test_db,
     );
 
-    if (!is_data_error(updated_technician_entry)) {
-        expect(updated_technician_entry.id).toBe(update_target.id);
-        expect(updated_technician_entry.name).toBe(update_target.name);
-        expect(updated_technician_entry.color).toBe(update_target.color);
-        expect(updated_technician_entry.active).toBe(update_target.active);
-    } else {
+    if (is_data_error(updated_technician_entry)) {
         updated_technician_entry.log();
         fail();
     }
+
+    expect(updated_technician_entry).toEqual(update_target);
 
     await delete_technician_entry.call(
         { tech_id: test_technician_entry.id },
@@ -108,52 +98,43 @@ test("location roster", async () => {
     const tech1: RosterEntry = {
         location_id: location_id,
         technician_id: "Chicken Noodle",
-    }
+    };
     const tech2: RosterEntry = {
         location_id: location_id,
-        technician_id:  "Banana Bread hmmmmmm",
-    }
+        technician_id: "Banana Bread hmmmmmm",
+    };
 
-    await create_roster_entry.call(
-        tech1,
-        test_db,
-    );
+    await create_roster_entry.call(tech1, test_db);
 
-    await create_roster_entry.call(
-        tech2,
-        test_db,
-    );
+    await create_roster_entry.call(tech2, test_db);
 
     const roster = await retrieve_roster.call(
         { location_id: location_id },
         test_db,
     );
 
-    if (!is_data_error(roster)) {
-        expect(roster).toHaveLength(2);
-        expect(roster).toContainEqual(tech1);
-        expect(roster).toContainEqual(tech2);
-    } else {
+    if (is_data_error(roster)) {
         roster.log();
         fail();
     }
 
-    await delete_roster_entry.call(
-        tech2,
-        test_db,
-    );
+    expect(roster).toHaveLength(2);
+    expect(roster).toContainEqual(tech1);
+    expect(roster).toContainEqual(tech2);
+
+    await delete_roster_entry.call(tech2, test_db);
 
     const post_del_roster = await retrieve_roster.call(
         { location_id: location_id },
         test_db,
     );
 
-    if (!is_data_error(roster)) {
-        expect(post_del_roster).toHaveLength(1);
-        expect(post_del_roster).toContainEqual(tech1);
-        expect(post_del_roster).not.toContainEqual(tech2);
-    } else {
+    if (is_data_error(roster)) {
         roster.log();
         fail();
     }
+
+    expect(post_del_roster).toHaveLength(1);
+    expect(post_del_roster).toContainEqual(tech1);
+    expect(post_del_roster).not.toContainEqual(tech2);
 });
