@@ -28,3 +28,11 @@ export const TransactionID = z.object({
     entry_id: z.string(),
 });
 export type TransactionID = z.infer<typeof TransactionID>;
+
+export const CustomerHistoryIndex = z.object({
+    customer_id: z.string(),
+    date: z.string(),
+    salon: z.string(),
+    transaction_id: z.string(),
+});
+export type CustomerHistoryIndex = z.infer<typeof CustomerHistoryIndex>;

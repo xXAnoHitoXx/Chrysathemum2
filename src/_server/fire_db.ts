@@ -18,6 +18,7 @@ export const DATES = "dates/";
 
 export const APPOINTMENTS_ROOT = "appointments/";
 export const TRANSACTION_ROOT =  "transactions/";
+export const HISTORY = "history/";
 
 // --------------------------------------------------------------------------------------
 const prod = "production";
