@@ -62,6 +62,7 @@ export class AppointmentQuery {
                 ),
             ),
     );
+
     public static retrieve_customers_appointments: ServerQuery<
         Customer,
         Appointment[]
@@ -125,7 +126,6 @@ export class AppointmentQuery {
         Appointment[]
     > = ServerQuery.from_builder((input, f_db) => {
         const context = `retriving appointments of { ${input.date} }`;
-        const v: void = undefined;
         const technicians_query = retrieve_all_technician_entries
             .chain<Technician[]>(report_partial_errors)
             .chain<Record<string, Technician>>((technicians) => {
@@ -135,7 +135,7 @@ export class AppointmentQuery {
                 }
                 return rec;
             })
-            .call(v, f_db);
+            .call(undefined as void, f_db);
 
         return retrieve_appointment_entries_on_date
             .chain<AppointmentEntry[]>(report_partial_errors)
