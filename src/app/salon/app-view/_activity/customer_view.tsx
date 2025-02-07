@@ -65,6 +65,8 @@ const useCustomerHistory = (
                     }
                 }
             }
+
+            return 0;
         },
         queryKey: ["customer_data", customer],
     });

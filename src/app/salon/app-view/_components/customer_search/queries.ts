@@ -9,7 +9,8 @@ export async function name_search(customer_name: string): Promise<Customer[] | D
         { method: Method.GET },
     );
 
-    const customers = z.array(Customer).safeParse(await response.json())
+    const json = await response.json();
+    const customers = z.array(Customer).safeParse(json)
 
     if (customers.success) {
         return customers.data;

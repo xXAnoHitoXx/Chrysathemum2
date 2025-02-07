@@ -15,7 +15,7 @@ export async function GET(
 
     const { phone } = await params;
 
-    const query = CustomerQuery.phone_search.call({ phone_search: phone }, FireDB.active());
+    const query = await CustomerQuery.phone_search.call({ phone_search: phone }, FireDB.active());
 
     if (is_data_error(query)) {
         query.report();

@@ -1,6 +1,5 @@
 import { heroui } from "@heroui/react";
 import { type Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
     content: [
@@ -9,9 +8,6 @@ export default {
     ],
     theme: {
         extend: {
-            fontFamily: {
-                sans: ["var(--font-sans)", ...fontFamily.sans],
-            },
             gridTemplateColumns: {
                 "appointment-board": "repeat(52, minmax(60px, 60px))",
             },
@@ -129,7 +125,7 @@ export default {
             },
         },
     },
-
+    /*
     safelist: [
         {
             pattern:
@@ -153,5 +149,26 @@ export default {
             pattern: /row-span-2/,
         },
     ],
-    plugins: [heroui()],
+    */
+    plugins: [
+        heroui({
+            layout: {
+                disabledOpacity: "0.3", // opacity-[0.3]
+                radius: {
+                    small: "2px", // rounded-small
+                    medium: "4px", // rounded-medium
+                    large: "6px", // rounded-large
+                },
+                borderWidth: {
+                    small: "1px", // border-small
+                    medium: "1px", // border-medium
+                    large: "2px", // border-large
+                },
+            },
+            themes: {
+                light: {},
+                dark: {},
+            },
+        }),
+    ],
 } satisfies Config;

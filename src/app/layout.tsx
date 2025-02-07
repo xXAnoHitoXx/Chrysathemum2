@@ -7,7 +7,8 @@ import { Providers } from "./providers";
 import { Inter } from "next/font/google";
 import { dark } from "@clerk/themes";
 import { is_data_error } from "~/server/data_error";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 const inter = Inter({
     subsets: ["latin"],

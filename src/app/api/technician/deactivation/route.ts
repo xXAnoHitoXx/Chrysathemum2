@@ -19,7 +19,7 @@ export async function PATCH(request: Request): Promise<Response> {
         );
     }
 
-    const query = TechnicianQuery.mark_inactive.call(
+    const query = await TechnicianQuery.mark_inactive.call(
         technician.data,
         FireDB.active(),
     );

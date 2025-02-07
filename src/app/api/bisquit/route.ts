@@ -1,6 +1,7 @@
-import { BisquitStore, set_bisquit } from "~/server/bisquit/bisquit";
+import { set_bisquit } from "~/server/bisquit/bisquit";
 import { is_data_error } from "~/server/data_error";
 import { currentUser } from "@clerk/nextjs/server";
+import { BisquitStore } from "~/server/bisquit/type_def";
 
 export async function POST(request: Request): Promise<Response> {
     const user = await currentUser();

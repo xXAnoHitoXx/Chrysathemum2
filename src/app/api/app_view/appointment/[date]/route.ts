@@ -1,6 +1,6 @@
 import { is_data_error } from "~/server/data_error";
 import { check_user_permission, Role } from "~/app/api/c_user";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
 import { z } from "zod";
 import { AppointmentQuery } from "~/server/appointment/appointment_queries";
 import { FireDB } from "~/server/fire_db";
@@ -12,6 +12,7 @@ import {
 import { array_query, ServerQuery } from "~/server/server_query";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
 import { TransactionQuery } from "~/server/transaction/transaction_queries";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export async function GET(
     _: Request,

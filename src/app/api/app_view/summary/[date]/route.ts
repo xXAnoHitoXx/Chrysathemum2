@@ -5,13 +5,14 @@ import {
     report_partial_errors,
 } from "~/server/data_error";
 import { z } from "zod";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
 import { retrieve_earnings_information_of_date } from "~/server/earnings/components/salon";
 import { ServerQuery } from "~/server/server_query";
 import { FireDB } from "~/server/fire_db";
 import { Technician } from "~/server/technician/type_def";
 import { retrieve_all_technician_entries } from "~/server/technician/components/technician_entry";
 import { EarningEntry, TechnicianEarnings } from "~/server/earnings/type_def";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export async function GET(
     _: Request,
@@ -51,7 +52,7 @@ export async function GET(
         })
         .call(undefined as void, f_db);
 
-    const query = retrieve_earnings_information_of_date
+    const query = await retrieve_earnings_information_of_date
         .chain<(TechnicianEarnings | DataError)[]>(
             ServerQuery.create_query(async (accounts: EarningEntry[]) => {
                 const technicians: Record<string, Technician> | DataError =

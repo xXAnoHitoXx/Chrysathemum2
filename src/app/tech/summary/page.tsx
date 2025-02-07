@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { check_user_permission, Role } from "~/app/api/c_user";
 import { DataError, is_data_error } from "~/server/data_error";
 import { TechSummaryView } from "./_component/client_component";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
 import { z } from "zod";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export default async function Page() {
     const user = await check_user_permission([Role.Tech]);

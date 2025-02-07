@@ -15,7 +15,7 @@ export async function GET(
 
     const { name } = await params;
 
-    const query = CustomerQuery.name_search.call({ name_search: name }, FireDB.active());
+    const query = await CustomerQuery.name_search.call({ name_search: name }, FireDB.active());
 
     if (is_data_error(query)) {
         query.report();

@@ -20,7 +20,7 @@ export async function POST(request: Request): Promise<Response> {
         return Response.json({ message: req.error.message }, { status: 400 });
     }
 
-    const query = CustomerQuery.create_new_customer.call(
+    const query = await CustomerQuery.create_new_customer.call(
         req.data,
         FireDB.active(),
     );
@@ -47,7 +47,7 @@ export async function PATCH(request: Request): Promise<Response> {
         return Response.json({ message: req.error.message }, { status: 400 });
     }
 
-    const query = CustomerQuery.update_customer_info.call(
+    const query = await CustomerQuery.update_customer_info.call(
         req.data,
         FireDB.active(),
     );

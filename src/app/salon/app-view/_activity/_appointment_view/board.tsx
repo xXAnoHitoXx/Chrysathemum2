@@ -69,9 +69,9 @@ export function Board(props: {
     return (
         <div
             id="AppointmentEntry View"
-            className="flex-1 flex-nowrap overflow-x-scroll border-4 border-sky-900"
+            className="w-full flex-1 flex-nowrap overflow-x-scroll border-4 border-sky-900"
         >
-            <ul className="grid-cols-appointment-board grid grid-flow-row-dense auto-rows-max">
+            <ul className="w-fit h-full grid-cols-appointment-board grid grid-flow-row-dense auto-rows-max">
                 {map(range(BOARD_STARTING_HOUR, BOARD_ENDING_HOUR), (i) =>
                     timestamp(i, { open: 10, close: 19 }, () => {
                         props.on_time_stamp(i);

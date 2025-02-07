@@ -1,9 +1,10 @@
 import { is_data_error } from "~/server/data_error";
 import { check_user_permission, Role } from "../../c_user";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
 import { TechnicianQuery } from "~/server/technician/technician_queries";
 import { FireDB } from "~/server/fire_db";
 import { Technician } from "~/server/technician/type_def";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export async function GET() {
     const user = await check_user_permission([Role.Operator, Role.Admin]);
@@ -50,7 +51,7 @@ export async function POST(request: Request): Promise<Response> {
         );
     }
 
-    const query = TechnicianQuery.assign_tech_to_location.call(
+    const query = await TechnicianQuery.assign_tech_to_location.call(
         {
             location_id: salon,
             technician_id: technician.data.id,

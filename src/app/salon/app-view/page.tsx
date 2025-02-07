@@ -3,7 +3,8 @@ import { Role } from "~/app/api/c_user";
 import { AppView } from "./_components/app_view_page";
 import { is_data_error } from "~/server/data_error";
 import { redirect } from "next/navigation";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export default async function Page() {
     const user = await currentUser();

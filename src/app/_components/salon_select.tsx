@@ -3,7 +3,7 @@
 import { Method } from "../api/api_query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bisquit } from "~/server/bisquit/bisquit";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export default function SalonSelect({ next_page }: { next_page: string }) {
     const router = useRouter();

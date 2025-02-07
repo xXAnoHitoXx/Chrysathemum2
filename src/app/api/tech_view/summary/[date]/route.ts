@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { check_user_permission, Role } from "~/app/api/c_user";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
+import { Bisquit } from "~/server/bisquit/type_def";
 import { is_data_error } from "~/server/data_error";
 import { retrieve_tech_earnings_information_of_date } from "~/server/earnings/components/tech";
 import { EarningEntry, TechnicianEarnings } from "~/server/earnings/type_def";

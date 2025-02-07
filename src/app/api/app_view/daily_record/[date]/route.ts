@@ -1,10 +1,11 @@
 import { is_data_error } from "~/server/data_error";
 import { check_user_permission, Role } from "../../../c_user";
 import { z } from "zod";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
 import { TransactionQuery } from "~/server/transaction/transaction_queries";
 import { FireDB } from "~/server/fire_db";
 import { Transaction } from "~/server/transaction/type_def";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export async function GET(
     _: Request,
@@ -31,7 +32,7 @@ export async function GET(
         return Response.json({ message: salon.message() }, { status: 400 });
     }
 
-    const query = TransactionQuery.retrieve_transactions_on_date.call(
+    const query = await TransactionQuery.retrieve_transactions_on_date.call(
         {
             salon: salon,
             date: date,

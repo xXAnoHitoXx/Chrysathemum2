@@ -1,6 +1,7 @@
 import ClientSide from "./_components/ClientSide";
 import { redirect } from "next/navigation";
-import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { get_bisquit } from "~/server/bisquit/bisquit";
+import { Bisquit } from "~/server/bisquit/type_def";
 import { is_data_error, report_partial_errors } from "~/server/data_error";
 import { FireDB } from "~/server/fire_db";
 import {
