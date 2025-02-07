@@ -1,7 +1,10 @@
-import { require_permission, Role } from "~/app/api/c_user";
+import { redirect } from "next/navigation";
+import { is_data_error } from "~/_server_/data_error";
+import { check_user_permission, Role } from "~/app/api/c_user";
 
 export default async function Page() {
-    await require_permission([Role.Tech]);
+    const user = await check_user_permission([Role.Tech]);
+    if (is_data_error(user)) redirect("/");
 
     return (
         <div className="flex h-dvh w-full justify-center">

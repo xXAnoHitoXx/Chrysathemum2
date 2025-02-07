@@ -1,21 +1,27 @@
-import { pack } from "~/server/queries/server_queries_monad";
-import {
-    handle_void_return,
-    parse_request,
-    unpack_response,
-} from "../server_parser";
-import { to_bisquit_data } from "~/server/validation/bisquit";
-import { set_bisquit } from "~/server/queries/crud/biscuits";
-import { require_permission, Role } from "../c_user";
+import { BisquitStore, set_bisquit } from "~/server/bisquit/bisquit";
+import { is_data_error } from "~/server/data_error";
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function POST(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    const user = await currentUser();
+    if (!user) {
+        return Response.json({ message: "not logged in" }, { status: 401 });
+    }
 
-    const query = pack(request)
-        .bind(parse_request(to_bisquit_data))
-        .bind(set_bisquit)
-        .bind(handle_void_return);
-    return unpack_response(query);
+    const bisquit = BisquitStore.safeParse(await request.json());
+
+    if (!bisquit.success) {
+        return Response.json(
+            { message: bisquit.error.message },
+            { status: 400 },
+        );
+    }
+
+    const query = await set_bisquit(bisquit.data);
+
+    if (is_data_error(query)) {
+        return Response.json({ message: query.message() }, { status: 400 });
+    }
+
+    return Response.json({}, { status: 200 });
 }

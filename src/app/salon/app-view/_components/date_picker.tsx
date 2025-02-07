@@ -1,18 +1,20 @@
 import { CalendarDate } from "@internationalized/date";
 import {
-    Button, Calendar,
+    Button,
+    Calendar,
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@heroui/react";
 import { Dispatch, SetStateAction, useState } from "react";
-import { current_date } from "~/server/validation/semantic/date";
+import { current_date } from "~/util/date";
 
 export function BoardDatePicker(props: {
     date: CalendarDate;
     set_date: Dispatch<SetStateAction<CalendarDate>>;
 }) {
-    const [holder, update_date] = useState(props.date);
+    const [holder, update_date] = useState<CalendarDate>(props.date);
+
     return (
         <div className="flex w-3/4 flex-wrap gap-1">
             <Popover
@@ -34,23 +36,18 @@ export function BoardDatePicker(props: {
                             cellButton: "w-12 h-12",
                         }}
                         weekdayStyle="short"
-                        onChange={(date) => {
-                            update_date(
-                                new CalendarDate(
-                                    date.year,
-                                    date.month,
-                                    date.day,
-                                ),
-                            );
-                        }}
+                        value={holder}
                     />
                 </PopoverContent>
             </Popover>
             <Button
                 color="secondary"
                 onPress={() => {
-                    update_date(current_date());
-                    props.set_date(holder);
+                    update_date(() => {
+                        const date = current_date();
+                        props.set_date(date);
+                        return date;
+                    });
                 }}
             >
                 Reset

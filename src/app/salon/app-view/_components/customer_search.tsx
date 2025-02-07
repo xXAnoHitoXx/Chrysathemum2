@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Customer } from "~/server/db_schema/type_def";
 import { SearchQueryInput } from "./customer_search/search_input";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import SelectionDisplay from "./customer_search/selection";
@@ -8,6 +7,8 @@ import {
     name_search,
     phone_search,
 } from "./customer_search/queries";
+import { Customer } from "~/server/customer/type_def";
+import { DataError, is_data_error } from "~/server/data_error";
 
 export type LastCustomerSave = {
     data: Customer | null;
@@ -37,13 +38,22 @@ export function CustomerSearch(props: {
             queryKey: [string, { state: State; input: string }];
         }) => {
             const [_key, { state, input }] = queryKey;
+
+            let result: Customer[] | DataError = [];
+
             if (state === State.SearchPhone) {
-                return phone_search(input);
+                result = await phone_search(input);
             } else if (state === State.SearchName) {
-                return name_search(input);
+                result = await name_search(input);
             }
 
-            return Promise.reject();
+            if (is_data_error(result)) {
+                result.report();
+                result.log();
+                return Promise.reject();
+            } else {
+                return result;
+            }
         },
         queryKey: ["customer search", { state: state, input: input }],
         enabled: state === State.SearchPhone || state === State.SearchName,
@@ -52,8 +62,12 @@ export function CustomerSearch(props: {
     const new_customer = useMutation({
         mutationFn: create_customer,
         mutationKey: ["new Customer"],
-        onSuccess: (customer: Customer) => {
-            props.on_complete(customer);
+        onSuccess: (customer: Customer | DataError) => {
+            if (!is_data_error(customer)) props.on_complete(customer);
+            else {
+                customer.log();
+                customer.report();
+            }
         },
     });
 

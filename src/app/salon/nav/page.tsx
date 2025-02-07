@@ -4,7 +4,6 @@ import { Role } from "~/app/api/c_user";
 
 export default async function Nav() {
     const user = await currentUser();
-
     if (!user) {
         redirect("/");
     }

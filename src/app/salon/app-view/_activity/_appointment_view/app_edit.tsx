@@ -1,9 +1,10 @@
 import { Button } from "@heroui/button";
-import { Appointment, Technician } from "~/server/db_schema/type_def";
-import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { TechSelectBar } from "./tech_select";
 import { Input } from "@heroui/react";
 import { NoTechColor } from "~/constants";
+import { Technician } from "~/server/technician/type_def";
+import { Appointment } from "~/server/appointment/type_def";
+import { format_phone_number } from "~/util/phone_format";
 
 export function AppEdit(props: {
     technicians: Technician[];
@@ -118,10 +119,10 @@ export function AppEdit(props: {
                         const app = props.appointments[0];
                         if (app != undefined) {
                             if (
-                                app.technician != null &&
+                                app.technician != undefined &&
                                 app.technician.id === tech.id
                             ) {
-                                app.technician = null;
+                                app.technician = undefined;
                             } else {
                                 app.technician = tech;
                             }

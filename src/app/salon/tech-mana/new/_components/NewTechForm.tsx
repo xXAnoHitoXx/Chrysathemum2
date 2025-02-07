@@ -2,14 +2,12 @@
 
 import { Button, Input, Select, SelectItem } from "@heroui/react";
 import TechPreview from "./TechPreview";
-import type { Technician } from "~/server/db_schema/type_def";
 import TechDisplayBar from "./TechDisplayBar";
-import { to_technician } from "~/server/validation/db_types/technician_validation";
-import { fetch_query, Method } from "~/app/api/api_query";
-import { is_data_error } from "~/server/data_error";
+import { Method } from "~/app/api/api_query";
 import { useMutation } from "@tanstack/react-query";
 import { ChangeEvent, useEffect, useState } from "react";
-import { sanitize_text_input } from "~/server/validation/text_sanitization";
+import { Technician } from "~/server/technician/type_def";
+import { sanitize_text_input } from "~/util/text_sanitization";
 
 type FormData = {
     name: string;
@@ -46,8 +44,6 @@ export function NewTechForm({
         "border-sky-500 bg-slate-950 text-sky-300",
     );
 
-    const [is_loading, set_loading] = useState(false);
-
     useEffect(() => {
         set_color_data(
             "border-".concat(
@@ -70,24 +66,21 @@ export function NewTechForm({
 
     const create_new_tech = useMutation({
         mutationFn: async () => {
-            const new_tech = await fetch_query({
-                url: "/api/technician/create",
+            const new_tech = await fetch("/api/technician/create", {
                 method: Method.POST,
-                params: {
-                    data: {
-                        name: form_data.name,
-                        color: color_data,
-                        active_salon: salon,
-                    },
-                },
-                to: to_technician,
+                body: JSON.stringify({
+                    name: form_data.name,
+                    color: color_data,
+                    active_salon: salon,
+                }),
             });
 
-            if (!is_data_error(new_tech)) {
-                set_active_techs([new_tech, ...active_techs]);
+            if (new_tech.status === 200) {
+                const tech = Technician.safeParse(await new_tech.json());
+                if (tech.success) {
+                    set_active_techs([tech.data, ...active_techs]);
+                }
             }
-
-            set_loading(false);
         },
 
         mutationKey: ["create_technician", form_data],
@@ -306,13 +299,14 @@ export function NewTechForm({
                         <Button
                             type="submit"
                             color="primary"
-                            isDisabled={is_loading}
+                            isDisabled={create_new_tech.isPending}
                             onPress={() => {
-                                set_loading(true);
                                 create_new_tech.mutate();
                             }}
                         >
-                            {is_loading ? "Loading..." : "Create"}
+                            {create_new_tech.isPending
+                                ? "Loading..."
+                                : "Create"}
                         </Button>
                     </div>
                 </div>

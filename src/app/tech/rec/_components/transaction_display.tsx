@@ -1,7 +1,8 @@
+import { time_to_string } from "~/_server_/validation/semantic/appointment_time";
 import { TaxRate } from "~/constants";
-import { Technician, Transaction } from "~/server/db_schema/type_def";
-import { time_to_string } from "~/server/validation/semantic/appointment_time";
-import { money } from "~/server/validation/semantic/money";
+import { Technician } from "~/server/technician/type_def";
+import { Transaction } from "~/server/transaction/type_def";
+import { money } from "~/util/money";
 
 export function TransactionDisplay(props: {
     technician: Technician;
@@ -151,7 +152,7 @@ function Row(props: {
     return (
         <button
             className={
-                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
+                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
                 " " +
                 props.color
             }

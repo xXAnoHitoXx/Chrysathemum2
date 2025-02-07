@@ -1,10 +1,10 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Appointment } from "~/server/db_schema/type_def";
 import {
     CustomerSearch,
     LastCustomerSave,
 } from "../../_components/customer_search";
 import { Button, Input } from "@heroui/react";
+import { Appointment } from "~/server/appointment/type_def";
 import {
     DURATION_30_MINUTES,
     hour_to_time,
@@ -13,7 +13,7 @@ import {
     modulus,
     to_0_index,
     to_1_index,
-} from "~/server/validation/semantic/appointment_time";
+} from "~/util/appointment_time";
 
 export function Booking(props: {
     last_customer_save: LastCustomerSave;

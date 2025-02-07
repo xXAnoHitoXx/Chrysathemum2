@@ -1,16 +1,41 @@
-import { pack } from "~/server/queries/server_queries_monad";
-import { to_technician_creation_info } from "./validation";
-import { create_new_technician } from "~/server/queries/business/technician/technician_queries";
-import { parse_request, unpack_response } from "../../server_parser";
-import { require_permission, Role } from "../../c_user";
+import { is_data_error } from "~/server/data_error";
+import { check_user_permission, Role } from "../../c_user";
+import { TechnicianCreationInfo } from "~/server/technician/type_def";
+import { TechnicianQuery } from "~/server/technician/technician_queries";
+import { FireDB } from "~/server/fire_db";
 
 export async function POST(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    let user = await check_user_permission([Role.Admin, Role.Operator]);
 
-    const technician_creation_query = pack(request)
-        .bind(parse_request(to_technician_creation_info))
-        .bind(create_new_technician);
-    return unpack_response(technician_creation_query);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
+
+    const data = TechnicianCreationInfo.safeParse(await request.json());
+
+    if (!data.success) {
+        return Response.json(
+            { message: `bad params - ${data.error.toString()}` },
+            { status: 400 },
+        );
+    }
+
+    const technician_creation_query =
+        await TechnicianQuery.create_new_technician.call(
+            data.data,
+            FireDB.active(),
+        );
+
+    if (is_data_error(technician_creation_query)) {
+        technician_creation_query.log();
+        technician_creation_query.report();
+        return Response.json(
+            {
+                message: `server error - ${technician_creation_query.message()}`,
+            },
+            { status: 500 },
+        );
+    }
+
+    return Response.json(technician_creation_query, { status: 200 });
 }

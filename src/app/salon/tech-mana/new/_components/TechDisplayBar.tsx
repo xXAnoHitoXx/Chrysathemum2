@@ -1,4 +1,4 @@
-import type { Technician } from "~/server/db_schema/type_def";
+import { Technician } from "~/server/technician/type_def";
 
 export type ButtonData = [Technician, string | null];
 

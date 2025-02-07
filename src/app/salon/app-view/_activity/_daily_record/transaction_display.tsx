@@ -1,9 +1,10 @@
 import { TaxRate } from "~/constants";
-import { Technician, Transaction } from "~/server/db_schema/type_def";
-import { time_to_string } from "~/server/validation/semantic/appointment_time";
-import { money } from "~/server/validation/semantic/money";
-import { bubble_sort } from "~/util/ano_bubble_sort";
+import { Technician } from "~/server/technician/type_def";
+import { Transaction } from "~/server/transaction/type_def";
 import { ano_iter } from "~/util/anoiter/anoiter";
+import { time_to_string } from "~/util/appointment_time";
+import { money } from "~/util/money";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 
 export function TransactionDisplay(props: {
     transactions: Transaction[];
@@ -245,7 +246,7 @@ function Row(props: {
         <button
             onClick={props.on_click}
             className={
-                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
+                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
                 " " +
                 props.color
             }

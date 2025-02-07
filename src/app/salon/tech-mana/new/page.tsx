@@ -1,20 +1,22 @@
+import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
 import { NewTechForm } from "./_components/NewTechForm";
-import { pack } from "~/server/queries/server_queries_monad";
-import { get_active_technicians } from "~/server/queries/business/technician/technician_queries";
 import { redirect } from "next/navigation";
-import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { Bisquit } from "~/server/validation/bisquit";
 import { is_data_error } from "~/server/data_error";
+import { FireDB } from "~/server/fire_db";
+import { TechnicianQuery } from "~/server/technician/technician_queries";
+import { Technician } from "~/server/technician/type_def";
 
 export default async function Page() {
-    const technicians = await pack(undefined)
-        .bind(get_active_technicians)
-        .unpack();
+    const technicians = await TechnicianQuery.get_all_technician
+        .chain<Technician[]>((technicans) => technicans.filter(
+            (technician) => technician.active
+        )).call(undefined as void, FireDB.active());
+
     if (is_data_error(technicians)) {
         redirect("/");
     }
 
-    const salon = await get_bisquit(Bisquit.salon_selection);
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
 
     if (is_data_error(salon)) {
         redirect("/");

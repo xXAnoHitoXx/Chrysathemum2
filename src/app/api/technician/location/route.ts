@@ -1,106 +1,105 @@
-import {
-    handle_void_return,
-    parse_request,
-    unpack_response,
-} from "~/app/api/server_parser";
 import { is_data_error } from "~/server/data_error";
-import type { Technician } from "~/server/db_schema/type_def";
-import {
-    assign_technician_to_location,
-    remove_technician_from_location,
-} from "~/server/queries/business/location/location";
-import { get_active_technicians } from "~/server/queries/business/technician/technician_queries";
-import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { retrieve_roster } from "~/server/queries/crud/location/location_roster";
-import { pack } from "~/server/queries/server_queries_monad";
-import { Bisquit } from "~/server/validation/bisquit";
-import { to_technician } from "~/server/validation/db_types/technician_validation";
-import { require_permission, Role } from "../../c_user";
+import { check_user_permission, Role } from "../../c_user";
+import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { TechnicianQuery } from "~/server/technician/technician_queries";
+import { FireDB } from "~/server/fire_db";
+import { Technician } from "~/server/technician/type_def";
 
 export async function GET() {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    const user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(Bisquit.salon_selection)
-        .bind(get_bisquit)
-        .bind(async (salon, f_db) => {
-            const active_technicians_query = get_active_technicians(
-                undefined as void,
-                f_db,
-            );
-            const roster_query = retrieve_roster({ location_id: salon }, f_db);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-            const active_technicians = await active_technicians_query;
-            const roster = await roster_query;
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
 
-            if (is_data_error(active_technicians))
-                return active_technicians.stack(
-                    "api/technician/location/GET",
-                    "failed to retrieve active technicians",
-                );
-            if (is_data_error(roster))
-                return roster.stack(
-                    "api/technician/location/GET",
-                    "failed to retrieve roster",
-                );
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
 
-            return active_technicians.filter((tech) => {
-                for (let i = 0; i < roster.length; i++) {
-                    if (roster[i]?.technician_id == tech.id) return true;
-                }
-                return false;
-            });
-        });
+    const query = await TechnicianQuery.get_tech_at_location.call(
+        { location_id: salon },
+        FireDB.active(),
+    );
 
-    return unpack_response(query);
+    if (is_data_error(query))
+        return Response.json({ message: query.message() }, { status: 500 });
+
+    return Response.json(query, { status: 200 });
 }
 
 export async function POST(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    const user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_technician))
-        .bind(async (t: Technician) => {
-            const salon = await get_bisquit(Bisquit.salon_selection);
-            if (is_data_error(salon))
-                return salon.stack(
-                    "Posting Technician",
-                    "posting to unknown location",
-                );
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-            return {
-                location_id: salon,
-                technician: t,
-            };
-        })
-        .bind(assign_technician_to_location);
-    return unpack_response(query);
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const technician = Technician.safeParse(await request.json());
+    if (!technician.success) {
+        return Response.json(
+            { message: technician.error.message },
+            { status: 400 },
+        );
+    }
+
+    const query = TechnicianQuery.assign_tech_to_location.call(
+        {
+            location_id: salon,
+            technician_id: technician.data.id,
+        },
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.log();
+        query.report();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json({}, { status: 200 });
 }
 
 export async function DELETE(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    const user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_technician))
-        .bind(async (t: Technician) => {
-            const salon = await get_bisquit(Bisquit.salon_selection);
-            if (is_data_error(salon))
-                return salon.stack(
-                    "Posting Technician",
-                    "posting to unknown location",
-                );
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-            return {
-                location_id: salon,
-                technician_id: t.id,
-            };
-        })
-        .bind(remove_technician_from_location)
-        .bind(handle_void_return);
-    return unpack_response(query);
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const technician = Technician.safeParse(await request.json());
+    if (!technician.success) {
+        return Response.json(
+            { message: technician.error.message },
+            { status: 400 },
+        );
+    }
+    const query = await TechnicianQuery.unassign_tech_from_location.call(
+        {
+            location_id: salon,
+            technician_id: technician.data.id,
+        },
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.log();
+        query.report();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json({}, { status: 200 });
 }

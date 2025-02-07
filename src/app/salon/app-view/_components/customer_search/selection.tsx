@@ -1,12 +1,9 @@
 import { Button, Input } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { Customer } from "~/server/db_schema/type_def";
 import { LastCustomerSave } from "../customer_search";
-import {
-    format_phone_input,
-    format_phone_number,
-} from "~/server/validation/semantic/phone_format";
-import { bubble_sort } from "~/util/ano_bubble_sort";
+import { Customer } from "~/server/customer/type_def";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
+import { format_phone_input, format_phone_number } from "~/util/phone_format";
 
 export default function SelectionDisplay(props: {
     save: LastCustomerSave;
@@ -104,7 +101,7 @@ export default function SelectionDisplay(props: {
 
     return (
         <div className="flex w-full flex-col gap-1">
-            <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
+            <div className="flex w-full items-center gap-1 border-t-1 border-b-1 border-t-sky-900 border-b-sky-900 p-2">
                 <Button
                     className="justify-self-center"
                     color="danger"

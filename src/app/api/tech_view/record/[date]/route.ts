@@ -1,51 +1,56 @@
-import { pack } from "~/server/queries/server_queries_monad";
-import { Bisquit } from "~/server/validation/bisquit";
-import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { retrieve_transactions_on_date } from "~/server/queries/business/transaction/transaction_queries";
-import {
-    data_error,
-    handle_partial_errors,
-    is_data_error,
-} from "~/server/data_error";
-import { is_string } from "~/server/validation/simple_type";
-import { require_permission, Role } from "~/app/api/c_user";
-import { unpack_response } from "~/app/api/server_parser";
+import { check_user_permission, Role } from "~/app/api/c_user";
+import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { z } from "zod";
+import { is_data_error, report_partial_errors } from "~/server/data_error";
+import { TransactionQuery } from "~/server/transaction/transaction_queries";
+import { Transaction } from "~/server/transaction/type_def";
+import { FireDB } from "~/server/fire_db";
 
 export async function GET(
     _: Request,
     { params }: { params: Promise<{ date: string }> },
 ) {
-    const { date } = await params;
-
-    const user = await require_permission([Role.Tech]).catch(() => {
-        return data_error("permission", "denied");
-    });
+    let user = await check_user_permission([Role.Tech]);
 
     if (is_data_error(user)) {
-        return Response.error();
+        return Response.json({ message: user.message() }, { status: 401 });
     }
 
-    const query = pack(user)
-        .bind((user) => user.publicMetadata.Tech_id)
-        .bind((tech_id) => {
-            if (is_string(tech_id)) {
-                return tech_id;
-            }
-            return data_error("technician data retrive", "user metadata error");
-        })
-        .bind((tech_id: string) => {
-            return pack(Bisquit.salon_selection)
-                .bind(get_bisquit)
-                .bind((salon) => ({ salon: salon, date: date }))
-                .bind(retrieve_transactions_on_date)
-                .bind(handle_partial_errors)
-                .bind((transactions) => {
-                    return transactions.filter(
-                        (transaction) => transaction.technician.id === tech_id,
-                    );
-                })
-                .unpack();
-        });
+    const params_data = await params;
 
-    return unpack_response(query);
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const tech_id = z.string().safeParse(user.publicMetadata.Tech_id);
+
+    if (!tech_id.success) {
+        return Response.json({ message: "Metadata error" }, { status: 401 });
+    }
+
+    const query = await TransactionQuery.retrieve_transactions_on_date
+        .chain<Transaction[]>(report_partial_errors)
+        .chain((transactions: Transaction[]) =>
+            transactions.filter(
+                (transaction) => transaction.technician.id === tech_id.data,
+            ),
+        )
+        .call({ salon: salon, date: date }, FireDB.active());
+
+    if (is_data_error(query)) {
+        query.log();
+        query.report();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }

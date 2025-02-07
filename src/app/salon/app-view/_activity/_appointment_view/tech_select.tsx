@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Technician } from "~/server/db_schema/type_def";
+import { Technician } from "~/server/technician/type_def";
 
 export function TechSelectBar(props: {
     technicians: Technician[];

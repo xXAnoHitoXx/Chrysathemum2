@@ -1,121 +1,33 @@
 import * as Sentry from "@sentry/nextjs";
-import { is_function, is_object } from "./validation/simple_type";
 
 export function is_data_error(t: unknown): t is DataError {
     return (
-        is_object(t) &&
+        typeof t === "object" &&
+        t !== null &&
         "message" in t &&
         "stack" in t &&
         "log" in t &&
         "report" in t &&
-        is_function(t.message) &&
-        is_function(t.stack) &&
-        is_function(t.log) &&
-        is_function(t.report)
+        typeof t.message === "function" &&
+        typeof t.stack === "function" &&
+        typeof t.log === "function" &&
+        typeof t.report === "function"
     );
 }
 
-export interface DataError {
-    message(): string;
-    stack(context: string, detail: string): DataError;
-    log(): void;
-    report(): void;
-    contains(message: string[]): boolean;
-}
-
-export function lotta_errors(
-    context: string,
-    detail: string,
-    errors: DataError[],
-): DataError {
-    return new LottaError(context, detail, errors);
-}
-
-export function data_error(context: string, detail: string): DataError {
-    return new SimpleDataError(context, detail);
-}
-
-export function handle_partial_errors<T>(res: PartialResult<T>): T {
-    res.error?.log();
-    res.error?.report();
-    return res.data;
-}
-
-export type PartialResult<T> = {
-    data: T;
-    error: DataError | null;
-};
-
-class LottaError implements DataError {
-    private stack_detail: DataError;
-    private errors: DataError[];
-    private _message_cache: string | null;
-    constructor(context: string, detail: string, errors: DataError[]) {
-        this.errors = errors;
-        this.stack_detail = new SimpleDataError(context, detail);
-        this._message_cache = null;
-    }
-
-    message(): string {
-        if (this._message_cache != null) return this._message_cache;
-
-        let m = "-----------------\n";
-        this.errors.forEach((error) => {
-            m = m.concat(error.message(), "-----------------\n");
-        });
-
-        const lines = m.split(/\n/);
-        this._message_cache = this.stack_detail.message();
-        lines.forEach((line) => {
-            this._message_cache = this._message_cache!.concat("| ", line, "\n");
-        });
-
-        return this._message_cache;
-    }
-
-    stack(context: string, detail: string) {
-        return new SimpleDataError(
-            context,
-            detail.concat("\n", this.message()),
-        );
-    }
-
-    log(): void {
-        console.log(this.message());
-    }
-
-    report(): void {
-        Sentry.captureMessage(this.message());
-    }
-
-    contains(messages: string[]) {
-        for (let i = 0; i < messages.length; i++) {
-            const m = messages[i];
-            if (!(m != undefined && this.message().includes(m))) return false;
-        }
-        return true;
-    }
-}
-
-class SimpleDataError {
+export class DataError {
     private _message: string;
 
-    constructor(context: string, detail: string) {
-        this._message = "> ".concat(context, ":\n    - ", detail, "\n");
+    constructor(message: string) {
+        this._message = "> " + message + "\n";
     }
 
     message() {
-        return this._message;
+        return ">----------<\n" + this._message + ">----------<\n";
     }
 
-    stack(context: string, detail: string): DataError {
-        this._message = "> ".concat(
-            context,
-            ":\n    - ",
-            detail,
-            "\n",
-            this._message,
-        );
+    stack(context: string): DataError {
+        this._message = "> " + context + "\n" + this._message;
         return this;
     }
 
@@ -128,15 +40,23 @@ class SimpleDataError {
     }
 
     contains(messages: string[]) {
-        for (let i = 0; i < messages.length; i++) {
-            const m = messages[i];
-            if (!(m != undefined && this._message.includes(m))) return false;
+        for (const message in messages) {
+            if (!this._message.includes(message)) return false;
         }
         return true;
     }
 }
 
-export const NOT_IMPLEMENTED: DataError = new SimpleDataError(
-    "Development",
-    "not implemented",
-);
+export function report_partial_errors<T>(data: (T | DataError)[]): T[] {
+    const ts: T[] = [];
+    for (const dat of data) {
+        if (is_data_error(dat)) {
+            dat.log();
+            dat.report();
+        } else {
+            ts.push(dat);
+        }
+    }
+
+    return ts;
+}

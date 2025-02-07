@@ -1,197 +1,238 @@
+import { is_data_error } from "~/server/data_error";
+import { check_user_permission, Role } from "~/app/api/c_user";
+import { Bisquit, get_bisquit } from "~/server/bisquit/bisquit";
+import { z } from "zod";
+import { AppointmentQuery } from "~/server/appointment/appointment_queries";
+import { FireDB } from "~/server/fire_db";
 import {
-    array_query,
-    pack,
-    pack_nested,
-} from "~/server/queries/server_queries_monad";
-import { valiDate } from "~/server/validation/semantic/date";
-import {
-    create_new_appointment,
-    delete_appointment,
-    retrieve_appointments_on_date,
-    update_appointment,
-} from "~/server/queries/business/appointment/appointment_queries";
-import { handle_partial_errors, is_data_error } from "~/server/data_error";
-import { parse_request, unpack_response } from "~/app/api/server_parser";
-import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { Bisquit } from "~/server/validation/bisquit";
-import { to_array } from "~/server/validation/simple_type";
-import {
-    to_appointment,
-    to_appointment_creation_info,
-} from "~/server/validation/db_types/appointment_validation";
-import { to_closing_info } from "~/server/validation/db_types/accounting_validation";
-import { close_transaction } from "~/server/queries/business/transaction/transaction_queries";
-import { require_permission, Role } from "~/app/api/c_user";
-import { invalidate_earnings_information_of_date } from "~/server/queries/salon/earnings/mod";
+    Appointment,
+    AppointmentCreationInfo,
+    AppointmentRecordID,
+} from "~/server/appointment/type_def";
+import { array_query, ServerQuery } from "~/server/server_query";
+import { AppointmentClosingData } from "~/server/transaction/type_def";
+import { TransactionQuery } from "~/server/transaction/transaction_queries";
 
 export async function GET(
     _: Request,
     { params }: { params: Promise<{ date: string }> },
 ): Promise<Response> {
-    const { date } = await params;
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-    const query = pack(date)
-        .bind(valiDate)
-        .bind(async (date) => {
-            const salon = await get_bisquit(Bisquit.salon_selection);
-            if (is_data_error(salon)) {
-                return salon.stack(
-                    "Load Appointments API Call",
-                    "no salon_selection bisquit",
-                );
-            }
+    const params_data = await params;
 
-            return {
-                date: date,
-                salon: salon,
-            };
-        })
-        .bind(retrieve_appointments_on_date)
-        .bind((data) => {
-            return data;
-        })
-        .bind(handle_partial_errors);
-    return unpack_response(query);
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const query = await AppointmentQuery.retrieve_appointments_on_date.call(
+        {
+            date: date,
+            salon: salon,
+        },
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }
 
 export async function POST(
     request: Request,
     { params }: { params: Promise<{ date: string }> },
 ) {
-    const { date } = await params;
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-    const context = "Create Appointmenpts API Call";
-    const query = pack(Bisquit.salon_selection)
-        .bind(get_bisquit)
-        .bind((salon) => {
-            return pack(request)
-                .bind(parse_request(to_array(to_appointment_creation_info)))
-                .bind(
-                    array_query(
-                        (app) => ({
-                            ...app,
-                            date: date,
-                            salon: salon,
-                        }),
-                        context,
-                        "adding salon and date to appointment",
-                    ),
-                )
-                .bind(handle_partial_errors)
-                .bind(
-                    array_query(
-                        create_new_appointment,
-                        context,
-                        "create appointments",
-                    ),
-                )
-                .bind((partial) => {
-                    if (partial.error == null)
-                        return { date: date, salon: salon };
-                    else return partial.error;
-                })
-                .bind(retrieve_appointments_on_date)
-                .bind(handle_partial_errors)
-                .unpack();
-        });
-    return unpack_response(query);
+    const params_data = await params;
+
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const req = z
+        .array(AppointmentCreationInfo)
+        .safeParse(await request.json());
+
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = await array_query(
+        ServerQuery.create_query((info: AppointmentCreationInfo) => {
+            return {
+                ...info,
+                date: date,
+                salon: salon,
+            };
+        }).chain<Appointment>(AppointmentQuery.create_new_appointment),
+    ).call(req.data, FireDB.active());
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }
 
 export async function PUT(
     request: Request,
-    { params }: { params: Promise<{ date: string }> },
+    _: { params: Promise<{ date: string }> },
 ) {
-    const { date } = await params;
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-    const query = pack(request)
-        .bind(parse_request(to_closing_info))
-        .bind(close_transaction)
-        .bind(() => Bisquit.salon_selection)
-        .bind(get_bisquit)
-        .bind((salon) => ({ date: date, salon: salon }))
-        .bind((data, f_db) => {
-            return pack_nested(data, f_db)
-                .bind(invalidate_earnings_information_of_date)
-                .bind((_) => data)
-                .unpack();
-        })
-        .bind(retrieve_appointments_on_date)
-        .bind(handle_partial_errors);
+    const req = AppointmentClosingData.safeParse(await request.json());
 
-    return unpack_response(query);
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = await TransactionQuery.close_transaction.call(
+        req.data,
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json({}, { status: 200 });
 }
 
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ date: string }> },
 ) {
-    const { date } = await params;
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-    const context = "UPDATE appointments api call";
-    const query = pack(Bisquit.salon_selection)
-        .bind(get_bisquit)
-        .bind((salon) => {
-            return pack(request)
-                .bind(parse_request(to_array(to_appointment)))
-                .bind(
-                    array_query(
-                        update_appointment,
-                        context,
-                        "failed to update some appointment",
-                    ),
-                )
-                .bind((partial) => {
-                    if (partial.error == null)
-                        return { date: date, salon: salon };
-                    else return partial.error;
-                })
-                .bind(retrieve_appointments_on_date)
-                .bind(handle_partial_errors)
-                .unpack();
-        });
-    return unpack_response(query);
+    const params_data = await params;
+
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const req = z.array(Appointment).safeParse(await request.json());
+
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = await array_query(AppointmentQuery.update_appointment)
+        .chain<AppointmentRecordID>(() => {
+            return {
+                salon: salon,
+                date: date,
+            };
+        })
+        .chain(AppointmentQuery.retrieve_appointments_on_date)
+        .call(req.data, FireDB.active());
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }
 
 export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ date: string }> },
 ) {
-    const { date } = await params;
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-    const query = pack(request)
-        .bind(parse_request(to_array(to_appointment)))
-        .bind(
-            array_query(
-                delete_appointment,
-                "DELETE appointments api call",
-                "...",
-            ),
-        )
-        .bind(handle_partial_errors)
-        .bind(() => Bisquit.salon_selection)
-        .bind(get_bisquit)
-        .bind((salon) => ({ date: date, salon: salon }))
-        .bind(retrieve_appointments_on_date)
-        .bind(handle_partial_errors);
-    return unpack_response(query);
+    const params_data = await params;
+
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const req = z.array(Appointment).safeParse(await request.json());
+
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = await array_query(AppointmentQuery.delete_appointment)
+        .chain<AppointmentRecordID>(() => {
+            return {
+                salon: salon,
+                date: date,
+            };
+        })
+        .chain(AppointmentQuery.retrieve_appointments_on_date)
+        .call(req.data, FireDB.active());
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }

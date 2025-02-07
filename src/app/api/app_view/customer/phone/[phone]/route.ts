@@ -1,21 +1,27 @@
-import { unpack_response } from "~/app/api/server_parser";
-import { handle_partial_errors } from "~/server/data_error";
-import { customer_phone_search } from "~/server/queries/business/customer/customer_queries";
-import { pack } from "~/server/queries/server_queries_monad";
-import { require_permission, Role } from "~/app/api/c_user";
+import { check_user_permission, Role } from "~/app/api/c_user";
+import { CustomerQuery } from "~/server/customer/customer_queries";
+import { is_data_error } from "~/server/data_error";
+import { FireDB } from "~/server/fire_db";
 
 export async function GET(
     _: Request,
     { params }: { params: Promise<{ phone: string }> },
 ): Promise<Response> {
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
+
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
+
     const { phone } = await params;
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    const query = CustomerQuery.phone_search.call({ phone_search: phone }, FireDB.active());
 
-    const query = pack(phone)
-        .bind(customer_phone_search)
-        .bind(handle_partial_errors);
-    return unpack_response(query);
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }

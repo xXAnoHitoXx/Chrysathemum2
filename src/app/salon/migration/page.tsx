@@ -1,16 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Method, fetch_query } from "~/app/api/api_query";
-import { to_old_customer_data } from "~/app/api/migration/customer/validation";
-import { is_data_error } from "~/server/data_error";
-import { to_array } from "~/server/validation/simple_type";
-import { ano_iter } from "~/util/anoiter/anoiter";
 
 export default function MigrationStation() {
-    const [is_loading, set_is_loading] = useState(false);
+    const [is_loading, _] = useState(false);
 
     async function migration_sequence() {
+        /*
         set_is_loading(true);
         const old_customers = await fetch_query({
             url: "/api/migration/customer",
@@ -47,6 +43,7 @@ export default function MigrationStation() {
                 }
             }
         }
+        */
     }
 
     return (

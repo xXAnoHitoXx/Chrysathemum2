@@ -2,13 +2,8 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/react";
 import { useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
-import { Customer } from "~/server/db_schema/type_def";
-import { to_customer } from "~/server/validation/db_types/customer_validation";
-import {
-    format_phone_input,
-    format_phone_number,
-} from "~/server/validation/semantic/phone_format";
+import { Customer, CustomerUpdateInfo } from "~/server/customer/type_def";
+import { format_phone_input, format_phone_number } from "~/util/phone_format";
 
 export function CustomerEdit(props: {
     customer: Customer;
@@ -43,22 +38,33 @@ export function CustomerEdit(props: {
         set_loading(true);
         props.set_loading(true);
 
-        return fetch("/api/app_view/customer", {
+        const update: CustomerUpdateInfo = {
+            customer: props.customer,
+            update: {
+                name: customer.name,
+                phone_number: customer.phone_number,
+                notes: customer.notes,
+            },
+        };
+
+        const response = await fetch("/api/app_view/customer", {
             method: Method.PATCH,
-            body: JSON.stringify({
-                customer: props.customer,
-                update: {
-                    name: customer.name,
-                    phone_number: customer.phone_number,
-                    notes: customer.notes,
-                },
-            }),
-        })
-            .then(handle_react_query_response(to_customer, props.on_complete))
-            .finally(() => {
+            body: JSON.stringify(update),
+        });
+
+        if (response.status === 200) {
+            const res = Customer.safeParse(await response.json());
+
+            if (res.success) {
                 set_loading(false);
                 props.set_loading(false);
-            });
+                props.on_complete(res.data);
+                return res.data;
+            }
+        }
+
+        set_loading(false);
+        props.set_loading(false);
     }
 
     function on_phone_value_change(phone: string) {
@@ -142,7 +148,7 @@ export function CustomerEdit(props: {
                     onValueChange={on_name_value_change}
                 />
             </div>
-            <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
+            <div className="flex w-full items-center gap-1 border-t-1 border-b-1 border-t-sky-900 border-b-sky-900 p-2">
                 <Input
                     label="phone number"
                     value={format_phone_input(
@@ -151,7 +157,7 @@ export function CustomerEdit(props: {
                     onValueChange={on_phone_value_change}
                 />
             </div>
-            <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
+            <div className="flex w-full items-center gap-1 border-t-1 border-b-1 border-t-sky-900 border-b-sky-900 p-2">
                 <Input
                     label="notes"
                     value={customer.notes}

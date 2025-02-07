@@ -4,17 +4,15 @@ import { CalendarDate, RangeValue } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
 import { BoardDateRangePicker } from "~/app/salon/app-view/_components/date_range_picker";
-import {
-    TechAccount,
-    to_tech_account,
-} from "~/server/queries/salon/earnings/types";
-import { last_monday, last_sunday } from "~/server/validation/semantic/date";
-import { bubble_sort } from "~/util/ano_bubble_sort";
 import { TechAccountDisplay } from "./tech_account_display";
+import { last_monday, last_sunday } from "~/util/date";
+import { TechnicianEarnings } from "~/server/earnings/type_def";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
+import { useRouter } from "next/navigation";
 
 export function TechSummaryView(props: { salon: string }) {
+    const router = useRouter();
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();
 
     const [date_range, set_date_range] = useState<RangeValue<CalendarDate>>({
@@ -23,7 +21,7 @@ export function TechSummaryView(props: { salon: string }) {
     });
 
     const [date_to_load, load_date] = useState<CalendarDate | null>(null);
-    const [entries, set_entries] = useState<TechAccount[]>([]);
+    const [entries, set_entries] = useState<TechnicianEarnings[]>([]);
 
     useEffect(() => {
         load_date(date_range.start);
@@ -31,7 +29,7 @@ export function TechSummaryView(props: { salon: string }) {
 
     const summary_api = "/api/tech_view/summary/";
     const query = useQuery({
-        queryFn: () => {
+        queryFn: async () => {
             if (date_to_load == null) {
                 return 0;
             }
@@ -40,13 +38,23 @@ export function TechSummaryView(props: { salon: string }) {
                 set_entries((_) => []);
             }
 
-            fetch(summary_api + date_to_load.toString(), {
-                method: Method.GET,
-                cache: "no-store",
-            }).then(
-                handle_react_query_response(to_tech_account, (tech_acc) => {
+            const response = await fetch(
+                summary_api + date_to_load.toString(),
+                {
+                    method: Method.GET,
+                    cache: "no-store",
+                },
+            );
+
+            let parse_failed = false;
+
+            if (response.status === 200) {
+                const tech_acc = TechnicianEarnings.safeParse(
+                    await response.json(),
+                );
+                if (tech_acc.success)
                     set_entries((prev) => {
-                        const next = [...prev, tech_acc];
+                        const next = [...prev, tech_acc.data];
                         bubble_sort(next, (a, b) => {
                             return a.date.localeCompare(b.date);
                         });
@@ -57,8 +65,21 @@ export function TechSummaryView(props: { salon: string }) {
                         }
                         return next;
                     });
-                }),
-            );
+                else parse_failed = true;
+            }
+
+            if (response.status === 500 || parse_failed) {
+                set_entries((prev) => {
+                    const next = [...prev];
+                    const next_day = date_to_load.add({ days: 1 });
+                    if (next_day.compare(date_range.end) <= 0) {
+                        load_date(next_day);
+                    }
+                    return next;
+                });
+            } else {
+                router.replace("/");
+            }
 
             return 0;
         },

@@ -1,29 +1,24 @@
 import { Method } from "~/app/api/api_query";
-import { parse_response } from "~/app/api/response_parser";
-import { data_error, is_data_error } from "~/server/data_error";
-import { Customer } from "~/server/db_schema/type_def";
-import { to_customer } from "~/server/validation/db_types/customer_validation";
-import { to_array } from "~/server/validation/simple_type";
+import { DataError } from "~/server/data_error";
+import { z } from "zod";
+import { Customer } from "~/server/customer/type_def";
 
-export async function name_search(customer_name: string): Promise<Customer[]> {
+export async function name_search(customer_name: string): Promise<Customer[] | DataError> {
     const response = await fetch(
         "/api/app_view/customer/name/" + customer_name,
         { method: Method.GET },
     );
 
-    const customers = await parse_response(response, to_array(to_customer));
+    const customers = z.array(Customer).safeParse(await response.json())
 
-    if (is_data_error(customers)) {
-        customers.report();
-        return Promise.reject(
-            data_error("name_search", "failed to retrieve customer"),
-        );
+    if (customers.success) {
+        return customers.data;
     }
 
-    return customers;
+    return new DataError("name search - error");
 }
 
-export async function phone_search(phone_number: string): Promise<Customer[]> {
+export async function phone_search(phone_number: string): Promise<Customer[] | DataError> {
     phone_number = phone_number.replaceAll("-", "");
     phone_number = phone_number.replaceAll("(", "");
     phone_number = phone_number.replaceAll(")", "");
@@ -41,20 +36,14 @@ export async function phone_search(phone_number: string): Promise<Customer[]> {
             { method: Method.GET },
         );
 
-        const customers = await parse_response(response, to_array(to_customer));
-
-        if (is_data_error(customers)) {
-            customers.report();
-            return Promise.reject(
-                data_error("phone_search", "failed to retrieve customer"),
-            );
+        const customers = z.array(Customer).safeParse(await response.json())
+        if (customers.success) {
+            return customers.data;
         }
 
-        return customers;
+        return new DataError("phone search - failed to retrieve customers");
     } else {
-        return Promise.reject(
-            data_error("phone_search", "incorrect phone number"),
-        );
+        return new DataError("phone search - incorrect phone number");
     }
 }
 
@@ -64,7 +53,7 @@ export async function create_customer({
 }: {
     phone_number: string;
     customer_name: string;
-}): Promise<Customer> {
+}): Promise<Customer | DataError> {
     phone_number = phone_number.replaceAll("-", "");
     phone_number = phone_number.replaceAll("(", "");
     phone_number = phone_number.replaceAll(")", "");
@@ -85,17 +74,14 @@ export async function create_customer({
             }),
         });
 
-        const customer = await parse_response(response, to_customer);
+        const customer = Customer.safeParse(await response.json())
 
-        if (is_data_error(customer)) {
-            customer.report();
-            return Promise.reject(
-                data_error("phone_search", "failed to retrieve customer"),
-            );
+        if (customer.success) {
+            return customer.data;
         }
 
-        return customer;
+        return new DataError("create customer - failed to create_customer");
     }
 
-    return Promise.reject(data_error("create customer", "bad formatting"));
+    return new DataError("bad formatting")
 }

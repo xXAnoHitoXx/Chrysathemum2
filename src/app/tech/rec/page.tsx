@@ -1,23 +1,29 @@
-import { data_error, is_data_error } from "~/server/data_error";
-import { is_string } from "~/server/validation/simple_type";
 import { TechDataDisplay } from "./_components/client_component";
-import { retrieve_technician_entry } from "~/server/queries/crud/technician/technician_entry";
-import { pack } from "~/server/queries/server_queries_monad";
-import { require_permission, Role } from "~/app/api/c_user";
+import { check_user_permission, Role } from "~/app/api/c_user";
+import { z } from "zod";
+import { is_data_error } from "~/_server_/data_error";
+import { redirect } from "next/navigation";
+import { DataError } from "~/server/data_error";
+import { retrieve_technician_entry } from "~/server/technician/components/technician_entry";
+import { FireDB } from "~/server/fire_db";
 
 export default async function Page() {
-    const user = await require_permission([Role.Tech]);
+    const user = await check_user_permission([Role.Tech]);
+    if (is_data_error(user)) {
+        redirect("/");
+    }
 
-    const tech_id = user?.publicMetadata.Tech_id;
+    const tech_id = z.string().safeParse(user?.publicMetadata.Tech_id);
 
-    if (!is_string(tech_id)) {
-        data_error(`technician ${tech_id}`, "meta data error").report();
+    if (!tech_id.success) {
+        new DataError(`technician ${tech_id} metaData error`).report();
         return <div>meta data error - tell Tinn 2 fix</div>;
     }
 
-    const technician = await pack({ id: tech_id })
-        .bind(retrieve_technician_entry)
-        .unpack();
+    const technician = await retrieve_technician_entry.call(
+        { tech_id: tech_id.data },
+        FireDB.active(),
+    );
 
     if (is_data_error(technician)) {
         technician.report();

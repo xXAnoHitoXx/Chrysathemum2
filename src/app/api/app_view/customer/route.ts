@@ -1,33 +1,62 @@
-import { pack } from "~/server/queries/server_queries_monad";
+import { check_user_permission, Role } from "~/app/api/c_user";
+import { CustomerQuery } from "~/server/customer/customer_queries";
 import {
-    to_customer_creation_info,
-    to_customer_update_info,
-} from "~/server/validation/db_types/customer_validation";
-import {
-    create_new_customer,
-    update_customer_info,
-} from "~/server/queries/business/customer/customer_queries";
-import { parse_request, unpack_response } from "../../server_parser";
-import { require_permission, Role } from "~/app/api/c_user";
+    CustomerCreationInfo,
+    CustomerUpdateInfo,
+} from "~/server/customer/type_def";
+import { is_data_error } from "~/server/data_error";
+import { FireDB } from "~/server/fire_db";
 
 export async function POST(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_customer_creation_info))
-        .bind(create_new_customer);
-    return unpack_response(query);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
+
+    const req = CustomerCreationInfo.safeParse(await request.json());
+
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = CustomerQuery.create_new_customer.call(
+        req.data,
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }
 
 export async function PATCH(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_customer_update_info))
-        .bind(update_customer_info);
-    return unpack_response(query);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
+
+    const req = CustomerUpdateInfo.safeParse(await request.json());
+
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = CustomerQuery.update_customer_info.call(
+        req.data,
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }
