@@ -1,16 +1,34 @@
-import { pack } from "~/server/queries/server_queries_monad";
-import { to_technician } from "~/server/validation/db_types/technician_validation";
-import { mark_technician_active } from "~/server/queries/business/technician/technician_queries";
-import { parse_request, unpack_response } from "../../server_parser";
-import { require_permission, Role } from "../../c_user";
+import { TechnicianQuery } from "~/server/technician/technician_queries";
+import { check_user_permission, Role } from "../../c_user";
+import { is_data_error } from "~/server/data_error";
+import { Technician } from "~/server/technician/type_def";
+import { FireDB } from "~/server/fire_db";
 
 export async function PATCH(request: Request): Promise<Response> {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    const user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_technician))
-        .bind(mark_technician_active);
-    return unpack_response(query);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
+
+    const technician = Technician.safeParse(await request.json());
+    if (!technician.success) {
+        return Response.json(
+            { message: technician.error.message },
+            { status: 400 },
+        );
+    }
+
+    const query = await TechnicianQuery.mark_active.call(
+        technician.data,
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.log();
+        query.report();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json({}, { status: 200 });
 }

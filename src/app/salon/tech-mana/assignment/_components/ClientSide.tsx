@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
-import { Technician } from "~/server/db_schema/type_def";
+import { Button } from "@heroui/button";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useState, FormEvent } from "react";
 import { ano_iter, ano_chain_iter, AnoIter } from "~/util/anoiter/anoiter";
@@ -12,31 +11,23 @@ import {
     ModalFooter,
     ModalHeader,
     useDisclosure,
-} from "@nextui-org/react";
-import { fetch_query, Method } from "~/app/api/api_query";
-import { DataError } from "~/server/data_error";
+} from "@heroui/react";
+import { Method } from "~/app/api/api_query";
+import { Technician } from "~/server/technician/type_def";
+import { RosterEntry } from "~/server/technician/components/roster_entry";
 
 export default function ClientSide({
     technicians,
     roster,
 }: {
     technicians: Technician[];
-    roster: { technician_id: string; color: string }[];
+    roster: RosterEntry[];
 }) {
     const inactive_list: Technician[] = technicians.filter(
         (technician) => !technician.active,
     );
 
-    const roster_ids: string[] = [];
-
-    for (const { technician_id, color } of roster) {
-        roster_ids.push(technician_id);
-        for (const technician of technicians) {
-            if (technician.id == technician_id) {
-                technician.color = color;
-            }
-        }
-    }
+    const roster_ids: string[] = roster.map((entry) => entry.technician_id);
 
     const active_list: Technician[] = technicians.filter(
         (technician) =>
@@ -79,71 +70,65 @@ export default function ClientSide({
     }
 
     async function requests_changes() {
-        const add_requests: AnoIter<Promise<DataError | null>> = ano_iter(
+        const add_requests: AnoIter<Promise<Response>> = ano_iter(
             current_location_tech_list,
         )
             .ifilter((technician) => {
                 return !initially_at_location_ids.includes(technician.id);
             })
             .imap((technician) =>
-                fetch_query({
-                    url: "/api/technician/location",
+                fetch("/api/technician/location", {
                     method: Method.POST,
-                    params: { data: technician },
-                    to: () => null,
+                    body: JSON.stringify(technician),
                 }),
             );
 
-        const remove_requests: AnoIter<Promise<DataError | null>> =
-            ano_chain_iter(active_tech_list, inactive_tech_list)
-                .ifilter((technician) =>
-                    initially_at_location_ids.includes(technician.id),
-                )
-                .imap((technician) =>
-                    fetch_query({
-                        url: "/api/technician/location",
-                        method: Method.DELETE,
-                        params: { data: technician },
-                        to: () => null,
-                    }),
-                );
-
-        const activation_requests: AnoIter<Promise<DataError | null>> =
-            ano_iter(active_tech_list)
-                .ifilter((technician) =>
-                    initially_inactive_ids.includes(technician.id),
-                )
-                .imap((technician) =>
-                    fetch_query({
-                        url: "/api/technician/activation",
-                        method: Method.PATCH,
-                        params: { data: technician },
-                        to: () => null,
-                    }),
-                );
-
-        const deactivation_requests: AnoIter<Promise<DataError | null>> =
-            ano_iter(inactive_tech_list)
-                .ifilter(
-                    (technician) =>
-                        !initially_inactive_ids.includes(technician.id),
-                )
-                .imap((technician) =>
-                    fetch_query({
-                        url: "/api/technician/deactivation",
-                        method: Method.PATCH,
-                        params: { data: technician },
-                        to: () => null,
-                    }),
-                );
-
-        const requests_iter: AnoIter<Promise<DataError | null>> =
-            ano_chain_iter(
-                add_requests,
-                remove_requests,
-                activation_requests,
-                deactivation_requests,
+        const remove_requests: AnoIter<Promise<Response>> = ano_chain_iter(
+            active_tech_list,
+            inactive_tech_list,
+        )
+            .ifilter((technician) =>
+                initially_at_location_ids.includes(technician.id),
+            )
+            .imap((technician) =>
+                fetch("/api/technician/location", {
+                    method: Method.DELETE,
+                    body: JSON.stringify(technician),
+                }),
             );
+
+        const activation_requests: AnoIter<Promise<Response>> = ano_iter(
+            active_tech_list,
+        )
+            .ifilter((technician) =>
+                initially_inactive_ids.includes(technician.id),
+            )
+            .imap((technician) =>
+                fetch("/api/technician/activation", {
+                    method: Method.PATCH,
+                    body: JSON.stringify(technician),
+                }),
+            );
+
+        const deactivation_requests: AnoIter<Promise<Response>> = ano_iter(
+            inactive_tech_list,
+        )
+            .ifilter(
+                (technician) => !initially_inactive_ids.includes(technician.id),
+            )
+            .imap((technician) =>
+                fetch("/api/technician/deactivation", {
+                    method: Method.PATCH,
+                    body: JSON.stringify(technician),
+                }),
+            );
+
+        const requests_iter: AnoIter<Promise<Response>> = ano_chain_iter(
+            add_requests,
+            remove_requests,
+            activation_requests,
+            deactivation_requests,
+        );
 
         await Promise.all(requests_iter.collect());
     }

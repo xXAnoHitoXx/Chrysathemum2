@@ -1,22 +1,16 @@
 "use client";
 
-import { Technician } from "~/server/db_schema/type_def";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { ReactNode, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
 import { BoardDatePicker } from "~/app/salon/app-view/_components/date_picker";
-import { Transaction } from "~/server/db_schema/type_def";
-import {
-    ErrorMessage_BisquitRetrival,
-    ErrorMessage_DoesNotExist,
-} from "~/server/error_messages/messages";
-import { to_transaction } from "~/server/validation/db_types/transaction_validation";
-import { current_date } from "~/server/validation/semantic/date";
-import { to_array } from "~/server/validation/simple_type";
-import { quick_sort } from "~/util/ano_quick_sort";
 import { TransactionDisplay } from "./transaction_display";
+import { Technician } from "~/server/technician/type_def";
+import { current_date } from "~/util/date";
+import { Transaction } from "~/server/transaction/type_def";
+import { z } from "zod";
+import { quick_sort } from "~/util/sorter/ano_quick_sort";
 
 const rec_view_transaction = "/api/tech_view/record/";
 
@@ -30,36 +24,36 @@ export function TechDataDisplay(props: {
     const router = useRouter();
 
     const { isFetching } = useQuery({
-        queryFn: () => {
-            return fetch(rec_view_transaction + date, {
+        queryFn: async () => {
+            const response = await fetch(rec_view_transaction + date, {
                 method: Method.GET,
                 cache: "no-store",
-            }).then(
-                handle_react_query_response(
-                    to_array(to_transaction),
-                    (transactions) => {
-                        quick_sort(transactions, (a, b) => {
+            });
+
+            if (response.status === 200) {
+                const transactions = z
+                    .array(Transaction)
+                    .safeParse(await response.json());
+
+                if (transactions.success) {
+                    set_transactions(() => {
+                        quick_sort(transactions.data, (a, b) => {
                             const time_diff = b.time - a.time;
                             if (time_diff != 0) return time_diff;
 
                             return a.customer.id.localeCompare(b.customer.id);
                         });
-                        set_transactions(transactions);
-                        return true;
-                    },
-                    (error) => {
-                        if (
-                            error.contains([
-                                ErrorMessage_BisquitRetrival,
-                                ErrorMessage_DoesNotExist,
-                            ])
-                        ) {
-                            router.replace("/");
-                        }
-                        return false;
-                    },
-                ),
-            );
+
+                        return transactions.data;
+                    });
+                }
+            }
+
+            if (response.status < 500) {
+                router.replace("/");
+            }
+
+            return 0;
         },
         queryKey: ["transaction_list", date],
     });

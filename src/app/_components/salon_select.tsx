@@ -1,9 +1,9 @@
 "use client";
 
-import { Bisquit } from "~/server/validation/bisquit";
-import { fetch_query, Method } from "../api/api_query";
+import { Method } from "../api/api_query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export default function SalonSelect({ next_page }: { next_page: string }) {
     const router = useRouter();
@@ -14,13 +14,12 @@ export default function SalonSelect({ next_page }: { next_page: string }) {
             if (is_loading) return;
             set_loading(true);
 
-            await fetch_query({
-                url: "/api/bisquit",
+            await fetch("/api/bisquit", {
                 method: Method.POST,
-                params: {
-                    data: { name: Bisquit.salon_selection, value: salon },
-                },
-                to: () => {},
+                body: JSON.stringify({
+                    name: Bisquit.enum.salon_selection,
+                    value: salon,
+                }),
             });
 
             router.push(next_page);

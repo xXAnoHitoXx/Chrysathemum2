@@ -1,8 +1,13 @@
 import { map, range } from "itertools";
-import { Appointment, Hour } from "~/server/db_schema/type_def";
-import { hour_to_time } from "~/server/validation/semantic/appointment_time";
-import { format_phone_number } from "~/server/validation/semantic/phone_format";
-import { bubble_sort } from "~/util/ano_bubble_sort";
+import { Appointment } from "~/server/appointment/type_def";
+import {
+    BOARD_ENDING_HOUR,
+    BOARD_STARTING_HOUR,
+    hour_to_time,
+} from "~/util/appointment_time";
+import { format_phone_number } from "~/util/phone_format";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
+import { Hour } from "./type_def";
 
 function timestamp(time: number, hours: Hour, on_click: () => void) {
     const stamp =
@@ -64,10 +69,10 @@ export function Board(props: {
     return (
         <div
             id="AppointmentEntry View"
-            className="flex-1 flex-nowrap overflow-x-scroll border-4 border-sky-900"
+            className="w-full flex-1 flex-nowrap overflow-x-scroll border-4 border-sky-900"
         >
-            <ul className="grid grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
-                {map(range(8, 21), (i) =>
+            <ul className="w-fit h-full grid-cols-appointment-board grid grid-flow-row-dense auto-rows-max">
+                {map(range(BOARD_STARTING_HOUR, BOARD_ENDING_HOUR), (i) =>
                     timestamp(i, { open: 10, close: 19 }, () => {
                         props.on_time_stamp(i);
                     }),
@@ -96,7 +101,7 @@ export function Board(props: {
                             )}
                         >
                             <button
-                                className="ml-1 h-full w-full text-ellipsis text-left"
+                                className="ml-1 h-full w-full text-left text-ellipsis"
                                 onClick={() => {
                                     props.on_appoitment_select(app);
                                 }}

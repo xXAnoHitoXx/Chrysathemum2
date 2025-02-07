@@ -1,3 +1,4 @@
+/*
 import { data_error, DataError } from "~/server/data_error";
 import {
     is_number,
@@ -41,3 +42,4 @@ export function to_old_customer_data(t: unknown): OldCustomerData | DataError {
 
     return { name: name, id: id, phoneNumber: phoneNumber };
 }
+*/

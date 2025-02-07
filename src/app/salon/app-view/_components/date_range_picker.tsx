@@ -6,7 +6,7 @@ import {
     PopoverTrigger,
     RangeCalendar,
     RangeValue,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Dispatch, SetStateAction, useState } from "react";
 
 export function BoardDateRangePicker(props: {

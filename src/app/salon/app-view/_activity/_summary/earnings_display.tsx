@@ -1,9 +1,9 @@
 import { TaxRate } from "~/constants";
-import { TechAccount } from "~/server/queries/salon/earnings/types";
-import { money } from "~/server/validation/semantic/money";
-import { bubble_sort } from "~/util/ano_bubble_sort";
+import { TechnicianEarnings } from "~/server/earnings/type_def";
+import { money } from "~/util/money";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 
-export function AccountDisplay(props: { accounts: TechAccount[] }) {
+export function AccountDisplay(props: { accounts: TechnicianEarnings[] }) {
     const full = "w-56";
     const half = "w-28";
 
@@ -35,8 +35,8 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
         },
     };
 
-    const to_display: TechAccount[] = [];
-    let tech_total: TechAccount = {
+    const to_display: TechnicianEarnings[] = [];
+    let tech_total: TechnicianEarnings = {
         date: "Total",
         tech: {
             id: "none",
@@ -58,7 +58,7 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
     };
 
     for (const account of props.accounts) {
-        if(to_display.length === 0) {
+        if (to_display.length === 0) {
             tech_total = {
                 date: "Total",
                 tech: account.tech,
@@ -249,7 +249,12 @@ export function AccountDisplay(props: { accounts: TechAccount[] }) {
                                         },
                                         {
                                             width: half,
-                                            text: money(Math.round(account.account.tip / TaxRate)),
+                                            text: money(
+                                                Math.round(
+                                                    account.account.tip /
+                                                        TaxRate,
+                                                ),
+                                            ),
                                         },
                                     ]}
                                 />
@@ -270,7 +275,7 @@ function Row(props: {
     return (
         <button
             className={
-                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
+                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
                 " " +
                 props.color
             }

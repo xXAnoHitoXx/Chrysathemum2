@@ -1,53 +1,77 @@
-import { parse_request, unpack_response } from "~/app/api/server_parser";
-import { handle_partial_errors } from "~/server/data_error";
-import {
-    retrieve_transactions_on_date,
-    update_transaction,
-} from "~/server/queries/business/transaction/transaction_queries";
-import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { pack, pack_nested } from "~/server/queries/server_queries_monad";
-import { Bisquit } from "~/server/validation/bisquit";
-import { to_transaction_update_info } from "~/server/validation/db_types/accounting_validation";
-import { require_permission, Role } from "../../../c_user";
-import { invalidate_earnings_information_of_date } from "~/server/queries/salon/earnings/mod";
+import { is_data_error } from "~/server/data_error";
+import { check_user_permission, Role } from "../../../c_user";
+import { z } from "zod";
+import { get_bisquit } from "~/server/bisquit/bisquit";
+import { TransactionQuery } from "~/server/transaction/transaction_queries";
+import { FireDB } from "~/server/fire_db";
+import { Transaction } from "~/server/transaction/type_def";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 export async function GET(
     _: Request,
     { params }: { params: Promise<{ date: string }> },
 ) {
-    const { date } = await params;
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-    const query = pack(Bisquit.salon_selection)
-        .bind(get_bisquit)
-        .bind((salon) => ({ salon: salon, date: date }))
-        .bind(retrieve_transactions_on_date)
-        .bind(handle_partial_errors);
+    const params_data = await params;
 
-    return unpack_response(query);
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
+    }
+
+    const query = await TransactionQuery.retrieve_transactions_on_date.call(
+        {
+            salon: salon,
+            date: date,
+        },
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }
 
 export async function PATCH(request: Request) {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_transaction_update_info))
-        .bind((update_info, f_db) => {
-            return pack_nested(update_info, f_db)
-                .bind(update_transaction)
-                .bind((_) => {
-                    return {
-                        salon: update_info.transaction.salon,
-                        date: update_info.transaction.date,
-                    };
-                })
-                .bind(invalidate_earnings_information_of_date)
-                .unpack();
-        });
-    return unpack_response(query);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
+
+    const req = Transaction.safeParse(await request.json());
+
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
+
+    const query = await TransactionQuery.update_transaction.call(
+        req.data,
+        FireDB.active(),
+    );
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json({}, { status: 200 });
 }

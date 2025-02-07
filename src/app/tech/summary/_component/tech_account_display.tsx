@@ -1,14 +1,14 @@
 import { TaxRate } from "~/constants";
-import { TechAccount } from "~/server/queries/salon/earnings/types";
-import { money } from "~/server/validation/semantic/money";
-export function TechAccountDisplay(props: { accounts: TechAccount[] }) {
+import { TechnicianEarnings } from "~/server/earnings/type_def";
+import { money } from "~/util/money";
+export function TechAccountDisplay(props: { accounts: TechnicianEarnings[] }) {
     const full = "w-60";
     const half = "w-32";
 
     if (props.accounts.length === 0) return <div>No Data</div>;
 
-    const to_display: TechAccount[] = [];
-    let tech_total: TechAccount = {
+    const to_display: TechnicianEarnings[] = [];
+    let tech_total: TechnicianEarnings = {
         date: "Total",
         tech: props.accounts[0]!.tech,
         account: {

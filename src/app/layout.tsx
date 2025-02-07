@@ -6,9 +6,9 @@ import { Providers } from "./providers";
 
 import { Inter } from "next/font/google";
 import { dark } from "@clerk/themes";
-import { get_bisquit } from "~/server/queries/crud/biscuits";
-import { Bisquit } from "~/server/validation/bisquit";
 import { is_data_error } from "~/server/data_error";
+import { get_bisquit } from "~/server/bisquit/bisquit";
+import { Bisquit } from "~/server/bisquit/type_def";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -47,7 +47,7 @@ export default function RootLayout({
 }
 
 async function TopNav() {
-    const salon = await get_bisquit(Bisquit.salon_selection);
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
     return (
         <nav
             id="top-nav"

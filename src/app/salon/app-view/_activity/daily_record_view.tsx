@@ -1,25 +1,18 @@
 "use client";
 
 import { BoardDatePicker } from "../_components/date_picker";
-import { current_date } from "~/server/validation/semantic/date";
-import { Technician, Transaction } from "~/server/db_schema/type_def";
-import { Button } from "@nextui-org/button";
-import { useRouter } from "next/navigation";
+import { Button } from "@heroui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
-import { to_array } from "~/server/validation/simple_type";
-import { to_transaction } from "~/server/validation/db_types/transaction_validation";
-import {
-    ErrorMessage_BisquitRetrival,
-    ErrorMessage_DoesNotExist,
-} from "~/server/error_messages/messages";
-import { quick_sort } from "~/util/ano_quick_sort";
 import { TransactionDisplay } from "./_daily_record/transaction_display";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { CalendarDate } from "@internationalized/date";
 import { TransactionUpdate } from "./_daily_record/update";
-import { TaxRate } from "~/constants";
+import { Transaction } from "~/server/transaction/type_def";
+import { z } from "zod";
+import { quick_sort } from "~/util/sorter/ano_quick_sort";
+import { current_date } from "~/util/date";
+import { Technician } from "~/server/technician/type_def";
 
 const rec_view_transaction = "/api/app_view/daily_record/";
 
@@ -30,47 +23,36 @@ const useTransactionList = (
 ): [Transaction[], Dispatch<SetStateAction<Transaction[]>>, boolean] => {
     const [transactions, set_transactions] =
         useState<Transaction[]>(saved_transactions);
-    const router = useRouter();
 
     const { isFetching } = useQuery({
-        queryFn: () => {
-            return fetch(rec_view_transaction + date, {
+        queryFn: async () => {
+            const response = await fetch(rec_view_transaction + date, {
                 method: Method.GET,
                 cache: "no-store",
-            }).then(
-                handle_react_query_response(
-                    to_array(to_transaction),
-                    (transactions) => {
-                        quick_sort(transactions, (a, b) => {
-                            const time_diff = b.time - a.time;
-                            if (time_diff != 0) return time_diff;
+            });
 
-                            const cid_diff = a.customer.id.localeCompare(
-                                b.customer.id,
-                            );
-                            if (cid_diff != 0) return cid_diff;
+            if (response.status === 200) {
+                const transactions = z
+                    .array(Transaction)
+                    .safeParse(await response.json());
+                if (transactions.success) {
+                    quick_sort(transactions.data, (a, b) => {
+                        const time_diff = b.time - a.time;
+                        if (time_diff != 0) return time_diff;
 
-                            return a.technician.id.localeCompare(
-                                b.technician.id,
-                            );
-                        });
-                        set_transactions(transactions);
-                        reset_filter();
-                        return true;
-                    },
-                    (error) => {
-                        if (
-                            error.contains([
-                                ErrorMessage_BisquitRetrival,
-                                ErrorMessage_DoesNotExist,
-                            ])
-                        ) {
-                            router.replace("/");
-                        }
-                        return false;
-                    },
-                ),
-            );
+                        const cid_diff = a.customer.id.localeCompare(
+                            b.customer.id,
+                        );
+                        if (cid_diff != 0) return cid_diff;
+
+                        return a.technician.id.localeCompare(b.technician.id);
+                    });
+                    set_transactions(transactions.data);
+                    reset_filter();
+                    return true;
+                }
+            }
+            return false;
         },
         queryKey: ["transaction_list", date],
     });
@@ -153,35 +135,10 @@ export function DailyRecordView(props: {
 
     async function update_transaction(transaction: Transaction) {
         if (editing == null) return;
-
-        editing.details = transaction.details;
-        editing.amount = transaction.amount;
-        editing.tip = transaction.tip;
-        editing.cash = transaction.cash;
-        editing.gift = transaction.gift;
-        editing.discount = transaction.discount;
-
         await fetch(rec_view_transaction + date, {
             method: Method.PATCH,
             cache: "no-store",
-            body: JSON.stringify({
-                transaction: editing,
-                account: {
-                    amount: transaction.amount,
-                    tip: transaction.tip,
-                },
-                close: {
-                    machine:
-                        Math.round(transaction.amount * TaxRate) +
-                        transaction.tip -
-                        transaction.cash -
-                        transaction.gift -
-                        transaction.discount,
-                    cash: transaction.cash,
-                    gift: transaction.gift,
-                    discount: transaction.discount,
-                },
-            }),
+            body: JSON.stringify(transaction),
         }).finally(() => {
             set_editing(null);
         });

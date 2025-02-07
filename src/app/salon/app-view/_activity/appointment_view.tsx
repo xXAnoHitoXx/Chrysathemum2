@@ -1,37 +1,26 @@
 "use client";
 
-import {
-    Appointment,
-    Closing as Close,
-    Account,
-    Technician,
-} from "~/server/db_schema/type_def";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { to_array } from "~/server/validation/simple_type";
-import { to_appointment } from "~/server/validation/db_types/appointment_validation";
-import { handle_react_query_response } from "~/app/api/response_parser";
-import { current_date } from "~/server/validation/semantic/date";
 import { BoardDatePicker } from "../_components/date_picker";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@nextui-org/button";
-import {
-    BOARD_STARTING_HOUR,
-    TIME_INTERVALS_PER_HOUR,
-    to_1_index,
-} from "~/server/validation/semantic/appointment_time";
-import {
-    ErrorMessage_BisquitRetrival,
-    ErrorMessage_DoesNotExist,
-} from "~/server/error_messages/messages";
-import { useRouter } from "next/navigation";
-import { to_technician } from "~/server/validation/db_types/technician_validation";
+import { Button } from "@heroui/button";
 import { Booking } from "./_appointment_view/booking_form";
 import { AppEdit } from "./_appointment_view/app_edit";
 import { Board } from "./_appointment_view/board";
 import { LastCustomerSave } from "../_components/customer_search";
-import { Closing } from "./_appointment_view/closing";
+import { ClosingTask } from "./_appointment_view/closing";
 import { AppViewActivity } from "../_components/app_view_page";
+import { Appointment } from "~/server/appointment/type_def";
+import { z } from "zod";
+import { current_date } from "~/util/date";
+import { Technician } from "~/server/technician/type_def";
+import { Account, Closing } from "~/server/transaction/type_def";
+import {
+    BOARD_STARTING_HOUR,
+    TIME_INTERVALS_PER_HOUR,
+    to_1_index,
+} from "~/util/appointment_time";
 
 export type AppointmentViewSaveState = {
     data: Appointment[];
@@ -59,39 +48,24 @@ const useAppointmentList = (
         saved_list.data,
     );
 
-    const router = useRouter();
-
     useQuery({
-        queryFn: () =>
-            fetch(app_view_appointment + date, {
+        queryFn: async () => {
+            const response = await fetch(app_view_appointment + date, {
                 method: Method.GET,
                 cache: "no-store",
-            }).then(
-                handle_react_query_response(
-                    to_array(to_appointment),
-                    (appointments) => {
-                        if (
-                            appointments.length > 0 &&
-                            appointments[0] != undefined &&
-                            appointments[0].date === current_date().toString()
-                        )
-                            save_current_state(appointments);
-                        set_appointments(appointments);
-                        return true;
-                    },
-                    (error) => {
-                        if (
-                            error.contains([
-                                ErrorMessage_BisquitRetrival,
-                                ErrorMessage_DoesNotExist,
-                            ])
-                        ) {
-                            router.replace("/");
-                        }
-                        return false;
-                    },
-                ),
-            ),
+            });
+
+            if (response.status === 200) {
+                const appointments = z
+                    .array(Appointment)
+                    .safeParse(await response.json());
+
+                if (appointments.success) {
+                    save_current_state(appointments.data);
+                    return appointments.data;
+                }
+            }
+        },
         queryKey: ["appointment_list", date],
     });
 
@@ -127,19 +101,23 @@ export function AppointmentView(props: {
     const [technicians, set_tech] = useState<Technician[]>([]);
 
     useQuery({
-        queryFn: () =>
-            fetch("/api/technician/location", {
+        queryFn: async () => {
+            const response = await fetch("/api/technician/location", {
                 method: Method.GET,
                 cache: "no-cache",
-            }).then(
-                handle_react_query_response(
-                    to_array(to_technician),
-                    (technicians) => {
-                        set_tech(technicians);
-                        return true;
-                    },
-                ),
-            ),
+            });
+
+            if (response.status === 200) {
+                const technicians = z
+                    .array(Technician)
+                    .safeParse(await response.json());
+
+                if (technicians.success) {
+                    set_tech(technicians.data);
+                }
+            }
+            return true;
+        },
         queryKey: ["technicians"],
         staleTime: 300000,
     });
@@ -150,7 +128,7 @@ export function AppointmentView(props: {
         const app = phantoms[0];
         if (app != undefined) props.last_customer_save.data = app.customer;
 
-        await fetch(app_view_appointment + date.toString(), {
+        const response = await fetch(app_view_appointment + date.toString(), {
             method: Method.POST,
             body: JSON.stringify(
                 phantoms.map((appointment) => ({
@@ -162,25 +140,29 @@ export function AppointmentView(props: {
                     salon: "",
                 })),
             ),
-        })
-            .then(
-                handle_react_query_response(
-                    to_array(to_appointment),
-                    (appointments) => {
-                        if (
-                            appointments.length > 0 &&
-                            appointments[0] != undefined &&
-                            appointments[0].date === current_date().toString()
-                        )
-                            save_current_state(appointments);
-                        set_appointments(appointments);
-                    },
-                ),
-            )
-            .finally(() => {
-                to_default_state();
-                set_is_loading(false);
-            });
+        });
+
+        if (response.status === 200) {
+            const appointments = z
+                .array(Appointment)
+                .safeParse(await response.json());
+
+            if (appointments.success) {
+                if (
+                    appointments.data.length > 0 &&
+                    appointments.data[0] != undefined &&
+                    appointments.data[0].date === current_date().toString()
+                ) {
+                    save_current_state(appointments.data);
+                }
+                set_appointments(appointments.data);
+            }
+        } else {
+            reload_appointments();
+        }
+
+        to_default_state();
+        set_is_loading(false);
     }
 
     function trigger_redraw() {
@@ -196,27 +178,28 @@ export function AppointmentView(props: {
     async function reload_appointments() {
         set_is_loading(true);
 
-        await fetch(app_view_appointment + date, {
+        const response = await fetch(app_view_appointment + date, {
             method: Method.GET,
             cache: "no-store",
-        })
-            .then(
-                handle_react_query_response(
-                    to_array(to_appointment),
-                    (appointments) => {
-                        if (
-                            appointments.length > 0 &&
-                            appointments[0] != undefined &&
-                            appointments[0].date === current_date().toString()
-                        )
-                            save_current_state(appointments);
-                        set_appointments(appointments);
-                    },
-                ),
-            )
-            .finally(() => {
-                set_is_loading(false);
-            });
+        });
+        if (response.status === 200) {
+            const appointments = z
+                .array(Appointment)
+                .safeParse(await response.json());
+
+            if (appointments.success) {
+                if (
+                    appointments.data.length > 0 &&
+                    appointments.data[0] != undefined &&
+                    appointments.data[0].date === current_date().toString()
+                ) {
+                    save_current_state(appointments.data);
+                }
+                set_appointments(appointments.data);
+            }
+        }
+
+        set_is_loading(false);
     }
 
     async function delete_appointments() {
@@ -227,31 +210,33 @@ export function AppointmentView(props: {
         const app = phantoms[0];
         if (app != undefined) props.last_customer_save.data = app.customer;
 
-        await fetch(app_view_appointment + date, {
+        const response = await fetch(app_view_appointment + date, {
             method: Method.DELETE,
             cache: "no-cache",
             body: JSON.stringify(phantoms),
-        })
-            .then(
-                handle_react_query_response(
-                    to_array(to_appointment),
-                    (appointments) => {
-                        if (
-                            appointments.length > 0 &&
-                            appointments[0] != undefined &&
-                            appointments[0].date === current_date().toString()
-                        )
-                            save_current_state(appointments);
-                        set_appointments(appointments);
-                    },
-                ),
-                reload_appointments,
-            )
-            .catch(reload_appointments)
-            .finally(() => {
-                to_default_state();
-                set_is_loading(false);
-            });
+        });
+
+        if (response.status === 200) {
+            const appointments = z
+                .array(Appointment)
+                .safeParse(await response.json());
+
+            if (appointments.success) {
+                if (
+                    appointments.data.length > 0 &&
+                    appointments.data[0] != undefined &&
+                    appointments.data[0].date === current_date().toString()
+                ) {
+                    save_current_state(appointments.data);
+                }
+                set_appointments(appointments.data);
+            }
+        } else {
+            reload_appointments();
+        }
+
+        set_is_loading(false);
+        to_default_state();
     }
 
     async function closing_update(appointment: Appointment) {
@@ -270,67 +255,71 @@ export function AppointmentView(props: {
         const app = appointments[0];
         if (app != undefined) props.last_customer_save.data = app.customer;
 
-        await fetch(app_view_appointment + date, {
+        const response = await fetch(app_view_appointment + date, {
             method: Method.PATCH,
             cache: "no-store",
             body: JSON.stringify(appointments),
-        })
-            .then(
-                handle_react_query_response(
-                    to_array(to_appointment),
-                    (appointments) => {
-                        if (
-                            appointments.length > 0 &&
-                            appointments[0] != undefined &&
-                            appointments[0].date === current_date().toString()
-                        )
-                            save_current_state(appointments);
-                        set_appointments(appointments);
-                    },
-                    reload_appointments,
-                ),
-            )
-            .catch(reload_appointments)
-            .finally(() => {
-                to_default_state();
-                set_is_loading(false);
-            });
+        });
+
+        if (response.status === 200) {
+            const appointments = z
+                .array(Appointment)
+                .safeParse(await response.json());
+
+            if (appointments.success) {
+                if (
+                    appointments.data.length > 0 &&
+                    appointments.data[0] != undefined &&
+                    appointments.data[0].date === current_date().toString()
+                ) {
+                    save_current_state(appointments.data);
+                }
+                set_appointments(appointments.data);
+            }
+        } else {
+            reload_appointments();
+        }
+
+        to_default_state();
+        set_is_loading(false);
     }
 
     async function close_appointment(data: {
         appointment: Appointment;
-        close: Close;
+        close: Closing;
         account: Account;
     }) {
         set_is_loading(true);
 
         props.last_customer_save.data = data.appointment.customer;
 
-        await fetch(app_view_appointment + date, {
+        const response = await fetch(app_view_appointment + date, {
             method: Method.PUT,
             cache: "no-cache",
             body: JSON.stringify(data),
-        })
-            .then(
-                handle_react_query_response(
-                    to_array(to_appointment),
-                    (appointments) => {
-                        if (
-                            appointments.length > 0 &&
-                            appointments[0] != undefined &&
-                            appointments[0].date === current_date().toString()
-                        )
-                            save_current_state(appointments);
-                        set_appointments(appointments);
-                    },
-                    reload_appointments,
-                ),
-            )
-            .catch(reload_appointments)
-            .finally(() => {
-                to_default_state();
-                set_is_loading(false);
-            });
+        });
+
+        if (response.status === 200) {
+            const appointments = z
+                .array(Appointment)
+                .safeParse(await response.json());
+
+            if (appointments.success) {
+                if (
+                    appointments.data.length > 0 &&
+                    appointments.data[0] != undefined &&
+                    appointments.data[0].date === current_date().toString()
+                ) {
+                    save_current_state(appointments.data);
+                }
+                set_appointments(appointments.data);
+            }
+        } else {
+            reload_appointments();
+        }
+
+        to_default_state();
+        set_is_loading(false);
     }
 
     return (
@@ -372,7 +361,7 @@ export function AppointmentView(props: {
                         />
                     ) : current_state === State.Closing &&
                       phantoms[0] != undefined ? (
-                        <Closing
+                        <ClosingTask
                             appointment={phantoms[0]}
                             on_change={trigger_redraw}
                             on_update={closing_update}

@@ -1,17 +1,13 @@
-import { CalendarDate, RangeValue } from "@nextui-org/react";
+import { CalendarDate, RangeValue } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { BoardDateRangePicker } from "../_components/date_range_picker";
-import { last_monday, last_sunday } from "~/server/validation/semantic/date";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
-import { to_array } from "~/server/validation/simple_type";
-import { bubble_sort } from "~/util/ano_bubble_sort";
 import { AccountDisplay } from "./_summary/earnings_display";
-import {
-    TechAccount,
-    to_tech_account,
-} from "~/server/queries/salon/earnings/types";
+import { last_monday, last_sunday } from "~/util/date";
+import { TechnicianEarnings } from "~/server/earnings/type_def";
+import { z } from "zod";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 
 export function SummaryView(props: { salon: string }) {
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();
@@ -22,7 +18,7 @@ export function SummaryView(props: { salon: string }) {
     });
 
     const [date_to_load, load_date] = useState<CalendarDate | null>(null);
-    const [entries, set_entries] = useState<TechAccount[]>([]);
+    const [entries, set_entries] = useState<TechnicianEarnings[]>([]);
 
     useEffect(() => {
         load_date(date_range.start);
@@ -30,7 +26,7 @@ export function SummaryView(props: { salon: string }) {
 
     const summary_api = "/api/app_view/summary/";
     const query = useQuery({
-        queryFn: () => {
+        queryFn: async () => {
             if (date_to_load == null) {
                 return 0;
             }
@@ -39,32 +35,36 @@ export function SummaryView(props: { salon: string }) {
                 set_entries((_) => []);
             }
 
-            fetch(summary_api + date_to_load.toString(), {
-                method: Method.GET,
-                cache: "no-store",
-            }).then(
-                handle_react_query_response(
-                    to_array(to_tech_account),
-                    (tech_acc) => {
-                        set_entries((prev) => {
-                            const next = [...prev, ...tech_acc];
-                            bubble_sort(next, (a, b) => {
-                                const comp = a.tech.id.localeCompare(b.tech.id);
-                                if (comp != 0) return comp;
-
-                                return a.date.localeCompare(b.date);
-                            });
-                            const next_day = date_to_load.add({ days: 1 });
-
-                            if (next_day.compare(date_range.end) <= 0) {
-                                load_date(next_day);
-                            }
-                            return next;
-                        });
-                    },
-                ),
+            const response = await fetch(
+                summary_api + date_to_load.toString(),
+                {
+                    method: Method.GET,
+                    cache: "no-store",
+                },
             );
+            if (response.status === 200) {
+                const accounts = z
+                    .array(TechnicianEarnings)
+                    .safeParse(await response.json());
 
+                if (accounts.success) {
+                    set_entries((prev) => {
+                        const next = [...prev, ...accounts.data];
+                        bubble_sort(next, (a, b) => {
+                            const comp = a.tech.id.localeCompare(b.tech.id);
+                            if (comp != 0) return comp;
+
+                            return a.date.localeCompare(b.date);
+                        });
+                        const next_day = date_to_load.add({ days: 1 });
+
+                        if (next_day.compare(date_range.end) <= 0) {
+                            load_date(next_day);
+                        }
+                        return next;
+                    });
+                }
+            }
             return 0;
         },
         queryKey: ["summary", date_to_load],

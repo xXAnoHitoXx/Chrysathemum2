@@ -3,11 +3,11 @@ import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Role } from "~/app/api/c_user";
 import { is_data_error } from "~/server/data_error";
+import { FireDB } from "~/server/fire_db";
 import {
     retrieve_technician_entry,
     update_technician_entry,
-} from "~/server/queries/crud/technician/technician_entry";
-import { pack } from "~/server/queries/server_queries_monad";
+} from "~/server/technician/components/technician_entry";
 
 export default async function Page({
     params,
@@ -38,9 +38,10 @@ export default async function Page({
         );
     }
 
-    const tech = await pack({ id: tech_id })
-        .bind(retrieve_technician_entry)
-        .unpack();
+    const tech = await retrieve_technician_entry.call(
+        { tech_id: tech_id },
+        FireDB.active(),
+    );
 
     if (is_data_error(tech)) {
         redirect("/");
@@ -51,7 +52,7 @@ export default async function Page({
     }
 
     tech.login_claimed = user.id;
-    const update = await pack(tech).bind(update_technician_entry).unpack();
+    const update = await update_technician_entry.call(tech, FireDB.active());
 
     if (is_data_error(update)) {
         redirect("/");

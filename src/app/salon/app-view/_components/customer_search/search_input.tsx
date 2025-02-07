@@ -1,7 +1,7 @@
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { LastCustomerSave } from "../customer_search";
-import { format_phone_input } from "~/server/validation/semantic/phone_format";
+import { format_phone_input } from "~/util/phone_format";
 
 enum State {
     LastCustomer = "Last Customer",
@@ -72,7 +72,7 @@ export function SearchQueryInput(props: {
 
     return (
         <div className="flex w-full flex-col gap-1">
-            <div className="flex w-full items-center gap-1 border-b-1 border-t-1 border-b-sky-900 border-t-sky-900 p-2">
+            <div className="flex w-full items-center gap-1 border-t-1 border-b-1 border-t-sky-900 border-b-sky-900 p-2">
                 <Input
                     label="name / phone number"
                     value={

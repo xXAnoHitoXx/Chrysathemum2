@@ -3,18 +3,15 @@ import {
     CustomerSearch,
     LastCustomerSave,
 } from "../_components/customer_search";
-import {
-    Appointment,
-    Customer,
-    Transaction,
-} from "~/server/db_schema/type_def";
 import { CustomerEdit } from "./_customer_view/customer_edit";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
-import { handle_react_query_response } from "~/app/api/response_parser";
-import { to_customer_data } from "~/server/validation/db_types/customer_validation";
 import { CustomerHistory } from "./_customer_view/history";
+import { Appointment } from "~/server/appointment/type_def";
+import { Transaction } from "~/server/transaction/type_def";
+import { Customer } from "~/server/customer/type_def";
+import { CustomerHistoryData } from "~/app/api/app_view/customer/history/type_def";
 
 export type SavedCustomerHistory = {
     id: string;
@@ -49,18 +46,27 @@ const useCustomerHistory = (
     );
 
     const { isFetching } = useQuery({
-        queryFn: () => {
-            if (customer != null)
-                fetch(customer_api, {
+        queryFn: async () => {
+            if (customer != null) {
+                const respones = await fetch(customer_api, {
                     method: Method.POST,
                     cache: "no-store",
                     body: JSON.stringify(customer),
-                }).then(
-                    handle_react_query_response(to_customer_data, (data) => {
-                        set_appointments(data.appointments);
-                        set_transactions(data.transactions);
-                    }),
-                );
+                });
+
+                if (respones.status === 200) {
+                    const history = CustomerHistoryData.safeParse(
+                        await respones.json(),
+                    );
+
+                    if (history.success) {
+                        set_appointments(history.data.appointments);
+                        set_transactions(history.data.transactions);
+                    }
+                }
+            }
+
+            return 0;
         },
         queryKey: ["customer_data", customer],
     });
@@ -109,7 +115,7 @@ export function CustomerView(props: {
             ) : edit_mode ? (
                 <CustomerEdit
                     customer={customer}
-                    on_complete={(customer) => {
+                    on_complete={(customer: Customer) => {
                         props.last_customer_save.data = customer;
                     }}
                     set_loading={set_loading}

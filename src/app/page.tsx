@@ -1,6 +1,5 @@
-import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
+import { SignedOut, SignUpButton } from "@clerk/nextjs";
 import SalonSelect from "./_components/salon_select";
-import RetryRedirect from "./_components/retry_redirect";
 import { currentUser } from "@clerk/nextjs/server";
 import { Role } from "./api/c_user";
 
@@ -33,9 +32,6 @@ export default async function HomePage() {
                         </button>
                     </SignUpButton>
                 </SignedOut>
-                <SignedIn>
-                    <RetryRedirect />
-                </SignedIn>
             </div>
         </div>
     );

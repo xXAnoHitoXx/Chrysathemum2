@@ -1,74 +1,50 @@
-import { retrieve_customers_appointments } from "~/server/queries/business/appointment/appointment_queries";
-import { retrieve_customer_history } from "~/server/queries/business/transaction/transaction_queries";
-import {
-    DataError,
-    handle_partial_errors,
-    is_data_error,
-    lotta_errors,
-} from "~/server/data_error";
-import { Appointment, Transaction } from "~/server/db_schema/type_def";
-import { pack } from "~/server/queries/server_queries_monad";
-import { parse_request, unpack_response } from "../../../server_parser";
-import { to_customer } from "~/server/validation/db_types/customer_validation";
-import { require_permission, Role } from "~/app/api/c_user";
+import { is_data_error } from "~/server/data_error";
+import { check_user_permission, Role } from "~/app/api/c_user";
+import { AppointmentQuery } from "~/server/appointment/appointment_queries";
+import { Customer } from "~/server/customer/type_def";
+import { FireDB } from "~/server/fire_db";
+import { TransactionQuery } from "~/server/transaction/transaction_queries";
+import { CustomerHistoryData } from "./type_def";
 
 export async function POST(request: Request) {
-    await require_permission([Role.Operator, Role.Admin]).catch(() => {
-        return Response.error();
-    });
+    let user = await check_user_permission([Role.Operator, Role.Admin]);
 
-    const query = pack(request)
-        .bind(parse_request(to_customer))
-        .bind(async (customer, f_db) => {
-            const appointment_query = retrieve_customers_appointments(
-                customer,
-                f_db,
-            );
-            const transaction_query = retrieve_customer_history(customer, f_db);
+    if (is_data_error(user)) {
+        return Response.json({ message: user.message() }, { status: 401 });
+    }
 
-            const errors: DataError[] = [];
-            const customer_data: {
-                appointments: Appointment[];
-                transactions: Transaction[];
-            } = {
-                appointments: [],
-                transactions: [],
-            };
+    const req = Customer.safeParse(await request.json());
 
-            const appointment_result = await appointment_query;
+    if (!req.success) {
+        return Response.json({ message: req.error.message }, { status: 400 });
+    }
 
-            if (is_data_error(appointment_result)) {
-                errors.push(appointment_result);
-            } else {
-                if (appointment_result.error != null) {
-                    errors.push(appointment_result.error);
-                }
-                customer_data.appointments = appointment_result.data;
-            }
+    const appointment_query =
+        AppointmentQuery.retrieve_customers_appointments.call(
+            req.data,
+            FireDB.active(),
+        );
 
-            const transaction_result = await transaction_query;
+    const query = await TransactionQuery.retrieve_customer_history
+        .chain<CustomerHistoryData>(async (transactions) => {
+            const appointments = await appointment_query;
 
-            if (is_data_error(transaction_result)) {
-                errors.push(transaction_result);
-            } else {
-                if (transaction_result.error != null) {
-                    errors.push(transaction_result.error);
-                }
-                customer_data.transactions = transaction_result.data;
+            if (is_data_error(appointments)) {
+                return appointments.stack("retrieving history");
             }
 
             return {
-                data: customer_data,
-                error:
-                    errors.length === 0
-                        ? null
-                        : lotta_errors(
-                              "retrieving customer data",
-                              `{name:${customer.name}, id:${customer.id}}`,
-                              errors,
-                          ),
+                appointments: appointments,
+                transactions: transactions,
             };
         })
-        .bind(handle_partial_errors);
-    return unpack_response(query);
+        .call(req.data, FireDB.active());
+
+    if (is_data_error(query)) {
+        query.report();
+        query.log();
+        return Response.json({ message: query.message() }, { status: 500 });
+    }
+
+    return Response.json(query, { status: 200 });
 }

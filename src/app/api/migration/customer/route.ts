@@ -1,3 +1,4 @@
+/*
 import { to_old_customer_data } from "./validation";
 import { pack } from "~/server/queries/server_queries_monad";
 import {
@@ -29,3 +30,4 @@ export async function GET(): Promise<Response> {
         .bind(handle_partial_errors);
     return unpack_response(query);
 }
+*/

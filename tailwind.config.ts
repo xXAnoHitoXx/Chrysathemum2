@@ -1,17 +1,13 @@
-import { nextui } from "@nextui-org/react";
+import { heroui } from "@heroui/react";
 import { type Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
     content: [
         "./src/**/*.tsx",
-        "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+        "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
     ],
     theme: {
         extend: {
-            fontFamily: {
-                sans: ["var(--font-sans)", ...fontFamily.sans],
-            },
             gridTemplateColumns: {
                 "appointment-board": "repeat(52, minmax(60px, 60px))",
             },
@@ -129,7 +125,6 @@ export default {
             },
         },
     },
-
     safelist: [
         {
             pattern:
@@ -153,5 +148,7 @@ export default {
             pattern: /row-span-2/,
         },
     ],
-    plugins: [nextui()],
+    plugins: [
+        heroui(),
+    ],
 } satisfies Config;

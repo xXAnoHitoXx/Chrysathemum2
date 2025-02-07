@@ -1,4 +1,5 @@
 import { currentUser, User } from "@clerk/nextjs/server";
+import { DataError } from "~/server/data_error";
 
 export enum Role {
     Admin = "admin",
@@ -6,10 +7,12 @@ export enum Role {
     Tech = "tech",
 }
 
-export async function require_permission(roles: Role[]): Promise<User> {
+export async function check_user_permission(
+    roles: Role[],
+): Promise<User | DataError> {
     const user = await currentUser();
     if (!user) {
-        return Promise.reject("not logged in");
+        return new DataError("not logged in");
     }
 
     for (const role of roles) {
@@ -18,5 +21,5 @@ export async function require_permission(roles: Role[]): Promise<User> {
         }
     }
 
-    return Promise.reject("not permitted");
+    return new DataError("access denied");
 }

@@ -1,5 +1,5 @@
+import { Technician } from "~/server/technician/type_def";
 import { TechnicianButton } from "./TechDisplayBar";
-import type { Technician } from "~/server/db_schema/type_def";
 
 export default function TechPreview({
     name,

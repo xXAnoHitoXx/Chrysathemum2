@@ -1,19 +1,16 @@
-import { Button, Checkbox, Input } from "@nextui-org/react";
+import { Button, Checkbox, Input } from "@heroui/react";
 import { useState } from "react";
 import { NoTechColor, TaxRate } from "~/constants";
-import {
-    Account,
-    Appointment,
-    Closing as Close,
-} from "~/server/db_schema/type_def";
-import { format_phone_number } from "~/server/validation/semantic/phone_format";
 import { parse_bill } from "../../_components/bill";
+import { Appointment } from "~/server/appointment/type_def";
+import { Account, Closing } from "~/server/transaction/type_def";
+import { format_phone_number } from "~/util/phone_format";
 
-export function Closing(props: {
+export function ClosingTask(props: {
     appointment: Appointment;
     on_close: (data: {
         appointment: Appointment;
-        close: Close;
+        close: Closing;
         account: Account;
     }) => void;
     on_update: (appointment: Appointment) => void;
