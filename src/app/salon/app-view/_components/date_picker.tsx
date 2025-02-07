@@ -24,7 +24,7 @@ export function BoardDatePicker(props: {
                 }}
             >
                 <PopoverTrigger>
-                    <Button className="w-36">{holder.toString()}</Button>
+                    <Button className="w-36" color="default">{holder.toString()}</Button>
                 </PopoverTrigger>
                 <PopoverContent>
                     <Calendar
