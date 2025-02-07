@@ -62,7 +62,9 @@ const useAppointmentList = (
 
                 if (appointments.success) {
                     save_current_state(appointments.data);
+                    set_appointments(appointments.data);
                     return appointments.data;
+                } else {
                 }
             }
         },
@@ -107,15 +109,18 @@ export function AppointmentView(props: {
                 cache: "no-cache",
             });
 
+            console.log("here")
             if (response.status === 200) {
                 const technicians = z
                     .array(Technician)
                     .safeParse(await response.json());
 
                 if (technicians.success) {
+                    console.log(">>>")
                     set_tech(technicians.data);
                 }
             }
+            console.log("done")
             return true;
         },
         queryKey: ["technicians"],
