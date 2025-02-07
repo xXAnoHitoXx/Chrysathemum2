@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { check_user_permission, Role } from "../api/c_user";
-import { is_data_error } from "~/_server_/data_error";
+import { is_data_error } from "~/server/data_error";
 
 export default async function RootLayout({
     children,

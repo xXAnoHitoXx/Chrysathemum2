@@ -1,9 +1,8 @@
 import { TechDataDisplay } from "./_components/client_component";
 import { check_user_permission, Role } from "~/app/api/c_user";
 import { z } from "zod";
-import { is_data_error } from "~/_server_/data_error";
 import { redirect } from "next/navigation";
-import { DataError } from "~/server/data_error";
+import { DataError, is_data_error } from "~/server/data_error";
 import { retrieve_technician_entry } from "~/server/technician/components/technician_entry";
 import { FireDB } from "~/server/fire_db";
 

@@ -1,7 +1,7 @@
-import { time_to_string } from "~/_server_/validation/semantic/appointment_time";
 import { TaxRate } from "~/constants";
 import { Technician } from "~/server/technician/type_def";
 import { Transaction } from "~/server/transaction/type_def";
+import { time_to_string } from "~/util/appointment_time";
 import { money } from "~/util/money";
 
 export function TransactionDisplay(props: {
