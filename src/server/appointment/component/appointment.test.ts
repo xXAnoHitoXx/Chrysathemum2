@@ -38,7 +38,7 @@ test("test appointment_entries CRUDs querries", async () => {
 
     const app_detail: AppointmentEntryCreationInfo = {
         customer_id: "minion",
-        date: "12 2 2012",
+        date: "2012-02-12",
         time: 5,
         duration: 10,
         details: "emotional damage",
@@ -214,14 +214,14 @@ test("test customer appointment list entries CRUDs querries", async () => {
     const index_1: CustomerAppointmentIndex = {
         customer_id: "bruh",
         appointment_id: "q;wyfupl",
-        date: "20 2 2085",
+        date: "2085-02-20",
         salon: "5CBL",
     };
 
     const index_2: CustomerAppointmentIndex = {
         customer_id: "bruh",
         appointment_id: "aorsoetna",
-        date: "20 2 2085",
+        date: "2085-02-20",
         salon: "5CBL",
     };
 
