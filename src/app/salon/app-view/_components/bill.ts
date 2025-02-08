@@ -11,12 +11,14 @@ export function parse_bill(bill: string): Bill {
         const v = vals[i];
 
         if (
+            i === 2 && (
             v === "c" ||
             v === "C" ||
             v === "g" ||
             v === "G" ||
             v === "m" ||
             v === "M"
+            )
         ) {
             return {
                 values: data,

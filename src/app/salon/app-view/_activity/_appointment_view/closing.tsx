@@ -3,16 +3,12 @@ import { useState } from "react";
 import { NoTechColor, TaxRate } from "~/constants";
 import { parse_bill } from "../../_components/bill";
 import { Appointment } from "~/server/appointment/type_def";
-import { Account, Closing } from "~/server/transaction/type_def";
+import { AppointmentClosingData  } from "~/server/transaction/type_def";
 import { format_phone_number } from "~/util/phone_format";
 
 export function ClosingTask(props: {
     appointment: Appointment;
-    on_close: (data: {
-        appointment: Appointment;
-        close: Closing;
-        account: Account;
-    }) => void;
+    on_close: (data: AppointmentClosingData) => void;
     on_update: (appointment: Appointment) => void;
     on_change: () => void;
 }) {
@@ -81,7 +77,7 @@ export function ClosingTask(props: {
                     amount: amount,
                     tip: tip,
                 },
-                close: {
+                closing: {
                     cash: cash,
                     gift: gift,
                     discount: discount,

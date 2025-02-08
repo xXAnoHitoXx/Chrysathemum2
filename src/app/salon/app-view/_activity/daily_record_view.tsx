@@ -101,7 +101,7 @@ export function DailyRecordView(props: {
     saves: DailyRecordSaveState;
 }) {
     const [date, set_date] = useState(props.saves.data.date);
-    const [transactions, _, isFetching] = useTransactionList(
+    const [transactions, set_transactions, isFetching] = useTransactionList(
         date.toString(),
         props.saves.data.transactions,
         () => set_filter([]),
@@ -139,9 +139,15 @@ export function DailyRecordView(props: {
             method: Method.PATCH,
             cache: "no-store",
             body: JSON.stringify(transaction),
-        }).finally(() => {
-            set_editing(null);
         });
+            
+        set_transactions((transactions) => transactions.map((tr) => {
+            if (tr.id === transaction.id) {
+                return transaction;
+            }
+            return tr;
+        }));
+        set_editing(null);
     }
 
     return (

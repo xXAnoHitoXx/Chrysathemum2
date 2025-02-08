@@ -37,6 +37,7 @@ export function BoardDatePicker(props: {
                         }}
                         weekdayStyle="short"
                         value={holder}
+                        onChange={update_date}
                     />
                 </PopoverContent>
             </Popover>
