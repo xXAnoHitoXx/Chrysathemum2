@@ -109,18 +109,16 @@ export function AppointmentView(props: {
                 cache: "no-cache",
             });
 
-            console.log("here")
             if (response.status === 200) {
                 const technicians = z
                     .array(Technician)
                     .safeParse(await response.json());
 
                 if (technicians.success) {
-                    console.log(">>>")
+                    console.log(JSON.stringify(technicians.data));
                     set_tech(technicians.data);
                 }
             }
-            console.log("done")
             return true;
         },
         queryKey: ["technicians"],
@@ -519,7 +517,7 @@ export function AppointmentView(props: {
                                           }
 
                                           set_phantoms([appointment]);
-                                          if (appointment.technician === null) {
+                                          if (appointment.technician === undefined) {
                                               set_changes([appointment]);
                                               set_state(State.AppEdit);
                                           } else set_state(State.Closing);
