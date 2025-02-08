@@ -46,6 +46,8 @@ export function TechDataDisplay(props: {
 
                         return transactions.data;
                     });
+
+                    return 0;
                 }
             }
 

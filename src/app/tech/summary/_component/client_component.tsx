@@ -52,7 +52,7 @@ export function TechSummaryView(props: { salon: string }) {
                 const tech_acc = TechnicianEarnings.safeParse(
                     await response.json(),
                 );
-                if (tech_acc.success)
+                if (tech_acc.success) {
                     set_entries((prev) => {
                         const next = [...prev, tech_acc.data];
                         bubble_sort(next, (a, b) => {
@@ -65,7 +65,10 @@ export function TechSummaryView(props: { salon: string }) {
                         }
                         return next;
                     });
-                else parse_failed = true;
+
+                    return 0;
+                }
+                parse_failed = true;
             }
 
             if (response.status === 500 || parse_failed) {
