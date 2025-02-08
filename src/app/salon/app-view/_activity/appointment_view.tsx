@@ -513,7 +513,10 @@ export function AppointmentView(props: {
                                           }
 
                                           set_phantoms([appointment]);
-                                          if (appointment.technician === undefined) {
+                                          if (
+                                              appointment.technician ===
+                                              undefined
+                                          ) {
                                               set_changes([appointment]);
                                               set_state(State.AppEdit);
                                           } else set_state(State.Closing);

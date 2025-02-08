@@ -8,64 +8,56 @@ export function TransactionUpdate(props: {
     transaction: Transaction;
     on_complete: (transaction: Transaction) => void;
 }) {
-    const initial_values = { ...props.transaction };
     const [is_loading, set_is_loading] = useState(false);
     const [details, set_details] = useState(props.transaction.details);
     const [discounted, set_discounted] = useState(false);
 
     function validate_bill(value: string) {
-        const data = parse_bill(value);
+        const bill = parse_bill(value);
 
-        if (data.values[0] != undefined) {
-            if (discounted)
-                props.transaction.amount = Math.round(data.values[0] / TaxRate);
-            else props.transaction.amount = data.values[0];
-        } else {
-            props.transaction.amount = initial_values.amount;
-        }
-
-        if (data.values[1] != undefined) props.transaction.tip = data.values[1];
-        else props.transaction.tip = initial_values.tip;
-
-        if (data.note != undefined) {
-            const total_cost =
-                Math.round(props.transaction.amount * TaxRate) +
-                props.transaction.tip;
-
-            switch (data.note) {
-                case "c":
-                    props.transaction.cash = total_cost;
-                    props.transaction.gift = 0;
-                    props.transaction.discount = 0;
-                case "g":
-                    props.transaction.cash = 0;
-                    props.transaction.gift = total_cost;
-                    props.transaction.discount = 0;
-                    break;
-                case "m":
-                    props.transaction.cash = 0;
-                    props.transaction.gift = 0;
-                    props.transaction.discount = 0;
-                    break;
-            }
+        if (bill.values[0] == undefined || bill.values[1] == undefined) {
             return;
         }
 
-        if (data.values[2] != undefined) {
-            props.transaction.cash = data.values[2];
+        const amount: number = bill.values[0];
+        const tip: number = bill.values[1];
+
+        let cash = 0;
+        let gift = 0;
+        let discount = 0;
+
+        if (bill.note != undefined) {
+            const total = discounted
+                ? bill.values[0] + bill.values[1]
+                : Math.round(bill.values[0] * TaxRate) + bill.values[1];
+            switch (bill.note) {
+                case "g":
+                    gift = total;
+                    break;
+                case "c":
+                    cash = total;
+                    break;
+            }
         } else {
-            props.transaction.cash = initial_values.cash;
+            let v = bill.values[2];
+            if (v != undefined) {
+                cash = v;
+            }
+            v = bill.values[3];
+            if (v != undefined) {
+                gift = v;
+            }
+            v = bill.values[4];
+            if (v != undefined) {
+                discount = v;
+            }
         }
-        if (data.values[3] != undefined) {
-            props.transaction.gift = data.values[3];
-        } else {
-            props.transaction.gift = initial_values.gift;
-        }
-        if (data.values[4] != undefined) {
-            props.transaction.discount = data.values[4];
-        } else {
-            props.transaction.discount = initial_values.discount;
-        }
+
+        props.transaction.amount = amount;
+        props.transaction.tip = tip;
+        props.transaction.cash = cash;
+        props.transaction.gift = gift;
+        props.transaction.discount = discount;
     }
 
     async function close_appointment() {
