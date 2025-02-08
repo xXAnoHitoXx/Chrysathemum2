@@ -97,7 +97,15 @@ export async function POST(
                 salon: salon,
             };
         }).chain<Appointment>(AppointmentQuery.create_new_appointment),
-    ).call(req.data, FireDB.active());
+    )
+        .chain<AppointmentRecordID>((_) => {
+            return {
+                date: date,
+                salon: salon,
+            };
+        })
+        .chain(AppointmentQuery.retrieve_appointments_on_date)
+        .call(req.data, FireDB.active());
 
     if (is_data_error(query)) {
         query.report();
@@ -110,12 +118,27 @@ export async function POST(
 
 export async function PUT(
     request: Request,
-    _: { params: Promise<{ date: string }> },
+    { params }: { params: Promise<{ date: string }> },
 ) {
     let user = await check_user_permission([Role.Operator, Role.Admin]);
 
     if (is_data_error(user)) {
         return Response.json({ message: user.message() }, { status: 401 });
+    }
+
+    const params_data = await params;
+
+    const validated_date = z.string().date().safeParse(params_data.date);
+    if (!validated_date.success) {
+        return Response.json({ message: "bad params" }, { status: 400 });
+    }
+
+    const date: string = validated_date.data;
+
+    const salon = await get_bisquit(Bisquit.enum.salon_selection);
+
+    if (is_data_error(salon)) {
+        return Response.json({ message: salon.message() }, { status: 400 });
     }
 
     const req = AppointmentClosingData.safeParse(await request.json());
@@ -124,10 +147,15 @@ export async function PUT(
         return Response.json({ message: req.error.message }, { status: 400 });
     }
 
-    const query = await TransactionQuery.close_transaction.call(
-        req.data,
-        FireDB.active(),
-    );
+    const query = await TransactionQuery.close_transaction
+        .chain<AppointmentRecordID>(() => {
+            return {
+                salon: salon,
+                date: date,
+            };
+        })
+        .chain(AppointmentQuery.retrieve_appointments_on_date)
+        .call(req.data, FireDB.active());
 
     if (is_data_error(query)) {
         query.report();
