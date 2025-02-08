@@ -15,7 +15,7 @@ import { Appointment } from "~/server/appointment/type_def";
 import { z } from "zod";
 import { current_date } from "~/util/date";
 import { Technician } from "~/server/technician/type_def";
-import { Account, Closing } from "~/server/transaction/type_def";
+import { AppointmentClosingData } from "~/server/transaction/type_def";
 import {
     BOARD_STARTING_HOUR,
     TIME_INTERVALS_PER_HOUR,
@@ -287,11 +287,7 @@ export function AppointmentView(props: {
         set_is_loading(false);
     }
 
-    async function close_appointment(data: {
-        appointment: Appointment;
-        close: Closing;
-        account: Account;
-    }) {
+    async function close_appointment(data: AppointmentClosingData) {
         set_is_loading(true);
 
         props.last_customer_save.data = data.appointment.customer;
