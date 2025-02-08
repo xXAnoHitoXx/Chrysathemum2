@@ -125,47 +125,187 @@ export function AppointmentView(props: {
         staleTime: 300000,
     });
 
-    async function book_appointments() {
-        set_is_loading(true);
+    class AppViewQuery {
+        static async book_appointments() {
+            set_is_loading(true);
 
-        const app = phantoms[0];
-        if (app != undefined) props.last_customer_save.data = app.customer;
+            const app = phantoms[0];
+            if (app != undefined) props.last_customer_save.data = app.customer;
 
-        const response = await fetch(app_view_appointment + date.toString(), {
-            method: Method.POST,
-            body: JSON.stringify(
-                phantoms.map((appointment) => ({
-                    customer: appointment.customer,
-                    date: date.toString(),
-                    time: appointment.time,
-                    duration: appointment.duration,
-                    details: appointment.details,
-                    salon: "",
-                })),
-            ),
-        });
+            const response = await fetch(
+                app_view_appointment + date.toString(),
+                {
+                    method: Method.POST,
+                    body: JSON.stringify(
+                        phantoms.map((appointment) => ({
+                            customer: appointment.customer,
+                            date: date.toString(),
+                            time: appointment.time,
+                            duration: appointment.duration,
+                            details: appointment.details,
+                            salon: "",
+                        })),
+                    ),
+                },
+            );
 
-        if (response.status === 200) {
-            const appointments = z
-                .array(Appointment)
-                .safeParse(await response.json());
+            if (response.status === 200) {
+                const appointments = z
+                    .array(Appointment)
+                    .safeParse(await response.json());
 
-            if (appointments.success) {
-                if (
-                    appointments.data.length > 0 &&
-                    appointments.data[0] != undefined &&
-                    appointments.data[0].date === current_date().toString()
-                ) {
-                    save_current_state(appointments.data);
+                if (appointments.success) {
+                    if (
+                        appointments.data.length > 0 &&
+                        appointments.data[0] != undefined &&
+                        appointments.data[0].date === current_date().toString()
+                    ) {
+                        save_current_state(appointments.data);
+                    }
+                    set_appointments(appointments.data);
                 }
-                set_appointments(appointments.data);
+            } else {
+                AppViewQuery.reload_appointments();
             }
-        } else {
-            reload_appointments();
+
+            to_default_state();
+            set_is_loading(false);
         }
 
-        to_default_state();
-        set_is_loading(false);
+        static async reload_appointments() {
+            set_is_loading(true);
+
+            const response = await fetch(app_view_appointment + date, {
+                method: Method.GET,
+                cache: "no-store",
+            });
+            if (response.status === 200) {
+                const appointments = z
+                    .array(Appointment)
+                    .safeParse(await response.json());
+
+                if (appointments.success) {
+                    if (
+                        appointments.data.length > 0 &&
+                        appointments.data[0] != undefined &&
+                        appointments.data[0].date === current_date().toString()
+                    ) {
+                        save_current_state(appointments.data);
+                    }
+                    set_appointments(appointments.data);
+                }
+            }
+
+            set_is_loading(false);
+        }
+
+        static async delete_appointments() {
+            if (current_state !== State.AppEdit) return;
+
+            set_is_loading(true);
+
+            const app = phantoms[0];
+            if (app != undefined) props.last_customer_save.data = app.customer;
+
+            const response = await fetch(app_view_appointment + date, {
+                method: Method.DELETE,
+                cache: "no-cache",
+                body: JSON.stringify(phantoms),
+            });
+
+            if (response.status === 200) {
+                const appointments = z
+                    .array(Appointment)
+                    .safeParse(await response.json());
+
+                if (appointments.success) {
+                    if (
+                        appointments.data.length > 0 &&
+                        appointments.data[0] != undefined &&
+                        appointments.data[0].date === current_date().toString()
+                    ) {
+                        save_current_state(appointments.data);
+                    }
+                    set_appointments(appointments.data);
+                }
+            } else {
+                AppViewQuery.reload_appointments();
+            }
+
+            set_is_loading(false);
+            to_default_state();
+        }
+
+        static async update_appointments(appointments: Appointment[]) {
+            if (appointments.length === 0) return;
+
+            set_is_loading(true);
+
+            const app = appointments[0];
+            if (app != undefined) props.last_customer_save.data = app.customer;
+
+            const response = await fetch(app_view_appointment + date, {
+                method: Method.PATCH,
+                cache: "no-store",
+                body: JSON.stringify(appointments),
+            });
+
+            if (response.status === 200) {
+                const appointments = z
+                    .array(Appointment)
+                    .safeParse(await response.json());
+
+                if (appointments.success) {
+                    if (
+                        appointments.data.length > 0 &&
+                        appointments.data[0] != undefined &&
+                        appointments.data[0].date === current_date().toString()
+                    ) {
+                        save_current_state(appointments.data);
+                    }
+                    set_appointments(appointments.data);
+                }
+            } else {
+                AppViewQuery.reload_appointments();
+            }
+
+            to_default_state();
+            set_is_loading(false);
+        }
+
+        static async close_appointment(data: AppointmentClosingData) {
+            set_is_loading(true);
+
+            props.last_customer_save.data = data.appointment.customer;
+
+            const response = await fetch(app_view_appointment + date, {
+                method: Method.PUT,
+                cache: "no-cache",
+                body: JSON.stringify(data),
+            });
+
+            if (response.status === 200) {
+                const appointments = z
+                    .array(Appointment)
+                    .safeParse(await response.json());
+
+                if (appointments.success) {
+                    if (
+                        appointments.data.length > 0 &&
+                        appointments.data[0] != undefined &&
+                        appointments.data[0].date === current_date().toString()
+                    ) {
+                        save_current_state(appointments.data);
+                    }
+                    set_appointments(appointments.data);
+                }
+            } else {
+                AppViewQuery.reload_appointments();
+            }
+
+            to_default_state();
+            set_is_loading(false);
+        }
     }
 
     function trigger_redraw() {
@@ -178,147 +318,12 @@ export function AppointmentView(props: {
         set_state(State.Default);
     }
 
-    async function reload_appointments() {
-        set_is_loading(true);
-
-        const response = await fetch(app_view_appointment + date, {
-            method: Method.GET,
-            cache: "no-store",
-        });
-        if (response.status === 200) {
-            const appointments = z
-                .array(Appointment)
-                .safeParse(await response.json());
-
-            if (appointments.success) {
-                if (
-                    appointments.data.length > 0 &&
-                    appointments.data[0] != undefined &&
-                    appointments.data[0].date === current_date().toString()
-                ) {
-                    save_current_state(appointments.data);
-                }
-                set_appointments(appointments.data);
-            }
-        }
-
-        set_is_loading(false);
-    }
-
-    async function delete_appointments() {
-        if (current_state !== State.AppEdit) return;
-
-        set_is_loading(true);
-
-        const app = phantoms[0];
-        if (app != undefined) props.last_customer_save.data = app.customer;
-
-        const response = await fetch(app_view_appointment + date, {
-            method: Method.DELETE,
-            cache: "no-cache",
-            body: JSON.stringify(phantoms),
-        });
-
-        if (response.status === 200) {
-            const appointments = z
-                .array(Appointment)
-                .safeParse(await response.json());
-
-            if (appointments.success) {
-                if (
-                    appointments.data.length > 0 &&
-                    appointments.data[0] != undefined &&
-                    appointments.data[0].date === current_date().toString()
-                ) {
-                    save_current_state(appointments.data);
-                }
-                set_appointments(appointments.data);
-            }
-        } else {
-            reload_appointments();
-        }
-
-        set_is_loading(false);
-        to_default_state();
-    }
-
     async function closing_update(appointment: Appointment) {
-        return update_appointments([appointment]);
+        return AppViewQuery.update_appointments([appointment]);
     }
 
     async function app_edit_confirm() {
-        return update_appointments(changes);
-    }
-
-    async function update_appointments(appointments: Appointment[]) {
-        if (appointments.length === 0) return;
-
-        set_is_loading(true);
-
-        const app = appointments[0];
-        if (app != undefined) props.last_customer_save.data = app.customer;
-
-        const response = await fetch(app_view_appointment + date, {
-            method: Method.PATCH,
-            cache: "no-store",
-            body: JSON.stringify(appointments),
-        });
-
-        if (response.status === 200) {
-            const appointments = z
-                .array(Appointment)
-                .safeParse(await response.json());
-
-            if (appointments.success) {
-                if (
-                    appointments.data.length > 0 &&
-                    appointments.data[0] != undefined &&
-                    appointments.data[0].date === current_date().toString()
-                ) {
-                    save_current_state(appointments.data);
-                }
-                set_appointments(appointments.data);
-            }
-        } else {
-            reload_appointments();
-        }
-
-        to_default_state();
-        set_is_loading(false);
-    }
-
-    async function close_appointment(data: AppointmentClosingData) {
-        set_is_loading(true);
-
-        props.last_customer_save.data = data.appointment.customer;
-
-        const response = await fetch(app_view_appointment + date, {
-            method: Method.PUT,
-            cache: "no-cache",
-            body: JSON.stringify(data),
-        });
-
-        if (response.status === 200) {
-            const appointments = z
-                .array(Appointment)
-                .safeParse(await response.json());
-
-            if (appointments.success) {
-                if (
-                    appointments.data.length > 0 &&
-                    appointments.data[0] != undefined &&
-                    appointments.data[0].date === current_date().toString()
-                ) {
-                    save_current_state(appointments.data);
-                }
-                set_appointments(appointments.data);
-            }
-        } else {
-            reload_appointments();
-        }
-
-        to_default_state();
-        set_is_loading(false);
+        return AppViewQuery.update_appointments(changes);
     }
 
     return (
@@ -338,7 +343,7 @@ export function AppointmentView(props: {
                             phantom={phantoms}
                             set_phantom_appointments={set_phantoms}
                             on_change={trigger_redraw}
-                            on_complete={book_appointments}
+                            on_complete={AppViewQuery.book_appointments}
                         />
                     ) : current_state === State.AppEdit ? (
                         <AppEdit
@@ -364,7 +369,7 @@ export function AppointmentView(props: {
                             appointment={phantoms[0]}
                             on_change={trigger_redraw}
                             on_update={closing_update}
-                            on_close={close_appointment}
+                            on_close={AppViewQuery.close_appointment}
                         />
                     ) : null}
                 </div>
@@ -451,7 +456,7 @@ export function AppointmentView(props: {
                                 <Button
                                     color="danger"
                                     isLoading={is_loading}
-                                    onPress={delete_appointments}
+                                    onPress={AppViewQuery.delete_appointments}
                                 >
                                     Delete
                                 </Button>
@@ -465,7 +470,7 @@ export function AppointmentView(props: {
                                     current_state === State.Booking
                                         ? to_default_state
                                         : () => {
-                                              reload_appointments();
+                                              AppViewQuery.reload_appointments();
                                               to_default_state();
                                           }
                                 }
