@@ -5,7 +5,7 @@ import { TechnicianQuery } from "../technician/technician_queries";
 import { TechnicianCreationInfo } from "../technician/type_def";
 import { wipe_test_data } from "../test_util";
 import { AppointmentQuery } from "./appointment_queries";
-import { Appointment, AppointmentCreationInfo } from "./type_def";
+import { AppointmentCreationInfo, AppointmentUpdate } from "./type_def";
 
 const test_suit = "appointment_queries_tests";
 
@@ -153,12 +153,15 @@ test("appointment update", async () => {
         fail();
     }
 
-    const update: Appointment = {
-        ...appointment,
-        technician: tech,
-        time: 11,
-        details: "lol",
-        duration: 3,
+    const update: AppointmentUpdate = {
+        appointment: {
+            ...appointment,
+            technician: tech,
+            time: 11,
+            details: "lol",
+            duration: 3,
+        },
+        new_date: appointment.date,
     };
 
     const updated = await AppointmentQuery.update_appointment.call(
@@ -171,7 +174,7 @@ test("appointment update", async () => {
         fail();
     }
 
-    const entries = await AppointmentQuery.retrieve_appointments_on_date.call(
+    let entries = await AppointmentQuery.retrieve_appointments_on_date.call(
         {
             date: appointment.date,
             salon: appointment.salon,
@@ -186,7 +189,62 @@ test("appointment update", async () => {
 
     expect(entries).toHaveLength(1);
     expect(entries).not.toContainEqual(appointment);
-    expect(entries).toContainEqual(update);
+    expect(entries).toContainEqual(update.appointment);
+
+    const date_change: AppointmentUpdate = {
+        appointment: update.appointment,
+        new_date: "2021-11-25",
+    };
+
+    const date_changed = await AppointmentQuery.update_appointment.call(
+        date_change,
+        test_db,
+    );
+
+    if (is_data_error(date_changed)) {
+        date_changed.log();
+        fail();
+    }
+
+    entries = await AppointmentQuery.retrieve_appointments_on_date.call(
+        {
+            date: appointment.date,
+            salon: appointment.salon,
+        },
+        test_db,
+    );
+
+    if (is_data_error(entries)) {
+        entries.log();
+        fail();
+    }
+
+    expect(entries).toHaveLength(0);
+    expect(entries).not.toContainEqual(appointment);
+    expect(entries).not.toContainEqual(update.appointment);
+    expect(entries).not.toContainEqual(date_change.appointment);
+
+    entries = await AppointmentQuery.retrieve_appointments_on_date.call(
+        {
+            date: date_change.new_date,
+            salon: appointment.salon,
+        },
+        test_db,
+    );
+
+    if (is_data_error(entries)) {
+        entries.log();
+        fail();
+    }
+
+    expect(entries).toHaveLength(1);
+    expect(entries).not.toContainEqual(appointment);
+    expect(entries).not.toContainEqual(update.appointment);
+    expect(entries).toContainEqual({
+        ...date_change.appointment,
+        date: date_change.new_date,
+        id: entries[0]!.id,
+    });
 });
 
 test("load appointments of date", async () => {

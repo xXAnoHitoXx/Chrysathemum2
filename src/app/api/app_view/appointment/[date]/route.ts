@@ -198,14 +198,22 @@ export async function PATCH(
     }
 
     const query = await array_query(AppointmentQuery.update_appointment)
-            .chain<AppointmentRecordID>(() => {
+        .chain<AppointmentRecordID>(() => {
+            return {
+                salon: salon,
+                date: date,
+            };
+        })
+        .chain(AppointmentQuery.retrieve_appointments_on_date)
+        .call(
+            req.data.map((app) => {
                 return {
-                    salon: salon,
-                    date: date,
+                    appointment: app,
+                    new_date: date,
                 };
-            })
-            .chain(AppointmentQuery.retrieve_appointments_on_date)
-            .call(req.data, FireDB.active());
+            }),
+            FireDB.active(),
+        );
 
     if (is_data_error(query)) {
         query.report();
