@@ -7,7 +7,7 @@ import {
 } from "~/util/appointment_time";
 import { format_phone_number } from "~/util/phone_format";
 import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
-import { Hour } from "./type_def";
+import { Hour } from "../type_def";
 
 function timestamp(time: number, hours: Hour, on_click: () => void) {
     const stamp =
@@ -48,7 +48,7 @@ function timestamp(time: number, hours: Hour, on_click: () => void) {
     );
 }
 
-export function Board(props: {
+export function AppointmentBoard(props: {
     appointments: Appointment[];
     on_appoitment_select: (appointment: Appointment) => void;
     on_time_stamp: (time: number) => void;

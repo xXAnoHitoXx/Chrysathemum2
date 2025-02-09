@@ -2,25 +2,16 @@
 
 import { Dispatch, SetStateAction, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { BoardDatePicker } from "../_components/date_picker";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@heroui/button";
-import { Booking } from "./_appointment_view/booking_form";
-import { AppEdit } from "./_appointment_view/app_edit";
-import { Board } from "./_appointment_view/board";
 import { LastCustomerSave } from "../_components/customer_search";
-import { ClosingTask } from "./_appointment_view/closing";
 import { AppViewActivity } from "../_components/app_view_page";
 import { Appointment } from "~/server/appointment/type_def";
 import { z } from "zod";
 import { current_date } from "~/util/date";
 import { Technician } from "~/server/technician/type_def";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
-import {
-    BOARD_STARTING_HOUR,
-    TIME_INTERVALS_PER_HOUR,
-    to_1_index,
-} from "~/util/appointment_time";
+import { MainTask } from "./_appointment_view/tasks/main";
+import { BookingTask } from "./_appointment_view/tasks/booking";
 
 export type AppointmentViewSaveState = {
     data: Appointment[];
@@ -31,7 +22,7 @@ export const appointment_view_default_save: AppointmentViewSaveState = {
 };
 
 enum State {
-    Default = "Default",
+    Main = "Main",
     Booking = "Booking",
     AppEdit = "Edit",
     Closing = "Closing",
@@ -86,7 +77,7 @@ export function AppointmentView(props: {
     }
 
     // general
-    const [current_state, set_state] = useState(State.Default);
+    const [current_state, set_state] = useState(State.Main);
     const [date, set_date] = useState(current_date());
     const [appointments, set_appointments] = useAppointmentList(
         props.save_state,
@@ -94,12 +85,7 @@ export function AppointmentView(props: {
         date.toString(),
     );
 
-    const [phantoms, set_phantoms] = useState<Appointment[]>([]);
     const [changes, set_changes] = useState<Appointment[]>([]);
-    const [start_time, set_start_time] = useState(1);
-
-    const [is_loading, set_is_loading] = useState(false);
-
     const [technicians, set_tech] = useState<Technician[]>([]);
 
     useQuery({
@@ -126,18 +112,13 @@ export function AppointmentView(props: {
     });
 
     class AppViewQuery {
-        static async book_appointments() {
-            set_is_loading(true);
-
-            const app = phantoms[0];
-            if (app != undefined) props.last_customer_save.data = app.customer;
-
+        static async book_appointments(apps: Appointment[]) {
             const response = await fetch(
                 app_view_appointment + date.toString(),
                 {
                     method: Method.POST,
                     body: JSON.stringify(
-                        phantoms.map((appointment) => ({
+                        apps.map((appointment) => ({
                             customer: appointment.customer,
                             date: date.toString(),
                             time: appointment.time,
@@ -168,13 +149,10 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            to_default_state();
-            set_is_loading(false);
+            switch_to_main_task();
         }
 
         static async reload_appointments() {
-            set_is_loading(true);
-
             const response = await fetch(app_view_appointment + date, {
                 method: Method.GET,
                 cache: "no-store",
@@ -195,22 +173,18 @@ export function AppointmentView(props: {
                     set_appointments(appointments.data);
                 }
             }
-
-            set_is_loading(false);
         }
 
-        static async delete_appointments() {
+        static async delete_appointments(apps: Appointment[]) {
             if (current_state !== State.AppEdit) return;
 
-            set_is_loading(true);
-
-            const app = phantoms[0];
+            const app = apps[0];
             if (app != undefined) props.last_customer_save.data = app.customer;
 
             const response = await fetch(app_view_appointment + date, {
                 method: Method.DELETE,
                 cache: "no-cache",
-                body: JSON.stringify(phantoms),
+                body: JSON.stringify(apps),
             });
 
             if (response.status === 200) {
@@ -232,14 +206,11 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            set_is_loading(false);
-            to_default_state();
+            switch_to_main_task();
         }
 
         static async update_appointments(appointments: Appointment[]) {
             if (appointments.length === 0) return;
-
-            set_is_loading(true);
 
             const app = appointments[0];
             if (app != undefined) props.last_customer_save.data = app.customer;
@@ -269,13 +240,10 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            to_default_state();
-            set_is_loading(false);
+            switch_to_main_task();
         }
 
         static async close_appointment(data: AppointmentClosingData) {
-            set_is_loading(true);
-
             props.last_customer_save.data = data.appointment.customer;
 
             const response = await fetch(app_view_appointment + date, {
@@ -303,19 +271,8 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            to_default_state();
-            set_is_loading(false);
+            switch_to_main_task();
         }
-    }
-
-    function trigger_redraw() {
-        set_appointments([...appointments]);
-    }
-
-    function to_default_state() {
-        set_phantoms([]);
-        set_changes([]);
-        set_state(State.Default);
     }
 
     async function closing_update(appointment: Appointment) {
@@ -326,26 +283,54 @@ export function AppointmentView(props: {
         return AppViewQuery.update_appointments(changes);
     }
 
+    const [appointment_holder, set_appointment_holder] = useState<{
+        appointment: Appointment;
+        edit_mode: boolean;
+    } | null>(null);
+
+    const [booking_time, set_booking_time] = useState<number | null>(null);
+
+    function switch_to_main_task() {
+        set_appointment_holder(null);
+        set_booking_time(null);
+    }
+
+    if (booking_time !== null) {
+        return <BookingTask
+            appointments={appointments}
+            date={date}
+            set_date={set_date}
+            save={props.last_customer_save}
+            hour={booking_time}
+            on_book={AppViewQuery.book_appointments}
+            on_cancel={switch_to_main_task}
+        />
+    }
+
+    return (
+        <MainTask
+            is_admin={props.admin}
+            set_activity={props.set_activity}
+            appointments={appointments}
+            date={date}
+            set_date={set_date}
+            edit_appointment={(app) =>
+                set_appointment_holder({
+                    appointment: app,
+                    edit_mode: true,
+                })
+            }
+            book_appointment_at={set_booking_time}
+        />
+    );
+
+    /*
     return (
         <div className="flex h-full w-full flex-1 flex-col overflow-y-auto">
             {current_state !== State.Default && !is_loading ? (
                 <div
-                    className={
-                        current_state == State.Booking && phantoms.length === 0
-                            ? "flex h-fit w-full justify-start"
-                            : "flex h-1/3 w-full justify-start overflow-y-scroll"
-                    }
-                >
-                    {current_state === State.Booking ? (
-                        <Booking
-                            last_customer_save={props.last_customer_save}
-                            booking_time_hour={start_time}
-                            phantom={phantoms}
-                            set_phantom_appointments={set_phantoms}
-                            on_change={trigger_redraw}
-                            on_complete={AppViewQuery.book_appointments}
-                        />
-                    ) : current_state === State.AppEdit ? (
+                    className={ "flex h-fit w-full justify-start" } >
+                    { current_state === State.AppEdit ? (
                         <AppEdit
                             technicians={technicians}
                             appointments={phantoms}
@@ -383,65 +368,7 @@ export function AppointmentView(props: {
                     "w-full flex-col justify-start gap-2 p-2"
                 }
             >
-                {current_state === State.Default ? (
-                    <div className="flex h-fit w-fit gap-2">
-                        <button
-                            disabled={is_loading}
-                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            onClick={() => {
-                                set_start_time(8);
-                                set_state(State.Booking);
-                            }}
-                        >
-                            Booking
-                        </button>
-                        <button
-                            disabled={is_loading}
-                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            onClick={() => {
-                                props.set_activity(
-                                    AppViewActivity.CustomerView,
-                                );
-                            }}
-                        >
-                            Customer Finder
-                        </button>
-                        {props.admin == true ? (
-                            <>
-                                <button
-                                    disabled={is_loading}
-                                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                    onClick={() => {
-                                        props.set_activity(
-                                            AppViewActivity.DailyRecordView,
-                                        );
-                                    }}
-                                >
-                                    Daily Record
-                                </button>
-                                <button
-                                    disabled={is_loading}
-                                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                    onClick={() => {
-                                        props.set_activity(
-                                            AppViewActivity.SummaryView,
-                                        );
-                                    }}
-                                >
-                                    Summary
-                                </button>
-                                <a href="/salon/nav/">
-                                    <button
-                                        disabled={is_loading}
-                                        className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                    >
-                                        Other Actions
-                                    </button>
-                                </a>
-                            </>
-                        ) : null}
-                    </div>
-                ) : null}
+                {
                 <div className="m-1 flex h-fit w-full flex-row-reverse border-t-2 border-t-sky-900 p-1">
                     <div className="flex w-1/4 flex-row-reverse gap-10">
                         {current_state === State.AppEdit ? (
@@ -468,10 +395,10 @@ export function AppointmentView(props: {
                                 isLoading={is_loading}
                                 onPress={
                                     current_state === State.Booking
-                                        ? to_default_state
+                                        ? switch_to_main_task
                                         : () => {
                                               AppViewQuery.reload_appointments();
-                                              to_default_state();
+                                              switch_to_main_task();
                                           }
                                 }
                             >
@@ -585,4 +512,5 @@ export function AppointmentView(props: {
             </div>
         </div>
     );
+    */
 }

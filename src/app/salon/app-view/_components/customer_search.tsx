@@ -63,9 +63,10 @@ export function CustomerSearch(props: {
         mutationFn: create_customer,
         mutationKey: ["new Customer"],
         onSuccess: (customer: Customer | DataError) => {
-            if (!is_data_error(customer)) 
+            if (!is_data_error(customer)) {
+                props.save.data = customer;
                 props.on_complete(customer);
-            else {
+            } else {
                 customer.log();
                 customer.report();
             }

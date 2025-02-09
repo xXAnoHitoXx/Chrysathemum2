@@ -1,6 +1,5 @@
 import { CalendarDate, RangeValue } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { BoardDateRangePicker } from "../_components/date_range_picker";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
 import { AccountDisplay } from "./_summary/earnings_display";
@@ -8,6 +7,7 @@ import { last_monday, last_sunday } from "~/util/date";
 import { TechnicianEarnings } from "~/server/earnings/type_def";
 import { z } from "zod";
 import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
+import { BoardDateRangePicker } from "~/app/_components/ui_elements/date_range_picker";
 
 export function SummaryView(props: { salon: string }) {
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();

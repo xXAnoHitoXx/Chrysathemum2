@@ -4,12 +4,12 @@ import { CalendarDate, RangeValue } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { BoardDateRangePicker } from "~/app/salon/app-view/_components/date_range_picker";
 import { TechAccountDisplay } from "./tech_account_display";
 import { last_monday, last_sunday } from "~/util/date";
 import { TechnicianEarnings } from "~/server/earnings/type_def";
 import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 import { useRouter } from "next/navigation";
+import { BoardDateRangePicker } from "~/app/_components/ui_elements/date_range_picker";
 
 export function TechSummaryView(props: { salon: string }) {
     const router = useRouter();

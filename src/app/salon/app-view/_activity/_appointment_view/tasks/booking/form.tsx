@@ -1,13 +1,9 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import {
-    CustomerSearch,
-    LastCustomerSave,
-} from "../../_components/customer_search";
-import { Button, Input } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/react";
+import { Dispatch, SetStateAction } from "react";
 import { Appointment } from "~/server/appointment/type_def";
 import {
     DURATION_30_MINUTES,
-    hour_to_time,
     MAX_APPOINTMENT_DURATION,
     MAX_APPOINTMENT_TIME,
     modulus,
@@ -15,15 +11,16 @@ import {
     to_1_index,
 } from "~/util/appointment_time";
 
-export function Booking(props: {
-    last_customer_save: LastCustomerSave;
-    booking_time_hour: number;
-    phantom: Appointment[];
-    set_phantom_appointments: Dispatch<SetStateAction<Appointment[]>>;
-    on_change: () => void;
-    on_complete: () => void;
+export function BookingForm({
+    phantoms,
+    set_phantoms,
+}: {
+    phantoms: Appointment[];
+    set_phantoms: Dispatch<SetStateAction<Appointment[]>>;
 }) {
-    const [is_loading, set_is_loading] = useState(false);
+    function on_change() {
+        set_phantoms((apps) => [...apps]);
+    }
 
     function change_time(app: Appointment, delta: number) {
         let t = to_0_index(app.time) + delta;
@@ -32,8 +29,8 @@ export function Booking(props: {
     }
 
     function change_time_all(delta: number) {
-        for (let i = 0; i < props.phantom.length; i++) {
-            const app = props.phantom[i];
+        for (let i = 0; i < phantoms.length; i++) {
+            const app = phantoms[i];
             if (app != undefined) {
                 change_time(app, delta);
             }
@@ -41,8 +38,8 @@ export function Booking(props: {
     }
 
     function change_duration_all(delta: number) {
-        for (let i = 0; i < props.phantom.length; i++) {
-            const app = props.phantom[i];
+        for (let i = 0; i < phantoms.length; i++) {
+            const app = phantoms[i];
             if (app != undefined) {
                 change_duration(app, delta);
             }
@@ -58,30 +55,7 @@ export function Booking(props: {
         }
     }
 
-    return props.phantom.length === 0 ? (
-        <CustomerSearch
-            save={props.last_customer_save}
-            on_complete={(customer) => {
-                const p: Appointment = {
-                    id: "phantom0",
-                    customer: customer,
-                    date: "",
-                    technician: {
-                        id: "phantom",
-                        name: "Booking",
-                        color: "border-neutral-400 text-neutral-900 bg-red-400",
-                        active: true,
-                        login_claimed: undefined,
-                    },
-                    time: hour_to_time(props.booking_time_hour),
-                    duration: 4,
-                    details: "",
-                    salon: "",
-                };
-                props.set_phantom_appointments([p]);
-            }}
-        />
-    ) : (
+    return (
         <div className="flex w-full flex-col justify-items-start">
             <div className="flex h-fit w-full">
                 <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-900 p-1">
@@ -90,7 +64,7 @@ export function Booking(props: {
                         size="sm"
                         onPress={() => {
                             change_time_all(-1);
-                            props.on_change();
+                            on_change();
                         }}
                     >
                         &lt;
@@ -99,7 +73,7 @@ export function Booking(props: {
                         size="sm"
                         onPress={() => {
                             change_time_all(1);
-                            props.on_change();
+                            on_change();
                         }}
                     >
                         &gt;
@@ -111,7 +85,7 @@ export function Booking(props: {
                         size="sm"
                         onPress={() => {
                             change_duration_all(-1);
-                            props.on_change();
+                            on_change();
                         }}
                     >
                         &lt;
@@ -120,7 +94,7 @@ export function Booking(props: {
                         size="sm"
                         onPress={() => {
                             change_duration_all(1);
-                            props.on_change();
+                            on_change();
                         }}
                     >
                         &gt;
@@ -129,41 +103,24 @@ export function Booking(props: {
                 <div className="flex w-1/3 justify-items-center gap-3 p-1">
                     <Button
                         onPress={() => {
-                            set_is_loading(true);
-                            const p0 = props.phantom[0];
+                            const p0 = phantoms[0];
                             if (p0 != undefined) {
                                 const p: Appointment = {
                                     ...p0,
-                                    id: "phantom" + props.phantom.length,
+                                    id: "phantom" + phantoms.length,
                                 };
 
-                                props.set_phantom_appointments((prev_data) => [
-                                    ...prev_data,
-                                    p,
-                                ]);
+                                set_phantoms((prev_data) => [...prev_data, p]);
                             }
-                            set_is_loading(false);
                         }}
-                        isLoading={is_loading}
                         className="w-1/12 p-1"
                         color="secondary"
                     >
                         +1 more
                     </Button>
-                    <Button
-                        onPress={() => {
-                            set_is_loading(true);
-                            props.on_complete();
-                        }}
-                        isLoading={is_loading}
-                        className="w-1/12 p-1"
-                        color="primary"
-                    >
-                        Confirm
-                    </Button>
                 </div>
             </div>
-            {props.phantom.map((data) => (
+            {phantoms.map((data) => (
                 <div className="flex w-full">
                     <div className="w-1/3 flex-wrap gap-1 border-r-2 border-r-sky-900 p-1">
                         <div className="w-full">Time</div>
@@ -171,7 +128,7 @@ export function Booking(props: {
                             size="sm"
                             onPress={() => {
                                 change_time(data, -1);
-                                props.on_change();
+                                on_change();
                             }}
                         >
                             &lt;
@@ -180,7 +137,7 @@ export function Booking(props: {
                             size="sm"
                             onPress={() => {
                                 change_time(data, 1);
-                                props.on_change();
+                                on_change();
                             }}
                         >
                             &gt;
@@ -192,7 +149,7 @@ export function Booking(props: {
                             size="sm"
                             onPress={() => {
                                 change_duration(data, -1);
-                                props.on_change();
+                                on_change();
                             }}
                         >
                             &lt;
@@ -201,7 +158,7 @@ export function Booking(props: {
                             size="sm"
                             onPress={() => {
                                 change_duration(data, 1);
-                                props.on_change();
+                                on_change();
                             }}
                         >
                             &gt;
@@ -211,11 +168,10 @@ export function Booking(props: {
                         <div className="w-full">Details</div>
                         <Input
                             size="sm"
-                            isDisabled={is_loading}
                             defaultValue={data.details}
                             onValueChange={(details) => {
                                 data.details = details;
-                                props.on_change();
+                                on_change();
                             }}
                         />
                     </div>
