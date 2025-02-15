@@ -1,6 +1,5 @@
 "use client";
 
-import { BoardDatePicker } from "../_components/date_picker";
 import { Button } from "@heroui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Method } from "~/app/api/api_query";
@@ -13,6 +12,7 @@ import { z } from "zod";
 import { quick_sort } from "~/util/sorter/ano_quick_sort";
 import { current_date } from "~/util/date";
 import { Technician } from "~/server/technician/type_def";
+import { BoardDatePicker } from "~/app/_components/ui_elements/date_picker";
 
 const rec_view_transaction = "/api/app_view/daily_record/";
 

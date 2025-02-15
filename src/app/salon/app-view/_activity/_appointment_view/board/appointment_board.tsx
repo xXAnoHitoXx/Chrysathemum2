@@ -67,67 +67,69 @@ export function AppointmentBoard(props: {
     }
 
     return (
-        <div
-            id="AppointmentEntry View"
-            className="w-full flex-1 flex-nowrap overflow-x-scroll border-4 border-sky-900"
-        >
-            <ul className="w-fit h-full grid-cols-appointment-board grid grid-flow-row-dense auto-rows-max">
-                {map(range(BOARD_STARTING_HOUR, BOARD_ENDING_HOUR), (i) =>
-                    timestamp(i, { open: 10, close: 19 }, () => {
-                        props.on_time_stamp(i);
-                    }),
-                )}
-                {props.appointments.map((app: Appointment) => {
-                    const app_color =
-                        app.technician == null
-                            ? "border-violet-500 text-violet-500 bg-slate-950"
-                            : app.technician.color;
-                    const app_col = "col-start-".concat(app.time.toString());
-                    const app_span = "col-span-".concat(
-                        app.duration.toString(),
-                    );
+        <div id="AppointmentEntry View" className="w-full flex-1 px-2">
+            <div className="h-full w-full flex-nowrap overflow-x-scroll border-4 border-sky-900">
+                <ul className="grid h-full w-fit grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
+                    {map(range(BOARD_STARTING_HOUR, BOARD_ENDING_HOUR), (i) =>
+                        timestamp(i, { open: 10, close: 19 }, () => {
+                            props.on_time_stamp(i);
+                        }),
+                    )}
+                    {props.appointments.map((app: Appointment) => {
+                        const app_color =
+                            app.technician == null
+                                ? "border-violet-500 text-violet-500 bg-slate-950"
+                                : app.technician.color;
+                        const app_col = "col-start-".concat(
+                            app.time.toString(),
+                        );
+                        const app_span = "col-span-".concat(
+                            app.duration.toString(),
+                        );
 
-                    return (
-                        <li
-                            className={"border-2".concat(
-                                " ",
-                                app_color,
-                                " ",
-                                app_col,
-                                " ",
-                                app_span,
-                                " ",
-                                "row-span-1 rounded",
-                            )}
-                        >
-                            <button
-                                className="ml-1 h-full w-full text-left text-ellipsis"
-                                onClick={() => {
-                                    props.on_appoitment_select(app);
-                                }}
+                        return (
+                            <li
+                                key = {app.id}
+                                className={"border-2".concat(
+                                    " ",
+                                    app_color,
+                                    " ",
+                                    app_col,
+                                    " ",
+                                    app_span,
+                                    " ",
+                                    "row-span-1 rounded",
+                                )}
                             >
-                                {app.customer.name}
-                                <br />
-                                {app.duration > 2 ? (
-                                    <>
-                                        {format_phone_number(
-                                            app.customer.phone_number,
-                                        )}
-                                        <br />
-                                    </>
-                                ) : null}
-                                {app.technician == null
-                                    ? null
-                                    : short_hand(app.technician.name) +
-                                      " " +
-                                      "-" +
-                                      " "}
-                                {app.details}
-                            </button>
-                        </li>
-                    );
-                })}
-            </ul>
+                                <button
+                                    className="ml-1 h-full w-full text-ellipsis text-left"
+                                    onClick={() => {
+                                        props.on_appoitment_select(app);
+                                    }}
+                                >
+                                    {app.customer.name}
+                                    <br />
+                                    {app.duration > 2 ? (
+                                        <>
+                                            {format_phone_number(
+                                                app.customer.phone_number,
+                                            )}
+                                            <br />
+                                        </>
+                                    ) : null}
+                                    {app.technician == null
+                                        ? null
+                                        : short_hand(app.technician.name) +
+                                          " " +
+                                          "-" +
+                                          " "}
+                                    {app.details}
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
         </div>
     );
 }

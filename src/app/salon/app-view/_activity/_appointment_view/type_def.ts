@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import {
     BOARD_ENDING_HOUR,
     BOARD_STARTING_HOUR,
@@ -9,3 +10,4 @@ export const Hour = z.object({
     close: z.number().lt(BOARD_ENDING_HOUR),
 });
 export type Hour = z.infer<typeof Hour>;
+

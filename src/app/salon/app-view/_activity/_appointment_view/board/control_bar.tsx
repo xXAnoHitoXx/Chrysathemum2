@@ -14,7 +14,7 @@ export function ControlBar({
     return (
         <div className="flex h-fit w-full justify-between p-2">
             <BoardDatePicker date={date} set_date={set_date} />
-            <div className="flex h-fit w-fit flex-row-reverse">{children}</div>
+            <div className="flex h-fit w-fit flex-row-reverse gap-10">{children}</div>
         </div>
     );
 }

@@ -12,6 +12,7 @@ import { Technician } from "~/server/technician/type_def";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
 import { MainTask } from "./_appointment_view/tasks/main";
 import { BookingTask } from "./_appointment_view/tasks/booking";
+import { EditTask } from "./_appointment_view/tasks/edit";
 
 export type AppointmentViewSaveState = {
     data: Appointment[];
@@ -85,8 +86,7 @@ export function AppointmentView(props: {
         date.toString(),
     );
 
-    const [changes, set_changes] = useState<Appointment[]>([]);
-    const [technicians, set_tech] = useState<Technician[]>([]);
+    const [changes, set_changes] = useState<Appointment[]>([]); const [technicians, set_tech] = useState<Technician[]>([]);
 
     useQuery({
         queryFn: async () => {
@@ -101,7 +101,6 @@ export function AppointmentView(props: {
                     .safeParse(await response.json());
 
                 if (technicians.success) {
-                    console.log(JSON.stringify(technicians.data));
                     set_tech(technicians.data);
                 }
             }
@@ -275,14 +274,6 @@ export function AppointmentView(props: {
         }
     }
 
-    async function closing_update(appointment: Appointment) {
-        return AppViewQuery.update_appointments([appointment]);
-    }
-
-    async function app_edit_confirm() {
-        return AppViewQuery.update_appointments(changes);
-    }
-
     const [appointment_holder, set_appointment_holder] = useState<{
         appointment: Appointment;
         edit_mode: boolean;
@@ -295,16 +286,40 @@ export function AppointmentView(props: {
         set_booking_time(null);
     }
 
+    if (appointment_holder !== null) {
+        if (appointment_holder.edit_mode) {
+            return (
+                <EditTask
+                    appointments={appointments}
+                    date={date}
+                    set_date={set_date}
+                    technicians={technicians}
+                    initial_app={appointment_holder.appointment}
+                    on_cancel={switch_to_main_task}
+                    apply_edit={() => {}}
+                    switch_to_closing={() =>
+                        set_appointment_holder({
+                            appointment: appointment_holder.appointment,
+                            edit_mode: false,
+                        })
+                    }
+                />
+            );
+        }
+    }
+
     if (booking_time !== null) {
-        return <BookingTask
-            appointments={appointments}
-            date={date}
-            set_date={set_date}
-            save={props.last_customer_save}
-            hour={booking_time}
-            on_book={AppViewQuery.book_appointments}
-            on_cancel={switch_to_main_task}
-        />
+        return (
+            <BookingTask
+                appointments={appointments}
+                date={date}
+                set_date={set_date}
+                save={props.last_customer_save}
+                hour={booking_time}
+                on_book={AppViewQuery.book_appointments}
+                on_cancel={switch_to_main_task}
+            />
+        );
     }
 
     return (

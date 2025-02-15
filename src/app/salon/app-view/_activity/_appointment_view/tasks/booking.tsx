@@ -59,7 +59,7 @@ export function BookingTask({
     } else {
         return (
             <div className="flex w-full flex-1 flex-col overflow-y-auto">
-                {is_loading ? (
+                {!is_loading ? (
                     <div className="flex h-1/3 w-full justify-start overflow-y-scroll border-b-2 border-b-sky-900">
                         <BookingForm
                             phantoms={phantoms}

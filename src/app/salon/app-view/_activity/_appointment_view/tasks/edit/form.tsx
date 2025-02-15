@@ -6,26 +6,30 @@ import { Technician } from "~/server/technician/type_def";
 import { Appointment } from "~/server/appointment/type_def";
 import { format_phone_number } from "~/util/phone_format";
 
-export function AppEdit(props: {
+export function AppEdit({
+    technicians,
+    appointments,
+    on_deselect,
+    on_change,
+}: {
     technicians: Technician[];
     appointments: Appointment[];
-    date: string;
     on_deselect: (appointment: Appointment) => void;
     on_change: () => void;
 }) {
     function change_time(delta: number) {
-        for (let i = 0; i < props.appointments.length; i++) {
-            const app = props.appointments[i];
+        for (let i = 0; i < appointments.length; i++) {
+            const app = appointments[i];
             if (app != undefined) {
                 app.time = ((app.time + 51 + delta) % 52) + 1;
             }
         }
-        props.on_change();
+        on_change();
     }
 
     function change_duration(delta: number) {
-        for (let i = 0; i < props.appointments.length; i++) {
-            const app = props.appointments[i];
+        for (let i = 0; i < appointments.length; i++) {
+            const app = appointments[i];
             if (app != undefined) {
                 app.duration = app.duration + delta;
                 if (app.duration < 2) {
@@ -35,19 +39,19 @@ export function AppEdit(props: {
                 }
             }
         }
-        props.on_change();
+        on_change();
     }
 
     return (
         <div className="flex w-full flex-wrap">
             <div className="full flex w-full gap-1">
                 <AppDisplay
-                    appointments={props.appointments}
-                    on_click={props.on_deselect}
+                    appointments={appointments}
+                    on_click={on_deselect}
                 />
                 <div className="flex w-full flex-1 flex-col flex-wrap gap-1 border-l-2 border-l-sky-900 p-1">
                     <div className="flex w-full">
-                        {props.appointments.length > 0 ? (
+                        {appointments.length > 0 ? (
                             <>
                                 <div className="w-1/3 flex-wrap border-r-2 border-r-sky-900 p-1">
                                     <div className="w-full">Time</div>
@@ -89,21 +93,21 @@ export function AppEdit(props: {
                                 </div>
                             </>
                         ) : null}
-                        {props.appointments.length === 1 ? (
+                        {appointments.length === 1 ? (
                             <div className="w-1/3 p-1">
                                 <div className="w-full">Details</div>
                                 <Input
                                     size="sm"
                                     defaultValue={
-                                        props.appointments[0]
-                                            ? props.appointments[0].details
+                                        appointments[0]
+                                            ? appointments[0].details
                                             : ""
                                     }
                                     onValueChange={(value) => {
-                                        const app = props.appointments[0];
+                                        const app = appointments[0];
                                         if (app != undefined) {
                                             app.details = value;
-                                            props.on_change();
+                                            on_change();
                                         }
                                     }}
                                 />
@@ -112,11 +116,11 @@ export function AppEdit(props: {
                     </div>
                 </div>
             </div>
-            {props.appointments.length === 1 ? (
+            {appointments.length === 1 ? (
                 <TechSelectBar
-                    technicians={props.technicians}
+                    technicians={technicians}
                     on_select={(tech) => {
-                        const app = props.appointments[0];
+                        const app = appointments[0];
                         if (app != undefined) {
                             if (
                                 app.technician != undefined &&
@@ -126,7 +130,7 @@ export function AppEdit(props: {
                             } else {
                                 app.technician = tech;
                             }
-                            props.on_change();
+                            on_change();
                         }
                     }}
                 />
@@ -135,14 +139,17 @@ export function AppEdit(props: {
     );
 }
 
-function AppDisplay(props: {
+function AppDisplay({
+    appointments,
+    on_click,
+}:{
     appointments: Appointment[];
     on_click: (appointment: Appointment) => void;
 }) {
     return (
         <div className="h-fit w-1/3 overflow-y-auto">
             <div className="grid w-full grid-cols-1 justify-items-center">
-                {props.appointments.map((app) => {
+                {appointments.map((app) => {
                     const app_color =
                         app.technician == null
                             ? NoTechColor
@@ -156,7 +163,7 @@ function AppDisplay(props: {
                                 "m-1 rounded",
                             )}
                             onClick={() => {
-                                props.on_click(app);
+                                on_click(app);
                             }}
                         >
                             {app.customer.name}
