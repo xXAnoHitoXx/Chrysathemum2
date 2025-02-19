@@ -61,7 +61,7 @@ export function MainTask({
                             Summary
                         </button>
                         <a href={"/salon/tech-mana/nav/"}>
-                            <button className="h-20 w-32 rounded-full border-2 border-sky-400">
+                            <button className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100">
                                 Manage Technicians
                             </button>
                         </a>
