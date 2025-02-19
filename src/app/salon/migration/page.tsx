@@ -1,62 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { useCustomerMigration } from "./_sequences/customer";
 
 export default function MigrationStation() {
-    const [is_loading, _] = useState(false);
+    const [is_loading, set_loading] = useState(false);
+    const [messages, set_messages] = useState("");
+    const customer_migration = useCustomerMigration(() => set_loading(false));
 
-    async function migration_sequence() {
-        /*
-        set_is_loading(true);
-        const old_customers = await fetch_query({
-            url: "/api/migration/customer",
-            method: Method.GET,
-            to: to_array(to_old_customer_data),
-            params: null,
-        });
-
-        if (is_data_error(old_customers)) {
-            old_customers.log();
-            return;
-        }
-
-        const batches = ano_iter(old_customers).ichunk(20).collect();
-
-        for (const batch_of_customers of batches) {
-            console.log(batch_of_customers);
-            const res = await Promise.all(
-                batch_of_customers.map((customer) =>
-                    fetch_query({
-                        url: "/api/migration/customer",
-                        method: Method.POST,
-                        params: { data: customer },
-                        to: () => null,
-                    }),
-                ),
-            );
-
-            for (let i = 0; i < res.length; i++) {
-                const result = res[i];
-                if (is_data_error(result)) {
-                    result.log();
-                    result.report();
-                }
-            }
-        }
-        */
+    function reporter(report: string) {
+        set_messages((prev) => prev + report + "\n");
     }
 
     return (
-        <div>
-            <div className="flex h-fit w-full flex-wrap justify-center gap-2 p-4">
+        <>
+            <div className="flex h-fit w-full gap-2 border-b-2 border-b-sky-900 p-2">
                 <button
-                    onClick={migration_sequence}
+                    onClick={async () => {
+                        set_loading(true);
+                        customer_migration.mutate(reporter);
+                    }}
                     disabled={is_loading}
                     className="h-20 w-32 rounded-full border-2 border-sky-400"
                 >
                     Initiate Migration Sequence
                 </button>
             </div>
-        </div>
+            <div className="w-full flex-1 overflow-y-scroll">
+                <p>{messages}</p>
+            </div>
+        </>
     );
 }

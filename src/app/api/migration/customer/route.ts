@@ -22,7 +22,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const query = await array_query(migrate_customer_data).call(
         req.data,
-        FireDB.prod(),
+        FireDB.active(),
     );
 
     if (is_data_error(query)) {
@@ -43,7 +43,7 @@ export async function GET(): Promise<Response> {
 
     const query = await import_customers_from_old_db
         .chain<OldCustomerEntry[]>(report_partial_errors)
-        .call(undefined, FireDB.prod());
+        .call(undefined, FireDB.active());
 
     if (is_data_error(query)) {
         query.report();
