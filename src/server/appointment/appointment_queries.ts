@@ -22,6 +22,7 @@ import {
     AppointmentEntryCreationInfo,
     Appointment,
     CustomerAppointmentIndex,
+    AppointmentUpdate,
 } from "./type_def";
 import { retrieve_customer_entry } from "../customer/components/customer_entry";
 
@@ -33,7 +34,7 @@ export class AppointmentQuery {
         ServerQuery.from_data(params.date)
             .chain<string>((date) => {
                 const validate = z.string().date().safeParse(date);
-                if(validate.success) {
+                if (validate.success) {
                     return validate.data;
                 } else {
                     return new DataError("not a date");
@@ -216,20 +217,56 @@ export class AppointmentQuery {
             .chain<Appointment[]>(report_partial_errors);
     });
 
-    public static update_appointment: ServerQuery<Appointment, void> =
-        ServerQuery.create_query((appointment: Appointment) => {
-            return {
-                id: {
-                    date: appointment.date,
-                    salon: appointment.salon,
-                    entry_id: appointment.id,
-                },
-                technician_id: appointment.technician?.id,
-                time: appointment.time,
-                duration: appointment.duration,
-                details: appointment.details,
-            };
-        }).chain(update_appointment_entry);
+    public static update_appointment: ServerQuery<AppointmentUpdate, void> =
+        ServerQuery.from_builder((update) => {
+            if (update.new_date === update.appointment.date) {
+                return ServerQuery.create_query((update: AppointmentUpdate) => {
+                    return {
+                        id: {
+                            date: update.appointment.date,
+                            salon: update.appointment.salon,
+                            entry_id: update.appointment.id,
+                        },
+                        technician_id: update.appointment.technician?.id,
+                        time: update.appointment.time,
+                        duration: update.appointment.duration,
+                        details: update.appointment.details,
+                    };
+                }).chain(update_appointment_entry);
+            } else {
+                return ServerQuery.create_query((update: AppointmentUpdate) => {
+                    return update.appointment;
+                })
+                    .chain(AppointmentQuery.delete_appointment)
+                    .chain<AppointmentCreationInfo>(() => {
+                        return {
+                            ...update.appointment,
+                            date: update.new_date,
+                        };
+                    })
+                    .chain<Appointment>(AppointmentQuery.create_new_appointment)
+                    .chain<void>(
+                        update.appointment.technician === undefined
+                            ? () => {}
+                            : ServerQuery.create_query(
+                                  (appointment: Appointment) => {
+                                      return {
+                                          id: {
+                                              date: appointment.date,
+                                              salon: appointment.salon,
+                                              entry_id: appointment.id,
+                                          },
+                                          technician_id:
+                                              update.appointment.technician?.id,
+                                          time: appointment.time,
+                                          duration: appointment.duration,
+                                          details: appointment.details,
+                                      };
+                                  },
+                              ).chain(update_appointment_entry),
+                    );
+            }
+        });
 
     public static delete_appointment: ServerQuery<Appointment, void> =
         ServerQuery.from_builder((appointment: Appointment) =>

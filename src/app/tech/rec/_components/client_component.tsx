@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { ReactNode, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { BoardDatePicker } from "~/app/salon/app-view/_components/date_picker";
 import { TransactionDisplay } from "./transaction_display";
 import { Technician } from "~/server/technician/type_def";
 import { current_date } from "~/util/date";
 import { Transaction } from "~/server/transaction/type_def";
 import { z } from "zod";
 import { quick_sort } from "~/util/sorter/ano_quick_sort";
+import { BoardDatePicker } from "~/app/_components/ui_elements/date_picker";
 
 const rec_view_transaction = "/api/tech_view/record/";
 

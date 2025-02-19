@@ -1,35 +1,31 @@
-import { Button, Checkbox, Input } from "@heroui/react";
-import { useState } from "react";
+import { Checkbox, Input } from "@heroui/react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { parse_bill } from "~/app/salon/app-view/_components/bill";
 import { NoTechColor, TaxRate } from "~/constants";
-import { parse_bill } from "../../_components/bill";
 import { Appointment } from "~/server/appointment/type_def";
-import { AppointmentClosingData  } from "~/server/transaction/type_def";
+import { AppointmentClosingData } from "~/server/transaction/type_def";
 import { format_phone_number } from "~/util/phone_format";
 
-export function ClosingTask(props: {
+export function ClosingForm(props: {
     appointment: Appointment;
-    on_close: (data: AppointmentClosingData) => void;
-    on_update: (appointment: Appointment) => void;
+    set_closing_data: Dispatch<SetStateAction<AppointmentClosingData | null>>;
     on_change: () => void;
 }) {
-    const [is_loading, set_is_loading] = useState(false);
-    const [is_bill_valid, set_is_bill_valid] = useState(true);
     const [details, set_details] = useState(props.appointment.details);
     const [discounted, set_discounted] = useState(false);
-    const [closing_data, set_closing_data] = useState<number[]>([]);
 
     function validate_bill(value: string) {
         const bill = parse_bill(value);
 
         if (bill.values[0] == undefined || bill.values[1] == undefined) {
-            set_is_bill_valid(false);
+            props.set_closing_data(()=>null);
             return;
         }
 
-        const data: number[] = [];
+        const closing_data: number[] = [];
 
-        data.push(bill.values[0]);
-        data.push(bill.values[1]);
+        closing_data.push(bill.values[0]);
+        closing_data.push(bill.values[1]);
 
         if (bill.note != undefined) {
             const total = discounted
@@ -37,61 +33,50 @@ export function ClosingTask(props: {
                 : Math.round(bill.values[0] * TaxRate) + bill.values[1];
             switch (bill.note) {
                 case "g":
-                    data.push(0);
+                    closing_data.push(0);
                 case "c":
-                    data.push(total);
+                    closing_data.push(total);
             }
         } else {
             let i = 2;
             let v = bill.values[i];
             while (v != undefined) {
-                data.push(v);
+                closing_data.push(v);
                 i++;
                 v = bill.values[i];
             }
         }
 
-        set_closing_data(data);
-        set_is_bill_valid(true);
-    }
+        let amount: number =
+            closing_data[0] == undefined ? 0 : closing_data[0];
 
-    async function close_appointment() {
-        set_is_loading(true);
-
-        if (is_bill_valid) {
-            let amount: number =
-                closing_data[0] == undefined ? 0 : closing_data[0];
-
-            if (discounted) {
-                amount = Math.round(amount / TaxRate);
-            }
-
-            const tip = closing_data[1] == undefined ? 0 : closing_data[1];
-            const cash = closing_data[2] == undefined ? 0 : closing_data[2];
-            const gift = closing_data[3] == undefined ? 0 : closing_data[3];
-            const discount = closing_data[4] == undefined ? 0 : closing_data[4];
-
-            props.on_close({
-                appointment: props.appointment,
-                account: {
-                    amount: amount,
-                    tip: tip,
-                },
-                closing: {
-                    cash: cash,
-                    gift: gift,
-                    discount: discount,
-                    machine:
-                        Math.round(amount * TaxRate) +
-                        tip -
-                        cash -
-                        gift -
-                        discount,
-                },
-            });
-        } else {
-            props.on_update(props.appointment);
+        if (discounted) {
+            amount = Math.round(amount / TaxRate);
         }
+
+        const tip = closing_data[1] == undefined ? 0 : closing_data[1];
+        const cash = closing_data[2] == undefined ? 0 : closing_data[2];
+        const gift = closing_data[3] == undefined ? 0 : closing_data[3];
+        const discount = closing_data[4] == undefined ? 0 : closing_data[4];
+
+        props.set_closing_data({
+            appointment: props.appointment,
+            account: {
+                amount: amount,
+                tip: tip,
+            },
+            closing: {
+                cash: cash,
+                gift: gift,
+                discount: discount,
+                machine:
+                    Math.round(amount * TaxRate) +
+                    tip -
+                    cash -
+                    gift -
+                    discount,
+            },
+        });
     }
 
     const app_color =
@@ -127,7 +112,6 @@ export function ClosingTask(props: {
                     </button>
                 </div>
                 <Checkbox
-                    isDisabled={is_loading}
                     size="lg"
                     radius="md"
                     color="primary"
@@ -137,7 +121,6 @@ export function ClosingTask(props: {
                     <div className="text-black">-15%</div>
                 </Checkbox>
                 <Input
-                    isDisabled={is_loading}
                     className="flex-1"
                     label="Bill: amount tip cash gift discount"
                     onValueChange={validate_bill}
@@ -145,7 +128,6 @@ export function ClosingTask(props: {
             </div>
             <div className="p-2">
                 <Input
-                    isDisabled={is_loading}
                     className="w-full"
                     label="details"
                     value={details}
@@ -155,15 +137,6 @@ export function ClosingTask(props: {
                         props.on_change();
                     }}
                 />
-            </div>
-            <div className="p- flex w-full flex-row-reverse">
-                <Button
-                    isLoading={is_loading}
-                    color="primary"
-                    onPress={close_appointment}
-                >
-                    Confirm
-                </Button>
             </div>
         </div>
     );

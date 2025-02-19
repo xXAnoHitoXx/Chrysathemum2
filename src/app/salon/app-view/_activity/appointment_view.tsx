@@ -2,25 +2,18 @@
 
 import { Dispatch, SetStateAction, useState } from "react";
 import { Method } from "~/app/api/api_query";
-import { BoardDatePicker } from "../_components/date_picker";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@heroui/button";
-import { Booking } from "./_appointment_view/booking_form";
-import { AppEdit } from "./_appointment_view/app_edit";
-import { Board } from "./_appointment_view/board";
 import { LastCustomerSave } from "../_components/customer_search";
-import { ClosingTask } from "./_appointment_view/closing";
 import { AppViewActivity } from "../_components/app_view_page";
-import { Appointment } from "~/server/appointment/type_def";
+import { Appointment, AppointmentUpdate } from "~/server/appointment/type_def";
 import { z } from "zod";
 import { current_date } from "~/util/date";
 import { Technician } from "~/server/technician/type_def";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
-import {
-    BOARD_STARTING_HOUR,
-    TIME_INTERVALS_PER_HOUR,
-    to_1_index,
-} from "~/util/appointment_time";
+import { MainTask } from "./_appointment_view/tasks/main";
+import { BookingTask } from "./_appointment_view/tasks/booking";
+import { EditTask } from "./_appointment_view/tasks/edit";
+import { ClosingTask } from "./_appointment_view/tasks/closing";
 
 export type AppointmentViewSaveState = {
     data: Appointment[];
@@ -29,13 +22,6 @@ export type AppointmentViewSaveState = {
 export const appointment_view_default_save: AppointmentViewSaveState = {
     data: [],
 };
-
-enum State {
-    Default = "Default",
-    Booking = "Booking",
-    AppEdit = "Edit",
-    Closing = "Closing",
-}
 
 const app_view_appointment = "/api/app_view/appointment/";
 
@@ -86,19 +72,12 @@ export function AppointmentView(props: {
     }
 
     // general
-    const [current_state, set_state] = useState(State.Default);
     const [date, set_date] = useState(current_date());
     const [appointments, set_appointments] = useAppointmentList(
         props.save_state,
         save_current_state,
         date.toString(),
     );
-
-    const [phantoms, set_phantoms] = useState<Appointment[]>([]);
-    const [changes, set_changes] = useState<Appointment[]>([]);
-    const [start_time, set_start_time] = useState(1);
-
-    const [is_loading, set_is_loading] = useState(false);
 
     const [technicians, set_tech] = useState<Technician[]>([]);
 
@@ -115,7 +94,6 @@ export function AppointmentView(props: {
                     .safeParse(await response.json());
 
                 if (technicians.success) {
-                    console.log(JSON.stringify(technicians.data));
                     set_tech(technicians.data);
                 }
             }
@@ -126,18 +104,13 @@ export function AppointmentView(props: {
     });
 
     class AppViewQuery {
-        static async book_appointments() {
-            set_is_loading(true);
-
-            const app = phantoms[0];
-            if (app != undefined) props.last_customer_save.data = app.customer;
-
+        static async book_appointments(apps: Appointment[]) {
             const response = await fetch(
                 app_view_appointment + date.toString(),
                 {
                     method: Method.POST,
                     body: JSON.stringify(
-                        phantoms.map((appointment) => ({
+                        apps.map((appointment) => ({
                             customer: appointment.customer,
                             date: date.toString(),
                             time: appointment.time,
@@ -168,13 +141,10 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            to_default_state();
-            set_is_loading(false);
+            switch_to_main_task();
         }
 
         static async reload_appointments() {
-            set_is_loading(true);
-
             const response = await fetch(app_view_appointment + date, {
                 method: Method.GET,
                 cache: "no-store",
@@ -195,22 +165,16 @@ export function AppointmentView(props: {
                     set_appointments(appointments.data);
                 }
             }
-
-            set_is_loading(false);
         }
 
-        static async delete_appointments() {
-            if (current_state !== State.AppEdit) return;
-
-            set_is_loading(true);
-
-            const app = phantoms[0];
+        static async delete_appointments(apps: Appointment[]) {
+            const app = apps[0];
             if (app != undefined) props.last_customer_save.data = app.customer;
 
             const response = await fetch(app_view_appointment + date, {
                 method: Method.DELETE,
                 cache: "no-cache",
-                body: JSON.stringify(phantoms),
+                body: JSON.stringify(apps),
             });
 
             if (response.status === 200) {
@@ -232,17 +196,15 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            set_is_loading(false);
-            to_default_state();
+            switch_to_main_task();
         }
 
-        static async update_appointments(appointments: Appointment[]) {
+        static async update_appointments(appointments: AppointmentUpdate[]) {
             if (appointments.length === 0) return;
 
-            set_is_loading(true);
-
             const app = appointments[0];
-            if (app != undefined) props.last_customer_save.data = app.customer;
+            if (app != undefined)
+                props.last_customer_save.data = app.appointment.customer;
 
             const response = await fetch(app_view_appointment + date, {
                 method: Method.PATCH,
@@ -269,13 +231,10 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            to_default_state();
-            set_is_loading(false);
+            switch_to_main_task();
         }
 
         static async close_appointment(data: AppointmentClosingData) {
-            set_is_loading(true);
-
             props.last_customer_save.data = data.appointment.customer;
 
             const response = await fetch(app_view_appointment + date, {
@@ -303,286 +262,97 @@ export function AppointmentView(props: {
                 AppViewQuery.reload_appointments();
             }
 
-            to_default_state();
-            set_is_loading(false);
+            switch_to_main_task();
         }
     }
 
-    function trigger_redraw() {
-        set_appointments([...appointments]);
+    const [appointment_holder, set_appointment_holder] = useState<{
+        appointment: Appointment;
+        edit_mode: boolean;
+    } | null>(null);
+
+    const [booking_time, set_booking_time] = useState<number | null>(null);
+
+    function switch_to_main_task() {
+        set_appointment_holder(null);
+        set_booking_time(null);
     }
 
-    function to_default_state() {
-        set_phantoms([]);
-        set_changes([]);
-        set_state(State.Default);
+    if (appointment_holder !== null) {
+        if (appointment_holder.edit_mode) {
+            return (
+                <EditTask
+                    appointments={appointments}
+                    date={date}
+                    set_date={set_date}
+                    technicians={technicians}
+                    initial_app={appointment_holder.appointment}
+                    on_cancel={switch_to_main_task}
+                    apply_edit={(
+                        updates: AppointmentUpdate[],
+                        deletes: Appointment[],
+                    ) => {
+                        if (updates.length > 0)
+                            AppViewQuery.update_appointments(updates);
+                        if (deletes.length > 0)
+                            AppViewQuery.delete_appointments(deletes);
+                    }}
+                />
+            );
+        } else {
+            return (
+                <ClosingTask
+                    appointment={appointment_holder.appointment}
+                    appointments={appointments}
+                    date={date}
+                    set_date={set_date}
+                    to_edit_mode={()=>{
+                        set_appointment_holder((holder) => {
+                            if (holder === null) {
+                                return null;
+                            }
+
+                            return {
+                                appointment: holder.appointment,
+                                edit_mode: true,
+                            }
+                        })
+                    }}
+                    on_close={AppViewQuery.close_appointment}
+                    on_cancel={switch_to_main_task}
+                />
+            );
+        }
     }
 
-    async function closing_update(appointment: Appointment) {
-        return AppViewQuery.update_appointments([appointment]);
-    }
-
-    async function app_edit_confirm() {
-        return AppViewQuery.update_appointments(changes);
+    if (booking_time !== null) {
+        return (
+            <BookingTask
+                appointments={appointments}
+                date={date}
+                set_date={set_date}
+                save={props.last_customer_save}
+                hour={booking_time}
+                on_book={AppViewQuery.book_appointments}
+                on_cancel={switch_to_main_task}
+            />
+        );
     }
 
     return (
-        <div className="flex h-full w-full flex-1 flex-col overflow-y-auto">
-            {current_state !== State.Default && !is_loading ? (
-                <div
-                    className={
-                        current_state == State.Booking && phantoms.length === 0
-                            ? "flex h-fit w-full justify-start"
-                            : "flex h-1/3 w-full justify-start overflow-y-scroll"
-                    }
-                >
-                    {current_state === State.Booking ? (
-                        <Booking
-                            last_customer_save={props.last_customer_save}
-                            booking_time_hour={start_time}
-                            phantom={phantoms}
-                            set_phantom_appointments={set_phantoms}
-                            on_change={trigger_redraw}
-                            on_complete={AppViewQuery.book_appointments}
-                        />
-                    ) : current_state === State.AppEdit ? (
-                        <AppEdit
-                            technicians={technicians}
-                            appointments={phantoms}
-                            date={date.toString()}
-                            on_deselect={(appointment) => {
-                                set_phantoms([
-                                    ...phantoms.filter(
-                                        (app) => app.id !== appointment.id,
-                                    ),
-                                ]);
-                                set_appointments([
-                                    ...appointments,
-                                    appointment,
-                                ]);
-                            }}
-                            on_change={trigger_redraw}
-                        />
-                    ) : current_state === State.Closing &&
-                      phantoms[0] != undefined ? (
-                        <ClosingTask
-                            appointment={phantoms[0]}
-                            on_change={trigger_redraw}
-                            on_update={closing_update}
-                            on_close={AppViewQuery.close_appointment}
-                        />
-                    ) : null}
-                </div>
-            ) : null}
-            <div
-                className={
-                    "flex" +
-                    " " +
-                    (current_state === State.Default ? "h-full" : "h-2/3") +
-                    " " +
-                    "w-full flex-col justify-start gap-2 p-2"
-                }
-            >
-                {current_state === State.Default ? (
-                    <div className="flex h-fit w-fit gap-2">
-                        <button
-                            disabled={is_loading}
-                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            onClick={() => {
-                                set_start_time(8);
-                                set_state(State.Booking);
-                            }}
-                        >
-                            Booking
-                        </button>
-                        <button
-                            disabled={is_loading}
-                            className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            onClick={() => {
-                                props.set_activity(
-                                    AppViewActivity.CustomerView,
-                                );
-                            }}
-                        >
-                            Customer Finder
-                        </button>
-                        {props.admin == true ? (
-                            <>
-                                <button
-                                    disabled={is_loading}
-                                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                    onClick={() => {
-                                        props.set_activity(
-                                            AppViewActivity.DailyRecordView,
-                                        );
-                                    }}
-                                >
-                                    Daily Record
-                                </button>
-                                <button
-                                    disabled={is_loading}
-                                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                    onClick={() => {
-                                        props.set_activity(
-                                            AppViewActivity.SummaryView,
-                                        );
-                                    }}
-                                >
-                                    Summary
-                                </button>
-                                <a href="/salon/nav/">
-                                    <button
-                                        disabled={is_loading}
-                                        className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                                    >
-                                        Other Actions
-                                    </button>
-                                </a>
-                            </>
-                        ) : null}
-                    </div>
-                ) : null}
-                <div className="m-1 flex h-fit w-full flex-row-reverse border-t-2 border-t-sky-900 p-1">
-                    <div className="flex w-1/4 flex-row-reverse gap-10">
-                        {current_state === State.AppEdit ? (
-                            <>
-                                <Button
-                                    color="primary"
-                                    isLoading={is_loading}
-                                    onPress={app_edit_confirm}
-                                >
-                                    Confirm
-                                </Button>
-                                <Button
-                                    color="danger"
-                                    isLoading={is_loading}
-                                    onPress={AppViewQuery.delete_appointments}
-                                >
-                                    Delete
-                                </Button>
-                            </>
-                        ) : null}
-                        {current_state !== State.Default ? (
-                            <Button
-                                color="danger"
-                                isLoading={is_loading}
-                                onPress={
-                                    current_state === State.Booking
-                                        ? to_default_state
-                                        : () => {
-                                              AppViewQuery.reload_appointments();
-                                              to_default_state();
-                                          }
-                                }
-                            >
-                                Cancel
-                            </Button>
-                        ) : null}
-                    </div>
-                    {current_state === State.Booking &&
-                    phantoms.length === 0 ? null : (
-                        <BoardDatePicker date={date} set_date={set_date} />
-                    )}
-                </div>
-
-                {current_state === State.Booking &&
-                phantoms.length === 0 ? null : (
-                    <Board
-                        appointments={[...appointments, ...phantoms]}
-                        on_appoitment_select={
-                            current_state === State.Default ||
-                            current_state === State.Closing
-                                ? (appointment) => {
-                                      if (is_loading) return;
-                                      if (phantoms.includes(appointment)) {
-                                          set_changes([appointment]);
-                                          set_state(State.AppEdit);
-                                      } else {
-                                          if (phantoms.length != 0) {
-                                              set_appointments([
-                                                  ...appointments.filter(
-                                                      (app) =>
-                                                          app.id !==
-                                                          appointment.id,
-                                                  ),
-                                                  ...phantoms,
-                                              ]);
-                                          } else {
-                                              set_appointments([
-                                                  ...appointments.filter(
-                                                      (app) =>
-                                                          app.id !==
-                                                          appointment.id,
-                                                  ),
-                                              ]);
-                                          }
-
-                                          set_phantoms([appointment]);
-                                          if (
-                                              appointment.technician ===
-                                              undefined
-                                          ) {
-                                              set_changes([appointment]);
-                                              set_state(State.AppEdit);
-                                          } else set_state(State.Closing);
-                                      }
-                                  }
-                                : current_state === State.AppEdit
-                                  ? (appointment) => {
-                                        if (is_loading) return;
-                                        if (phantoms.includes(appointment)) {
-                                            set_appointments([
-                                                ...appointments,
-                                                ...phantoms.filter(
-                                                    (app) =>
-                                                        app.id !==
-                                                        appointment.id,
-                                                ),
-                                            ]);
-                                            set_phantoms([appointment]);
-                                            return;
-                                        }
-                                        set_phantoms([
-                                            ...phantoms,
-                                            appointment,
-                                        ]);
-                                        set_changes([...changes, appointment]);
-                                        set_appointments([
-                                            ...appointments.filter(
-                                                (app) =>
-                                                    app.id.localeCompare(
-                                                        appointment.id,
-                                                    ) !== 0,
-                                            ),
-                                        ]);
-                                        set_state(State.AppEdit);
-                                    }
-                                  : () => {}
-                        }
-                        on_time_stamp={(time) => {
-                            if (current_state === State.Default) {
-                                if (is_loading) return;
-                                set_start_time(time);
-                                set_state(State.Booking);
-                                return;
-                            }
-
-                            if (current_state === State.Booking) {
-                                for (let i = 0; i < phantoms.length; i++) {
-                                    const app = phantoms[i];
-                                    if (app != undefined) {
-                                        app.time = to_1_index(
-                                            (time - BOARD_STARTING_HOUR) *
-                                                TIME_INTERVALS_PER_HOUR,
-                                        );
-                                    }
-                                }
-                                set_phantoms([...phantoms]);
-                            }
-                        }}
-                    />
-                )}
-            </div>
-        </div>
+        <MainTask
+            is_admin={props.admin}
+            set_activity={props.set_activity}
+            appointments={appointments}
+            date={date}
+            set_date={set_date}
+            edit_appointment={(app, edit_mode) =>
+                set_appointment_holder({
+                    appointment: app,
+                    edit_mode: edit_mode,
+                })
+            }
+            book_appointment_at={set_booking_time}
+        />
     );
 }

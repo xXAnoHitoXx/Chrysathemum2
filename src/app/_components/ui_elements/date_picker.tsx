@@ -16,7 +16,7 @@ export function BoardDatePicker(props: {
     const [holder, update_date] = useState<CalendarDate>(props.date);
 
     return (
-        <div className="flex w-3/4 flex-wrap gap-1">
+        <div className="flex h-fit w-fit flex-wrap gap-1">
             <Popover
                 placement="bottom"
                 onClose={() => {
@@ -24,7 +24,9 @@ export function BoardDatePicker(props: {
                 }}
             >
                 <PopoverTrigger>
-                    <Button className="w-36" color="default">{holder.toString()}</Button>
+                    <Button className="w-36" color="default">
+                        {holder.toString()}
+                    </Button>
                 </PopoverTrigger>
                 <PopoverContent>
                     <Calendar

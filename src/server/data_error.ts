@@ -15,6 +15,7 @@ export function is_data_error(t: unknown): t is DataError {
     );
 }
 
+//todo add level
 export class DataError {
     private _message: string;
 
