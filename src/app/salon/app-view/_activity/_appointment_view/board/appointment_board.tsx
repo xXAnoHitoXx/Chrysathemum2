@@ -53,12 +53,7 @@ export function AppointmentBoard(props: {
     on_appoitment_select: (appointment: Appointment) => void;
     on_time_stamp: (time: number) => void;
 }) {
-    bubble_sort(props.appointments, (a, b) => {
-        if (a.time !== b.time) return b.time - a.time;
-        if (a.customer.id !== b.customer.id)
-            return a.customer.id.localeCompare(b.customer.id);
-        return a.id.localeCompare(b.id);
-    });
+    bubble_sort(props.appointments, (a, b) => a.id.localeCompare(b.id));
 
     function short_hand(name: string): string {
         const short = name.split(" ")[0];
