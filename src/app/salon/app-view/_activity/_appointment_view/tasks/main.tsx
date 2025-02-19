@@ -29,6 +29,14 @@ export function MainTask({
                 <button
                     className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                     onClick={() => {
+                        book_appointment_at(8);
+                    }}
+                >
+                    Book
+                </button>
+                <button
+                    className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
+                    onClick={() => {
                         set_activity(AppViewActivity.CustomerView);
                     }}
                 >
@@ -68,7 +76,7 @@ export function MainTask({
         );
     }
 
-    const [menu_open, set_menu_open] = useState(false);
+    const [menu_open, set_menu_open] = useState(true);
 
     return (
         <div className="flex w-full flex-1 flex-col overflow-y-auto">
