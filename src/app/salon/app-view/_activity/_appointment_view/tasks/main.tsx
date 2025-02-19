@@ -21,7 +21,7 @@ export function MainTask({
     date: CalendarDate;
     set_date: Dispatch<SetStateAction<CalendarDate>>;
     book_appointment_at: (time: number) => void;
-    edit_appointment: (appointment: Appointment) => void;
+    edit_appointment: (appointment: Appointment, edit_mode: boolean) => void;
 }) {
     function Menu() {
         return (
@@ -29,9 +29,7 @@ export function MainTask({
                 <button
                     className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                     onClick={() => {
-                        set_activity(
-                            AppViewActivity.CustomerView,
-                        );
+                        set_activity(AppViewActivity.CustomerView);
                     }}
                 >
                     Customer Finder
@@ -41,9 +39,7 @@ export function MainTask({
                         <button
                             className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                             onClick={() => {
-                                set_activity(
-                                    AppViewActivity.DailyRecordView,
-                                );
+                                set_activity(AppViewActivity.DailyRecordView);
                             }}
                         >
                             Daily Record
@@ -51,53 +47,45 @@ export function MainTask({
                         <button
                             className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                             onClick={() => {
-                                set_activity(
-                                    AppViewActivity.SummaryView,
-                                );
+                                set_activity(AppViewActivity.SummaryView);
                             }}
                         >
                             Summary
                         </button>
                         <a href="/salon/nav/">
-                            <button
-                                className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
-                            >
+                            <button className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100">
                                 Other Actions
                             </button>
                         </a>
                     </>
-                ): null}
+                ) : null}
             </div>
         );
     }
 
     const [menu_open, set_menu_open] = useState(false);
 
-    return ( 
+    return (
         <div className="flex w-full flex-1 flex-col overflow-y-auto">
-            {menu_open? <Menu/> : null}
+            {menu_open ? <Menu /> : null}
             <ControlBar date={date} set_date={set_date}>
-                { menu_open 
-                    ? <Button
-                            color="danger"
-                            onPress={() => set_menu_open(false)}
-                        >
-                            ^^^
-                        </Button>
-                    : <Button
-                            color="primary"
-                            onPress={() => set_menu_open(true)}
-                        >
-                            vvv
-                        </Button>
-                }
+                {menu_open ? (
+                    <Button color="danger" onPress={() => set_menu_open(false)}>
+                        ^^^
+                    </Button>
+                ) : (
+                    <Button color="primary" onPress={() => set_menu_open(true)}>
+                        vvv
+                    </Button>
+                )}
             </ControlBar>
-            <AppointmentBoard 
+            <AppointmentBoard
                 appointments={appointments}
-                on_appoitment_select={edit_appointment}
+                on_appoitment_select={(app) => {
+                    edit_appointment(app, app.technician === undefined);
+                }}
                 on_time_stamp={book_appointment_at}
             />
         </div>
     );
 }
-

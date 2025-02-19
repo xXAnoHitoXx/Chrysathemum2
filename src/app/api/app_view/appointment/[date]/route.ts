@@ -8,6 +8,7 @@ import {
     Appointment,
     AppointmentCreationInfo,
     AppointmentRecordID,
+    AppointmentUpdate,
 } from "~/server/appointment/type_def";
 import { array_query, ServerQuery } from "~/server/server_query";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
@@ -191,7 +192,7 @@ export async function PATCH(
         return Response.json({ message: salon.message() }, { status: 400 });
     }
 
-    const req = z.array(Appointment).safeParse(await request.json());
+    const req = z.array(AppointmentUpdate).safeParse(await request.json());
 
     if (!req.success) {
         return Response.json({ message: req.error.message }, { status: 400 });
@@ -205,15 +206,7 @@ export async function PATCH(
             };
         })
         .chain(AppointmentQuery.retrieve_appointments_on_date)
-        .call(
-            req.data.map((app) => {
-                return {
-                    appointment: app,
-                    new_date: date,
-                };
-            }),
-            FireDB.active(),
-        );
+        .call(req.data, FireDB.active());
 
     if (is_data_error(query)) {
         query.report();

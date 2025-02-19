@@ -7,6 +7,11 @@ import { ControlBar } from "../board/control_bar";
 import { Button } from "@heroui/button";
 import { AppointmentBoard } from "../board/appointment_board";
 
+type Change = {
+    original_appointment: Appointment;
+    update: AppointmentUpdate;
+};
+
 export function EditTask({
     appointments,
     date,
@@ -15,7 +20,6 @@ export function EditTask({
     initial_app,
     apply_edit,
     on_cancel,
-    switch_to_closing,
 }: {
     appointments: Appointment[];
     date: CalendarDate;
@@ -24,13 +28,8 @@ export function EditTask({
     initial_app: Appointment;
     apply_edit: (updates: AppointmentUpdate[], deletes: Appointment[]) => void;
     on_cancel: () => void;
-    switch_to_closing: () => void;
 }) {
-    type Change = {
-        original_appointment: Appointment;
-        update: AppointmentUpdate;
-    };
-    const initial = {...initial_app}
+    const initial = { ...initial_app };
     // the appointment in focus and change.update.appointment is the same object
     const [focus, set_focus] = useState([initial]);
     const [changes, set_changes] = useState<Change[]>([
@@ -57,21 +56,28 @@ export function EditTask({
             }
         }
 
-        board = board
-            .filter((app) => {
-                const changed = changes_map[app.id];
-                return (
-                    changed === undefined ||
-                    (app.date === changed.update.new_date &&
-                        app.id !== changed.original_appointment.id)
-                );
-            })
-            .map((app) => {
-                const changed = changes_map[app.id];
-                return changed === undefined ? app : changed.update.appointment;
-            });
+        const ids: string[] = [];
+        const apps: Appointment[] = [];
 
-        return [...board, ...focus];
+        for (const app of board) {
+            if (!ids.includes(app.id)) {
+                ids.push(app.id);
+                apps.push(app);
+            }
+        }
+
+        board = apps;
+
+        board = board.map((app) => {
+            const changed = changes_map[app.id];
+            if (changed === undefined) {
+                return app;
+            }
+
+            return changed.update.appointment;
+        });
+
+        return [...board];
     }
 
     function delete_focus() {
@@ -127,16 +133,11 @@ export function EditTask({
                 }}
             />
             <ControlBar date={date} set_date={set_date}>
-                {changes.length === 1 ? (
-                    <div className="flex h-full w-fit border-x-2 border-x-sky-900 px-4">
-                        <Button
-                            color="success"
-                            onPress={() => switch_to_closing()}
-                        >
-                            Closing Menu
-                        </Button>
-                    </div>
-                ) : null}
+                <div className="flex h-full w-fit border-x-2 border-x-sky-900 px-4">
+                    <Button color="warning" onPress={on_cancel}>
+                        Cancel
+                    </Button>
+                </div>
                 <Button
                     color="primary"
                     onPress={() => {
@@ -160,9 +161,6 @@ export function EditTask({
                 </Button>
                 <Button color="danger" onPress={delete_focus}>
                     Delete
-                </Button>
-                <Button color="danger" onPress={on_cancel}>
-                    Cancel
                 </Button>
             </ControlBar>
             <AppointmentBoard
@@ -194,12 +192,16 @@ export function EditTask({
                     );
 
                     if (is_focused) {
-                        if (in_changed !== null) {
-                            in_changed.update.new_date = date.toString();
+                        if (in_changed === null) {
+                            throw new Error("invalid state");
                         }
-                        set_focus((f) =>
-                            f.filter((app) => app.id !== appointment.id),
-                        );
+
+                        if (focus.length > 1) {
+                            in_changed.update.new_date = date.toString();
+                            set_focus((f) =>
+                                f.filter((app) => app.id === appointment.id),
+                            );
+                        }
                     } else {
                         if (in_changed === null) {
                             set_focus((f) => [...f, appointment]);

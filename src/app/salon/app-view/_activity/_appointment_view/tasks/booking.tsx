@@ -68,6 +68,11 @@ export function BookingTask({
                     </div>
                 ) : null}
                 <ControlBar date={date} set_date={set_date}>
+                    <div className="flex h-full w-fit border-x-2 border-x-sky-900 px-4">
+                        <Button color="warning" onPress={on_cancel}>
+                            Cancel
+                        </Button>
+                    </div>
                     <Button
                         color="primary"
                         isLoading={is_loading}
@@ -79,11 +84,21 @@ export function BookingTask({
                         Confirm
                     </Button>
                     <Button
-                        color="danger"
-                        isLoading={is_loading}
-                        onPress={on_cancel}
+                        onPress={() => {
+                            const p0 = phantoms[0];
+                            if (p0 != undefined) {
+                                const p: Appointment = {
+                                    ...p0,
+                                    id: "phantom" + phantoms.length,
+                                };
+
+                                set_phantoms((prev_data) => [...prev_data, p]);
+                            }
+                        }}
+                        className="w-1/12 p-1"
+                        color="secondary"
                     >
-                        Cancel
+                        +1 more
                     </Button>
                 </ControlBar>
                 <AppointmentBoard

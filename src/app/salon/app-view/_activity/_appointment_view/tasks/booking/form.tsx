@@ -100,25 +100,6 @@ export function BookingForm({
                         &gt;
                     </Button>
                 </div>
-                <div className="flex w-1/3 justify-items-center gap-3 p-1">
-                    <Button
-                        onPress={() => {
-                            const p0 = phantoms[0];
-                            if (p0 != undefined) {
-                                const p: Appointment = {
-                                    ...p0,
-                                    id: "phantom" + phantoms.length,
-                                };
-
-                                set_phantoms((prev_data) => [...prev_data, p]);
-                            }
-                        }}
-                        className="w-1/12 p-1"
-                        color="secondary"
-                    >
-                        +1 more
-                    </Button>
-                </div>
             </div>
             {phantoms.map((data) => (
                 <div className="flex w-full">
