@@ -25,7 +25,7 @@ export function MainTask({
 }) {
     function Menu() {
         return (
-            <div className="flex h-fit w-full gap-2">
+            <div className="flex h-fit w-full gap-2 p-2">
                 <button
                     className="h-20 w-32 rounded-full border-2 border-sky-900 bg-sky-100"
                     onClick={() => {
