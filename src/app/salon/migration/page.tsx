@@ -5,11 +5,11 @@ import { useCustomerMigration } from "./_sequences/customer";
 
 export default function MigrationStation() {
     const [is_loading, set_loading] = useState(false);
-    const [messages, set_messages] = useState("");
+    const [messages, set_messages] = useState<string[]>([]);
     const customer_migration = useCustomerMigration(() => set_loading(false));
 
     function reporter(report: string) {
-        set_messages((prev) => prev + report + "\n");
+        set_messages((prev) => [...prev, report]);
     }
 
     return (
@@ -23,11 +23,15 @@ export default function MigrationStation() {
                     disabled={is_loading}
                     className="h-20 w-32 rounded-full border-2 border-sky-400"
                 >
-                    Initiate Migration Sequence
+                    Customer Migration
                 </button>
             </div>
             <div className="w-full flex-1 overflow-y-scroll">
-                <p>{messages}</p>
+                {messages.map((message) => 
+                    <div className="w-full h-fit">
+                        {message}
+                    </div>
+                )}
             </div>
         </>
     );

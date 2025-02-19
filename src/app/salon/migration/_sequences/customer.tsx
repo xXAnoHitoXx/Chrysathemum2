@@ -44,7 +44,7 @@ export function useCustomerMigration(on_complete: () => void) {
             let batch_number = 1;
             for (const batch of batches) {
                 reporter(
-                    `> migrating batch ${batch_number} - ${batch_number}/${customers.data?.length}`,
+                    `> migrating batch ${batch_number} - ${batch_number}/${Math.ceil(customers.data.length / 100)}`,
                 );
                 const migration = await fetch("/api/migration/customer", {
                     method: Method.POST,

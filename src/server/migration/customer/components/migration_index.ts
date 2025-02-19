@@ -3,6 +3,7 @@ import { CUSTOMER_ROOT, MIGRATION_INDEX } from "~/server/fire_db";
 import { DataError } from "~/server/data_error";
 import { ServerQuery } from "~/server/server_query";
 import { z } from "zod";
+import { LegacyCustomerIndex } from "./type_def";
 
 function customer_migration_index(id: string | null = null): string[] {
     return id === null
@@ -11,7 +12,7 @@ function customer_migration_index(id: string | null = null): string[] {
 }
 
 export const create_customer_migration_index: ServerQuery<
-    { customer_id: string; legacy_id: string },
+    LegacyCustomerIndex,
     void
 > = ServerQuery.create_query(async ({ customer_id, legacy_id }, f_db) => {
     try {
@@ -21,7 +22,7 @@ export const create_customer_migration_index: ServerQuery<
         );
     } catch {
         return new DataError(
-            `Creating customer migration index ${legacy_id} : ${customer_id} - db connection error`,
+            `Creating cstomer migration index ${legacy_id} : ${customer_id} - db connection error`,
         );
     }
 });

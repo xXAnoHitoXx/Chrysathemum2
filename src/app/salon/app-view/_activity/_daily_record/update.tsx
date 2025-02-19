@@ -19,7 +19,7 @@ export function TransactionUpdate(props: {
             return;
         }
 
-        const amount: number = bill.values[0];
+        const amount: number = discounted? Math.round(bill.values[0] / TaxRate) : bill.values[0];
         const tip: number = bill.values[1];
 
         let cash = 0;

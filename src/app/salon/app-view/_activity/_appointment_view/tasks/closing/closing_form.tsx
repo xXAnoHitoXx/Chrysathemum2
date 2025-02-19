@@ -18,13 +18,15 @@ export function ClosingForm(props: {
         const bill = parse_bill(value);
 
         if (bill.values[0] == undefined || bill.values[1] == undefined) {
-            props.set_closing_data(()=>null);
+            props.set_closing_data(() => null);
             return;
         }
 
         const closing_data: number[] = [];
 
-        closing_data.push(bill.values[0]);
+        closing_data.push(
+            discounted ? Math.round(bill.values[0] / TaxRate) : bill.values[0],
+        );
         closing_data.push(bill.values[1]);
 
         if (bill.note != undefined) {
@@ -47,8 +49,7 @@ export function ClosingForm(props: {
             }
         }
 
-        let amount: number =
-            closing_data[0] == undefined ? 0 : closing_data[0];
+        let amount: number = closing_data[0] == undefined ? 0 : closing_data[0];
 
         if (discounted) {
             amount = Math.round(amount / TaxRate);
@@ -70,11 +71,7 @@ export function ClosingForm(props: {
                 gift: gift,
                 discount: discount,
                 machine:
-                    Math.round(amount * TaxRate) +
-                    tip -
-                    cash -
-                    gift -
-                    discount,
+                    Math.round(amount * TaxRate) + tip - cash - gift - discount,
             },
         });
     }
