@@ -62,8 +62,8 @@ export function AppointmentBoard(props: {
     }
 
     return (
-        <div id="AppointmentEntry View" className="w-full flex-1 px-2">
-            <div className="h-full w-full flex-nowrap overflow-x-scroll border-4 border-sky-900">
+        <div id="AppointmentEntry View" className="w-full flex-1 m-f overflow-y-scroll overflow-x-scrollborder-4 border-sky-900">
+            <div className="h-full w-full flex-nowrap">
                 <ul className="grid h-full w-fit grid-flow-row-dense auto-rows-max grid-cols-appointment-board">
                     {map(range(BOARD_STARTING_HOUR, BOARD_ENDING_HOUR), (i) =>
                         timestamp(i, { open: 10, close: 19 }, () => {
