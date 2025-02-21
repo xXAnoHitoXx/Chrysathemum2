@@ -1,5 +1,5 @@
 import { Checkbox, Input } from "@heroui/react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parse_bill } from "~/app/salon/app-view/_components/bill";
 import { NoTechColor, TaxRate } from "~/constants";
 import { Appointment } from "~/server/appointment/type_def";
@@ -12,10 +12,11 @@ export function ClosingForm(props: {
     on_change: () => void;
 }) {
     const [details, set_details] = useState(props.appointment.details);
+    const [input, set_input] = useState("");
     const [discounted, set_discounted] = useState(false);
 
-    function validate_bill(value: string) {
-        const bill = parse_bill(value);
+    useEffect(() => {
+        const bill = parse_bill(input);
 
         if (bill.values[0] == undefined || bill.values[1] == undefined) {
             props.set_closing_data(() => null);
@@ -27,6 +28,7 @@ export function ClosingForm(props: {
         closing_data.push(
             discounted ? Math.round(bill.values[0] / TaxRate) : bill.values[0],
         );
+
         closing_data.push(bill.values[1]);
 
         if (bill.note != undefined) {
@@ -49,7 +51,8 @@ export function ClosingForm(props: {
             }
         }
 
-        let amount: number = closing_data[0] == undefined ? 0 : closing_data[0];
+        let amount: number =
+            closing_data[0] === undefined ? 0 : closing_data[0];
 
         if (discounted) {
             amount = Math.round(amount / TaxRate);
@@ -74,7 +77,7 @@ export function ClosingForm(props: {
                     Math.round(amount * TaxRate) + tip - cash - gift - discount,
             },
         });
-    }
+    }, [discounted, input]);
 
     const app_color =
         props.appointment.technician == null
@@ -120,7 +123,7 @@ export function ClosingForm(props: {
                 <Input
                     className="flex-1"
                     label="Bill: amount tip cash gift discount"
-                    onValueChange={validate_bill}
+                    onValueChange={set_input}
                 />
             </div>
             <div className="p-2">
