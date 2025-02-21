@@ -76,7 +76,7 @@ export function AppointmentBoard(props: {
                         {props.appointments.map((app: Appointment) => {
                             const app_color =
                                 app.technician == null
-                                    ? "border-violet-500 text-violet-500 bg-slate-950"
+                                    ? "border-zinc-950 bg-sky-100 text-zinc-950 "
                                     : app.technician.color;
                             const app_col = "col-start-".concat(
                                 app.time.toString(),
