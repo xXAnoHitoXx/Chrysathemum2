@@ -27,6 +27,32 @@ export const create_customer_migration_index: ServerQuery<
     }
 });
 
+export const retrieve_legacy_customer_index: ServerQuery<
+    any,
+    LegacyCustomerIndex[]
+> = ServerQuery.create_query(async (_, f_db) => {
+    const context = `Retrieving legacy index`;
+    let data;
+
+    try {
+        data = await get(f_db.access(customer_migration_index()));
+    } catch {
+        return new DataError(context + " - db connection error");
+    }
+
+    if (!data.exists()) {
+        return [];
+    }
+
+    const index = z.array(LegacyCustomerIndex).safeParse(data.val());
+
+    if (!index.success) {
+        return new DataError(context + " - parsing error");
+    }
+
+    return index.data;
+});
+
 export const retrieve_customer_id_from_legacy_id: ServerQuery<
     { legacy_id: string },
     { customer_id: string | null }
