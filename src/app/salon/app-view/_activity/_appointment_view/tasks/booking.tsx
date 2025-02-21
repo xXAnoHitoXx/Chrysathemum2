@@ -31,8 +31,6 @@ export function BookingTask({
     const [phantoms, set_phantoms] = useState<Appointment[]>([]);
     const [is_loading, set_loading] = useState(false);
 
-    console.log(is_loading);
-
     if (phantoms.length === 0) {
         return (
             <CustomerSearch
@@ -60,9 +58,9 @@ export function BookingTask({
         );
     } else {
         return (
-            <div className="flex w-full flex-1 flex-col">
+            <div className="flex w-full h-full flex-col">
                 {!is_loading ? (
-                    <div className="flex h-1/3 w-full justify-start overflow-y-scroll border-b-2 border-b-sky-900">
+                    <div className="flex h-52 w-full justify-start overflow-y-scroll border-b-2 border-b-sky-900">
                         <BookingForm
                             phantoms={phantoms}
                             set_phantoms={set_phantoms}

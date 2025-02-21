@@ -13,7 +13,7 @@ export default function MigrationStation() {
     }
 
     return (
-        <>
+        <div className="flex flex-col w-full h-full">
             <div className="flex h-fit w-full gap-2 border-b-2 border-b-sky-900 p-2">
                 <button
                     onClick={async () => {
@@ -33,6 +33,6 @@ export default function MigrationStation() {
                     </div>
                 )}
             </div>
-        </>
+        </div>
     );
 }

@@ -136,7 +136,7 @@ export default function ClientSide({
     return (
         <form
             onSubmit={onSubmit}
-            className="flex h-fit w-full flex-wrap justify-start gap-1 p-2"
+            className="flex h-full w-full flex-wrap justify-start gap-1 p-2"
         >
             <h1>At Current Location</h1>
             <div className="flex h-28 w-full flex-nowrap overflow-x-auto border-b-2 border-sky-900">

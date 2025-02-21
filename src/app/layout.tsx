@@ -35,9 +35,11 @@ export default function RootLayout({
             <html lang="en">
                 <body className={`font-sans ${inter.variable}`}>
                     <Providers>
-                        <div className="flex h-lvh w-full flex-col">
+                        <div className="flex h-lvh w-full flex-col overflow-y-auto">
                             <TopNav />
-                            {children}
+                            <div className="w-full flex-1 bg-white">
+                                {children}
+                            </div>
                         </div>
                     </Providers>
                 </body>

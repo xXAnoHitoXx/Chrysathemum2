@@ -90,7 +90,7 @@ export function TechSummaryView(props: { salon: string }) {
     });
 
     return (
-        <div className="flex w-full flex-col">
+        <div className="flex w-full h-full overflow-y-scroll flex-col">
             <div className="flex h-fit w-full justify-between p-2">
                 <BoardDateRangePicker
                     dates={date_range}
