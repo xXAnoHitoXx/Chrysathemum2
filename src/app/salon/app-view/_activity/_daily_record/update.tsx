@@ -1,5 +1,5 @@
 import { Button, Checkbox, Input } from "@heroui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TaxRate } from "~/constants";
 import { parse_bill } from "../../_components/bill";
 import { Transaction } from "~/server/transaction/type_def";
@@ -10,16 +10,19 @@ export function TransactionUpdate(props: {
 }) {
     const [is_loading, set_is_loading] = useState(false);
     const [details, set_details] = useState(props.transaction.details);
+    const [input, set_input] = useState("");
     const [discounted, set_discounted] = useState(false);
 
-    function validate_bill(value: string) {
-        const bill = parse_bill(value);
+    useEffect(() => {
+        const bill = parse_bill(input);
 
         if (bill.values[0] == undefined || bill.values[1] == undefined) {
             return;
         }
 
-        const amount: number = discounted? Math.round(bill.values[0] / TaxRate) : bill.values[0];
+        const amount: number = discounted
+            ? Math.round(bill.values[0] / TaxRate)
+            : bill.values[0];
         const tip: number = bill.values[1];
 
         let cash = 0;
@@ -58,7 +61,7 @@ export function TransactionUpdate(props: {
         props.transaction.cash = cash;
         props.transaction.gift = gift;
         props.transaction.discount = discount;
-    }
+    }, [input, discounted]);
 
     async function close_appointment() {
         set_is_loading(true);
@@ -83,7 +86,7 @@ export function TransactionUpdate(props: {
                     isDisabled={is_loading}
                     className="flex-1"
                     label="Bill: amount tip cash gift discount"
-                    onValueChange={validate_bill}
+                    onValueChange={set_input}
                 />
             </div>
             <div className="p-2">
