@@ -30,7 +30,7 @@ export function ClosingTask({
         useState<AppointmentClosingData | null>(null);
 
     return (
-        <div className="flex w-full flex-1 flex-col overflow-y-auto">
+        <div className="flex w-full h-full flex-col">
             {!is_loading ? (
                 <div className="flex flex-row-reverse items-center gap-2 p-2">
                     <Button color="success" onPress={to_edit_mode}>

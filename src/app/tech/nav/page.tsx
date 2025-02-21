@@ -7,7 +7,7 @@ export default async function Page() {
     if (is_data_error(user)) redirect("/");
 
     return (
-        <div className="flex h-dvh w-full justify-center">
+        <div className="flex h-full w-full justify-center">
             <div className="m-auto grid grid-cols-2 justify-items-center gap-10">
                 <a href={"/tech/rec"}>
                     <button className="h-20 w-32 rounded-full border-4 border-sky-900">

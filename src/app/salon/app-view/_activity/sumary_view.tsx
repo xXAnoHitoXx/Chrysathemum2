@@ -71,7 +71,7 @@ export function SummaryView(props: { salon: string }) {
     });
 
     return (
-        <div className="flex w-full flex-col">
+        <div className="flex h-full w-full flex-col">
             <div className="flex h-fit w-full justify-between p-2">
                 <BoardDateRangePicker
                     dates={date_range}

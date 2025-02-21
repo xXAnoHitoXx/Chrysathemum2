@@ -90,7 +90,7 @@ export function CustomerView(props: {
     );
 
     return (
-        <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="flex flex-col w-full h-full">
             <div className="m-1 flex h-fit w-full flex-row-reverse gap-2 border-b-2 border-b-sky-900 p-2">
                 <Button
                     color="danger"

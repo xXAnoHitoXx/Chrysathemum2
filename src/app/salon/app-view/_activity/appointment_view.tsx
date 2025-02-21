@@ -362,6 +362,7 @@ export function AppointmentView(props: {
             is_admin={props.admin}
             set_activity={props.set_activity}
             appointments={appointments}
+            set_appointments={set_appointments}
             date={date}
             set_date={set_date}
             edit_appointment={(app, edit_mode) =>

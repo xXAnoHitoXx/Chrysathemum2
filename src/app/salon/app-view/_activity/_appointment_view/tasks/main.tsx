@@ -10,6 +10,7 @@ export function MainTask({
     is_admin,
     set_activity,
     appointments,
+    set_appointments,
     date,
     set_date,
     book_appointment_at,
@@ -18,6 +19,7 @@ export function MainTask({
     is_admin: boolean;
     set_activity: Dispatch<SetStateAction<AppViewActivity>>;
     appointments: Appointment[];
+    set_appointments: Dispatch<SetStateAction<Appointment[]>>;
     date: CalendarDate;
     set_date: Dispatch<SetStateAction<CalendarDate>>;
     book_appointment_at: (time: number) => void;
@@ -79,15 +81,27 @@ export function MainTask({
     const [menu_open, set_menu_open] = useState(true);
 
     return (
-        <div className="flex w-full flex-1 flex-col overflow-y-auto">
+        <div className="flex h-full w-full flex-col">
             {menu_open ? <Menu /> : null}
             <ControlBar date={date} set_date={set_date}>
                 {menu_open ? (
-                    <Button color="danger" onPress={() => set_menu_open(false)}>
+                    <Button
+                        color="danger"
+                        onPress={() => {
+                            set_menu_open(false);
+                            set_appointments((prev) => [...prev]);
+                        }}
+                    >
                         ^^^
                     </Button>
                 ) : (
-                    <Button color="primary" onPress={() => set_menu_open(true)}>
+                    <Button
+                        color="primary"
+                        onPress={() => {
+                            set_menu_open(true);
+                            set_appointments((prev) => [...prev]);
+                        }}
+                    >
                         vvv
                     </Button>
                 )}

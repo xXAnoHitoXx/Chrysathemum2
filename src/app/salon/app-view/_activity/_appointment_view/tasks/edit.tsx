@@ -101,7 +101,7 @@ export function EditTask({
     }
 
     return (
-        <div className="flex w-full flex-1 flex-col overflow-y-auto">
+        <div className="flex h-full w-full flex-col">
             <AppEdit
                 technicians={technicians}
                 appointments={focus}

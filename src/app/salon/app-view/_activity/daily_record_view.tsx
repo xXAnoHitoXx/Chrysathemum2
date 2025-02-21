@@ -151,7 +151,7 @@ export function DailyRecordView(props: {
     }
 
     return (
-        <div className="flex w-full flex-1 flex-col">
+        <div className="flex w-full h-full flex-1 flex-col">
             <div className="flex w-full">
                 {editing == null ? (
                     <>
