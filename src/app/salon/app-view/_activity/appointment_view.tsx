@@ -168,11 +168,13 @@ export function AppointmentView(props: {
         }
 
         static async delete_appointments(apps: Appointment[]) {
-            set_appointments((prev) => 
-                prev.filter((app) => 
-                    apps.reduce((b, deleted) => b || deleted.id === app.id),
-                    false
-            ));
+            set_appointments((prev) =>
+                prev.filter(
+                    (app) =>
+                        apps.reduce((b, deleted) => b || deleted.id === app.id),
+                    false,
+                ),
+            );
             const app = apps[0];
             if (app != undefined) props.last_customer_save.data = app.customer;
 
@@ -205,17 +207,19 @@ export function AppointmentView(props: {
         }
 
         static async update_appointments(appointments: AppointmentUpdate[]) {
-            set_appointments((prev) => prev.map((app) => {
-                for (const update of appointments) {
-                    if (update.appointment.id === app.id) {
-                        return {
-                            ...update.appointment,
-                            date: update.new_date,
-                        };
+            set_appointments((prev) =>
+                prev.map((app) => {
+                    for (const update of appointments) {
+                        if (update.appointment.id === app.id) {
+                            return {
+                                ...update.appointment,
+                                date: update.new_date,
+                            };
+                        }
                     }
-                }
-                return app;
-            }))
+                    return app;
+                }),
+            );
 
             if (appointments.length === 0) return;
 
@@ -253,7 +257,9 @@ export function AppointmentView(props: {
 
         static async close_appointment(data: AppointmentClosingData) {
             props.last_customer_save.data = data.appointment.customer;
-            set_appointments((app) => app.filter((app) => app.id !== data.appointment.id))
+            set_appointments((app) =>
+                app.filter((app) => app.id !== data.appointment.id),
+            );
 
             const response = await fetch(app_view_appointment + date, {
                 method: Method.PUT,
@@ -324,7 +330,7 @@ export function AppointmentView(props: {
                     appointments={appointments}
                     date={date}
                     set_date={set_date}
-                    to_edit_mode={()=>{
+                    to_edit_mode={() => {
                         set_appointment_holder((holder) => {
                             if (holder === null) {
                                 return null;
@@ -333,8 +339,8 @@ export function AppointmentView(props: {
                             return {
                                 appointment: holder.appointment,
                                 edit_mode: true,
-                            }
-                        })
+                            };
+                        });
                     }}
                     on_close={AppViewQuery.close_appointment}
                     on_cancel={switch_to_main_task}
