@@ -13,6 +13,7 @@ import { quick_sort } from "~/util/sorter/ano_quick_sort";
 import { current_date } from "~/util/date";
 import { Technician } from "~/server/technician/type_def";
 import { BoardDatePicker } from "~/app/_components/ui_elements/date_picker";
+import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 
 const rec_view_transaction = "/api/app_view/daily_record/";
 
@@ -133,6 +134,22 @@ export function DailyRecordView(props: {
         }
     }
 
+    bubble_sort(technicians, (t1, t2) => {
+        if (t1.name === "NoShow") {
+            return 1;
+        }
+        if (t2.name === "NoShow") {
+            return -1;
+        }
+        if (t1.name === "Sale") {
+            return 1;
+        }
+        if (t2.name === "Sale") {
+            return -1;
+        }
+        return t1.id.localeCompare(t2.name);
+    });
+
     async function update_transaction(transaction: Transaction) {
         if (editing == null) return;
         await fetch(rec_view_transaction + date, {
@@ -140,18 +157,20 @@ export function DailyRecordView(props: {
             cache: "no-store",
             body: JSON.stringify(transaction),
         });
-            
-        set_transactions((transactions) => transactions.map((tr) => {
-            if (tr.id === transaction.id) {
-                return transaction;
-            }
-            return tr;
-        }));
+
+        set_transactions((transactions) =>
+            transactions.map((tr) => {
+                if (tr.id === transaction.id) {
+                    return transaction;
+                }
+                return tr;
+            }),
+        );
         set_editing(null);
     }
 
     return (
-        <div className="flex w-full h-full flex-1 flex-col">
+        <div className="flex h-full w-full flex-1 flex-col">
             <div className="flex w-full">
                 {editing == null ? (
                     <>
