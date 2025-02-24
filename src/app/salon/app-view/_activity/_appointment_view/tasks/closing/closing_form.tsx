@@ -1,7 +1,7 @@
 import { Checkbox, Input } from "@heroui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parse_bill } from "~/app/salon/app-view/_components/bill";
-import { NoTechColor, getTaxRate } from "~/constants";
+import { NoTechColor, getTaxPercent, getTaxRate } from "~/constants";
 import { Appointment } from "~/server/appointment/type_def";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
 import { format_phone_number } from "~/util/phone_format";
@@ -118,7 +118,7 @@ export function ClosingForm(props: {
                     isSelected={discounted}
                     onValueChange={set_discounted}
                 >
-                    <div className="text-black">{`-${getTaxRate(props.appointment.date)}`}</div>
+                    <div className="text-black">{`-${getTaxPercent(props.appointment.date)}`}</div>
                 </Checkbox>
                 <Input
                     className="flex-1"
