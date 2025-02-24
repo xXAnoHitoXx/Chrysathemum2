@@ -219,7 +219,7 @@ export function AccountDisplay(props: { accounts: TechnicianEarnings[] }) {
                         { width: full, text: "Technician" },
                         { width: half, text: "Amount" },
                         { width: half, text: "tip" },
-                        { width: half, text: "tip -15%" },
+                        { width: half, text: "tip payout" },
                     ]}
                 />
 

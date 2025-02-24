@@ -118,7 +118,7 @@ export function ClosingForm(props: {
                     isSelected={discounted}
                     onValueChange={set_discounted}
                 >
-                    <div className="text-black">-15%</div>
+                    <div className="text-black">{`-${getTaxRate(props.appointment.date)}`}</div>
                 </Checkbox>
                 <Input
                     className="flex-1"

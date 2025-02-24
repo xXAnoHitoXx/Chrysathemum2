@@ -41,7 +41,7 @@ export function TechAccountDisplay(props: { accounts: TechnicianEarnings[] }) {
                         { width: half, text: "Date" },
                         { width: full, text: "Amount" },
                         { width: half, text: "tip" },
-                        { width: half, text: "tip -15%" },
+                        { width: half, text: "tip -Tax" },
                     ]}
                 />
 

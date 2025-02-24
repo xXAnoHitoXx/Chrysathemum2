@@ -1,10 +1,11 @@
 import { Button, Checkbox, Input } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { TaxRate } from "~/constants";
+import { getTaxPercent, getTaxRate } from "~/constants";
 import { parse_bill } from "../../_components/bill";
 import { Transaction } from "~/server/transaction/type_def";
 
 export function TransactionUpdate(props: {
+    date: string;
     transaction: Transaction;
     on_complete: (transaction: Transaction) => void;
 }) {
@@ -21,7 +22,7 @@ export function TransactionUpdate(props: {
         }
 
         const amount: number = discounted
-            ? Math.round(bill.values[0] / TaxRate)
+            ? Math.round(bill.values[0] / getTaxRate(props.date))
             : bill.values[0];
         const tip: number = bill.values[1];
 
@@ -32,7 +33,8 @@ export function TransactionUpdate(props: {
         if (bill.note != undefined) {
             const total = discounted
                 ? bill.values[0] + bill.values[1]
-                : Math.round(bill.values[0] * TaxRate) + bill.values[1];
+                : Math.round(bill.values[0] * getTaxRate(props.date)) +
+                  bill.values[1];
             switch (bill.note) {
                 case "g":
                     gift = total;
@@ -80,7 +82,7 @@ export function TransactionUpdate(props: {
                     isSelected={discounted}
                     onValueChange={set_discounted}
                 >
-                    <div className="text-black">-15%</div>
+                    <div className="text-black">{`-${getTaxPercent(props.date)}`}</div>
                 </Checkbox>
                 <Input
                     isDisabled={is_loading}
