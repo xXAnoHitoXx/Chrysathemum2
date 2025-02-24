@@ -61,7 +61,7 @@ export function TechDataDisplay(props: {
     });
 
     return (
-        <div className="flex h-full overflow-y-scroll w-full flex-col">
+        <div className="flex h-full w-full flex-col overflow-y-scroll">
             <div className="flex w-full p-2">
                 <BoardDatePicker date={date} set_date={set_date} />
                 <div className="flex flex-1 flex-row-reverse">
@@ -70,6 +70,7 @@ export function TechDataDisplay(props: {
             </div>
             {isFetching ? <div>LOADING DATA...</div> : null}
             <TransactionDisplay
+                date={date.toString()}
                 technician={props.tech}
                 transactions={transactions}
             />

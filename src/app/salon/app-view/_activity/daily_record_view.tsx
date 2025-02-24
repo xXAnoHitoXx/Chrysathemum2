@@ -78,6 +78,7 @@ export const daily_record_default_save: DailyRecordSaveState = {
 };
 
 function Update(props: {
+    date: string;
     transaction: Transaction;
     on_complete: (transaction: Transaction) => void;
 }) {
@@ -86,6 +87,7 @@ function Update(props: {
     return (
         <>
             <TransactionDisplay
+                date={props.date}
                 on_click={() => {}}
                 transactions={[props.transaction]}
             />
@@ -229,6 +231,7 @@ export function DailyRecordView(props: {
 
             {editing != null ? (
                 <Update
+                    date={date.toString()}
                     transaction={editing}
                     on_complete={update_transaction}
                 />
@@ -289,6 +292,7 @@ export function DailyRecordView(props: {
                 </>
             ) : (
                 <TransactionDisplay
+                    date={date.toString()}
                     on_click={set_editing}
                     transactions={transactions.filter((transaction) =>
                         filter.includes(transaction.technician.id),

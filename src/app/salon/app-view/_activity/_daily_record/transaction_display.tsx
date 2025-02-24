@@ -1,4 +1,4 @@
-import { TaxRate } from "~/constants";
+import { getTaxRate } from "~/constants";
 import { Technician } from "~/server/technician/type_def";
 import { Transaction } from "~/server/transaction/type_def";
 import { ano_iter } from "~/util/anoiter/anoiter";
@@ -7,6 +7,7 @@ import { money } from "~/util/money";
 import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 
 export function TransactionDisplay(props: {
+    date: string;
     transactions: Transaction[];
     on_click: (transaction: Transaction) => void;
 }) {
@@ -44,7 +45,7 @@ export function TransactionDisplay(props: {
                 amount: transaction.amount,
                 tip: transaction.tip,
                 machine:
-                    Math.round(transaction.amount * TaxRate) +
+                    Math.round(transaction.amount * getTaxRate(props.date)) +
                     transaction.tip -
                     transaction.cash -
                     transaction.gift -
@@ -57,7 +58,7 @@ export function TransactionDisplay(props: {
             tech_entry.amount += transaction.amount;
             tech_entry.tip += transaction.tip;
             tech_entry.machine +=
-                Math.round(transaction.amount * TaxRate) +
+                Math.round(transaction.amount * getTaxRate(props.date)) +
                 transaction.tip -
                 transaction.cash -
                 transaction.gift -
@@ -70,7 +71,7 @@ export function TransactionDisplay(props: {
         shop_entry.amount += transaction.amount;
         shop_entry.tip += transaction.tip;
         shop_entry.machine +=
-            Math.round(transaction.amount * TaxRate) +
+            Math.round(transaction.amount * getTaxRate(props.date)) +
             transaction.tip -
             transaction.cash -
             transaction.gift -
@@ -158,7 +159,10 @@ export function TransactionDisplay(props: {
                             {
                                 width: half,
                                 text: money(
-                                    Math.round(shop_entry.amount * TaxRate) +
+                                    Math.round(
+                                        shop_entry.amount *
+                                            getTaxRate(props.date),
+                                    ) +
                                         shop_entry.tip -
                                         shop_entry.cash -
                                         shop_entry.gift -
@@ -207,7 +211,8 @@ export function TransactionDisplay(props: {
                                         width: half,
                                         text: money(
                                             Math.round(
-                                                transaction.amount * TaxRate,
+                                                transaction.amount *
+                                                    getTaxRate(props.date),
                                             ) +
                                                 transaction.tip -
                                                 transaction.cash -
@@ -246,7 +251,7 @@ function Row(props: {
         <button
             onClick={props.on_click}
             className={
-                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
+                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
                 " " +
                 props.color
             }

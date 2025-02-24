@@ -1,10 +1,11 @@
-import { TaxRate } from "~/constants";
+import { getTaxRate } from "~/constants";
 import { Technician } from "~/server/technician/type_def";
 import { Transaction } from "~/server/transaction/type_def";
 import { time_to_string } from "~/util/appointment_time";
 import { money } from "~/util/money";
 
 export function TransactionDisplay(props: {
+    date: string;
     technician: Technician;
     transactions: Transaction[];
 }) {
@@ -24,7 +25,7 @@ export function TransactionDisplay(props: {
         shop_entry.amount += transaction.amount;
         shop_entry.tip += transaction.tip;
         shop_entry.machine +=
-            Math.round(transaction.amount * TaxRate) +
+            Math.round(transaction.amount * getTaxRate(transaction.date)) +
             transaction.tip -
             transaction.cash -
             transaction.gift -
@@ -70,7 +71,10 @@ export function TransactionDisplay(props: {
                             {
                                 width: half,
                                 text: money(
-                                    Math.round(shop_entry.amount * TaxRate) +
+                                    Math.round(
+                                        shop_entry.amount *
+                                            getTaxRate(props.date),
+                                    ) +
                                         shop_entry.tip -
                                         shop_entry.cash -
                                         shop_entry.gift -
@@ -115,7 +119,10 @@ export function TransactionDisplay(props: {
                                         width: half,
                                         text: money(
                                             Math.round(
-                                                transaction.amount * TaxRate,
+                                                transaction.amount *
+                                                    getTaxRate(
+                                                        transaction.date,
+                                                    ),
                                             ) +
                                                 transaction.tip -
                                                 transaction.cash -
@@ -152,7 +159,7 @@ function Row(props: {
     return (
         <button
             className={
-                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
+                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
                 " " +
                 props.color
             }

@@ -1,4 +1,4 @@
-import { TaxRate } from "~/constants";
+import { getTaxRate } from "~/constants";
 import { TechnicianEarnings } from "~/server/earnings/type_def";
 import { money } from "~/util/money";
 export function TechAccountDisplay(props: { accounts: TechnicianEarnings[] }) {
@@ -70,7 +70,9 @@ export function TechAccountDisplay(props: { accounts: TechnicianEarnings[] }) {
                                             text: money(
                                                 Math.round(
                                                     account.account.tip /
-                                                        TaxRate,
+                                                        getTaxRate(
+                                                            account.date,
+                                                        ),
                                                 ),
                                             ),
                                         },

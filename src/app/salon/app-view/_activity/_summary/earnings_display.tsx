@@ -1,4 +1,4 @@
-import { TaxRate } from "~/constants";
+import { getTaxRate } from "~/constants";
 import { TechnicianEarnings } from "~/server/earnings/type_def";
 import { money } from "~/util/money";
 import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
@@ -252,7 +252,9 @@ export function AccountDisplay(props: { accounts: TechnicianEarnings[] }) {
                                             text: money(
                                                 Math.round(
                                                     account.account.tip /
-                                                        TaxRate,
+                                                        getTaxRate(
+                                                            account.date,
+                                                        ),
                                                 ),
                                             ),
                                         },
@@ -275,7 +277,7 @@ function Row(props: {
     return (
         <button
             className={
-                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
+                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
                 " " +
                 props.color
             }
