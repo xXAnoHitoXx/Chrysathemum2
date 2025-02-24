@@ -92,6 +92,7 @@ function Update(props: {
                 transactions={[props.transaction]}
             />
             <TransactionUpdate
+                date={props.date}
                 transaction={edit_data}
                 on_complete={props.on_complete}
             />
