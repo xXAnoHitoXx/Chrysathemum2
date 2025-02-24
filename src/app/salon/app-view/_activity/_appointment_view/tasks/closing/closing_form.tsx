@@ -11,7 +11,6 @@ export function ClosingForm(props: {
     set_closing_data: Dispatch<SetStateAction<AppointmentClosingData | null>>;
     on_change: () => void;
 }) {
-    const [details, set_details] = useState(props.appointment.details);
     const [input, set_input] = useState("");
     const [discounted, set_discounted] = useState(false);
 
@@ -26,7 +25,11 @@ export function ClosingForm(props: {
         const closing_data: number[] = [];
 
         closing_data.push(
-            discounted ? Math.round(bill.values[0] / getTaxRate(props.appointment.date)) : bill.values[0],
+            discounted
+                ? Math.round(
+                      bill.values[0] / getTaxRate(props.appointment.date),
+                  )
+                : bill.values[0],
         );
 
         closing_data.push(bill.values[1]);
@@ -34,7 +37,9 @@ export function ClosingForm(props: {
         if (bill.note != undefined) {
             const total = discounted
                 ? bill.values[0] + bill.values[1]
-                : Math.round(bill.values[0] * getTaxRate(props.appointment.date)) + bill.values[1];
+                : Math.round(
+                      bill.values[0] * getTaxRate(props.appointment.date),
+                  ) + bill.values[1];
             switch (bill.note) {
                 case "g":
                     closing_data.push(0);
@@ -54,10 +59,6 @@ export function ClosingForm(props: {
         let amount: number =
             closing_data[0] === undefined ? 0 : closing_data[0];
 
-        if (discounted) {
-            amount = Math.round(amount / getTaxRate(props.appointment.date));
-        }
-
         const tip = closing_data[1] == undefined ? 0 : closing_data[1];
         const cash = closing_data[2] == undefined ? 0 : closing_data[2];
         const gift = closing_data[3] == undefined ? 0 : closing_data[3];
@@ -74,7 +75,11 @@ export function ClosingForm(props: {
                 gift: gift,
                 discount: discount,
                 machine:
-                    Math.round(amount * getTaxRate(props.appointment.date)) + tip - cash - gift - discount,
+                    Math.round(amount * getTaxRate(props.appointment.date)) +
+                    tip -
+                    cash -
+                    gift -
+                    discount,
             },
         });
     }, [discounted, input]);
@@ -108,7 +113,7 @@ export function ClosingForm(props: {
                               " " +
                               "-" +
                               " "}
-                        {details}
+                        {props.appointment.details}
                     </button>
                 </div>
                 <Checkbox
@@ -130,10 +135,8 @@ export function ClosingForm(props: {
                 <Input
                     className="w-full"
                     label="details"
-                    value={details}
                     onValueChange={(det) => {
                         props.appointment.details = det;
-                        set_details(det);
                         props.on_change();
                     }}
                 />
