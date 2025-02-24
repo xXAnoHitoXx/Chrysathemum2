@@ -8,7 +8,7 @@ import {
 } from "../type_def";
 import { z } from "zod";
 import { Transaction } from "~/server/transaction/type_def";
-import { TaxRate } from "~/constants";
+import { getTaxRate } from "~/constants";
 import { TransactionQuery } from "~/server/transaction/transaction_queries";
 import { DataError } from "~/server/data_error";
 
@@ -89,7 +89,10 @@ const extract_earning_information: ServerQuery<Transaction[], EarningEntry[]> =
                     },
                     closing: {
                         machine:
-                            Math.round(transaction.amount * TaxRate) +
+                            Math.round(
+                                transaction.amount *
+                                    getTaxRate(transaction.date),
+                            ) +
                             transaction.tip -
                             transaction.cash -
                             transaction.gift -
@@ -111,7 +114,9 @@ const extract_earning_information: ServerQuery<Transaction[], EarningEntry[]> =
                 entry.closing = {
                     machine:
                         entry.closing.machine +
-                        Math.round(transaction.amount * TaxRate) +
+                        Math.round(
+                            transaction.amount * getTaxRate(transaction.date),
+                        ) +
                         transaction.tip -
                         transaction.cash -
                         transaction.gift -

@@ -1,7 +1,7 @@
 import { Checkbox, Input } from "@heroui/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parse_bill } from "~/app/salon/app-view/_components/bill";
-import { NoTechColor, TaxRate } from "~/constants";
+import { NoTechColor, getTaxRate } from "~/constants";
 import { Appointment } from "~/server/appointment/type_def";
 import { AppointmentClosingData } from "~/server/transaction/type_def";
 import { format_phone_number } from "~/util/phone_format";
@@ -26,7 +26,7 @@ export function ClosingForm(props: {
         const closing_data: number[] = [];
 
         closing_data.push(
-            discounted ? Math.round(bill.values[0] / TaxRate) : bill.values[0],
+            discounted ? Math.round(bill.values[0] / getTaxRate(props.appointment.date)) : bill.values[0],
         );
 
         closing_data.push(bill.values[1]);
@@ -34,7 +34,7 @@ export function ClosingForm(props: {
         if (bill.note != undefined) {
             const total = discounted
                 ? bill.values[0] + bill.values[1]
-                : Math.round(bill.values[0] * TaxRate) + bill.values[1];
+                : Math.round(bill.values[0] * getTaxRate(props.appointment.date)) + bill.values[1];
             switch (bill.note) {
                 case "g":
                     closing_data.push(0);
@@ -55,7 +55,7 @@ export function ClosingForm(props: {
             closing_data[0] === undefined ? 0 : closing_data[0];
 
         if (discounted) {
-            amount = Math.round(amount / TaxRate);
+            amount = Math.round(amount / getTaxRate(props.appointment.date));
         }
 
         const tip = closing_data[1] == undefined ? 0 : closing_data[1];
@@ -74,7 +74,7 @@ export function ClosingForm(props: {
                 gift: gift,
                 discount: discount,
                 machine:
-                    Math.round(amount * TaxRate) + tip - cash - gift - discount,
+                    Math.round(amount * getTaxRate(props.appointment.date)) + tip - cash - gift - discount,
             },
         });
     }, [discounted, input]);

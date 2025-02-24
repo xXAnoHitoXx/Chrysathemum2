@@ -3,7 +3,7 @@ import { AppointmentClosingData } from "~/server/transaction/type_def";
 import { AppointmentBoard } from "../board/appointment_board";
 import { ControlBar } from "../board/control_bar";
 import { CalendarDate } from "@internationalized/date";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { ClosingForm } from "./closing/closing_form";
 
@@ -24,13 +24,22 @@ export function ClosingTask({
     on_close: (data: AppointmentClosingData) => void;
     on_cancel: () => void;
 }) {
+    const [date_holder, set_holder_date] = useState(date);
     const [board_appointments, set_board_appointments] = useState(appointments);
     const [is_loading, set_is_loading] = useState(false);
     const [closing_data, set_closing_data] =
         useState<AppointmentClosingData | null>(null);
 
+    useEffect(() => {
+        if (date_holder.compare(date) != 0) {
+            set_is_loading(true);
+            set_date(date_holder);
+            on_cancel();
+        }
+    }, [date_holder, date]);
+
     return (
-        <div className="flex w-full h-full flex-col">
+        <div className="flex h-full w-full flex-col">
             {!is_loading ? (
                 <div className="flex flex-row-reverse items-center gap-2 p-2">
                     <Button color="success" onPress={to_edit_mode}>
@@ -47,7 +56,7 @@ export function ClosingTask({
                     </div>
                 </div>
             ) : null}
-            <ControlBar date={date} set_date={set_date}>
+            <ControlBar date={date_holder} set_date={set_holder_date}>
                 <div className="flex h-full w-fit border-x-2 border-x-sky-900 px-4">
                     <Button color="warning" onPress={on_cancel}>
                         Cancel

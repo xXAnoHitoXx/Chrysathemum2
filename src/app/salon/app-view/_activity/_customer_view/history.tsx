@@ -1,4 +1,4 @@
-import { TaxRate } from "~/constants";
+import { getTaxRate } from "~/constants";
 import { Appointment } from "~/server/appointment/type_def";
 import { Transaction } from "~/server/transaction/type_def";
 import { time_to_string } from "~/util/appointment_time";
@@ -91,7 +91,10 @@ export function CustomerHistory(props: {
                             {
                                 width: half,
                                 text: money(
-                                    Math.round(transaction.amount * TaxRate) +
+                                    Math.round(
+                                        transaction.amount *
+                                            getTaxRate(transaction.date),
+                                    ) +
                                         transaction.tip -
                                         transaction.cash -
                                         transaction.gift -
@@ -125,7 +128,7 @@ function Row(props: {
     return (
         <button
             className={
-                "flex h-10 w-fit border-t-2 border-r-4 border-b-2" +
+                "flex h-10 w-fit border-b-2 border-r-4 border-t-2" +
                 " " +
                 props.color
             }
