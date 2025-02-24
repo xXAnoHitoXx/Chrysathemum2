@@ -1,5 +1,5 @@
 import { Button, Checkbox, Input } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getTaxPercent, getTaxRate } from "~/constants";
 import { parse_bill } from "../../_components/bill";
 import { Transaction } from "~/server/transaction/type_def";
@@ -10,7 +10,7 @@ export function TransactionUpdate(props: {
     on_complete: (transaction: Transaction) => void;
 }) {
     const [is_loading, set_is_loading] = useState(false);
-    const [details, set_details] = useState(props.transaction.details);
+    const transaction_ref = useRef(props.transaction);
     const [input, set_input] = useState("");
     const [discounted, set_discounted] = useState(false);
 
@@ -58,17 +58,19 @@ export function TransactionUpdate(props: {
             }
         }
 
-        props.transaction.amount = amount;
-        props.transaction.tip = tip;
-        props.transaction.cash = cash;
-        props.transaction.gift = gift;
-        props.transaction.discount = discount;
+        transaction_ref.current = {
+            ...transaction_ref.current,
+            amount: amount,
+            tip: tip,
+            cash: cash,
+            gift: gift,
+            discount: discount,
+        };
     }, [input, discounted]);
 
     async function close_appointment() {
         set_is_loading(true);
-        props.transaction.details = details;
-        props.on_complete(props.transaction);
+        props.on_complete(transaction_ref.current);
     }
 
     return (
@@ -96,9 +98,8 @@ export function TransactionUpdate(props: {
                     isDisabled={is_loading}
                     className="w-full"
                     label="details"
-                    value={details}
                     onValueChange={(det) => {
-                        set_details(det);
+                        transaction_ref.current.details = det;
                     }}
                 />
             </div>
