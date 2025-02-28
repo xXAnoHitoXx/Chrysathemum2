@@ -52,43 +52,7 @@ export function TransactionDisplay(props: {
             />
 
             <div className="flex w-fit flex-1 border-4 border-sky-900">
-                <div className="flex h-full w-fit flex-col-reverse">
-                    <Row
-                        color={props.technician.color}
-                        data={[
-                            { width: half, text: "" },
-                            { width: full, text: "Total:" },
-                            {
-                                width: full,
-                                text:
-                                    money(shop_entry.amount) +
-                                    " " +
-                                    "(" +
-                                    money(shop_entry.tip) +
-                                    ")",
-                            },
-                            { width: full, text: "" },
-                            {
-                                width: half,
-                                text: money(
-                                    Math.round(
-                                        shop_entry.amount *
-                                            getTaxRate(props.date),
-                                    ) +
-                                        shop_entry.tip -
-                                        shop_entry.cash -
-                                        shop_entry.gift -
-                                        shop_entry.discount,
-                                ),
-                            },
-                            { width: half, text: money(shop_entry.cash) },
-                            { width: half, text: money(shop_entry.gift) },
-                            {
-                                width: half,
-                                text: money(shop_entry.discount),
-                            },
-                        ]}
-                    />
+                <div className="flex h-full w-fit flex-col">
                     {props.transactions.map((transaction) => {
                         return (
                             <Row
@@ -146,6 +110,42 @@ export function TransactionDisplay(props: {
                             />
                         );
                     })}
+                    <Row
+                        color={props.technician.color}
+                        data={[
+                            { width: half, text: "" },
+                            { width: full, text: "Total:" },
+                            {
+                                width: full,
+                                text:
+                                    money(shop_entry.amount) +
+                                    " " +
+                                    "(" +
+                                    money(shop_entry.tip) +
+                                    ")",
+                            },
+                            { width: full, text: "" },
+                            {
+                                width: half,
+                                text: money(
+                                    Math.round(
+                                        shop_entry.amount *
+                                            getTaxRate(props.date),
+                                    ) +
+                                        shop_entry.tip -
+                                        shop_entry.cash -
+                                        shop_entry.gift -
+                                        shop_entry.discount,
+                                ),
+                            },
+                            { width: half, text: money(shop_entry.cash) },
+                            { width: half, text: money(shop_entry.gift) },
+                            {
+                                width: half,
+                                text: money(shop_entry.discount),
+                            },
+                        ]}
+                    />
                 </div>
             </div>
         </div>

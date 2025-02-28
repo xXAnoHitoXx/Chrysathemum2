@@ -38,7 +38,7 @@ export function TechDataDisplay(props: {
                 if (transactions.success) {
                     set_transactions(() => {
                         quick_sort(transactions.data, (a, b) => {
-                            const time_diff = b.time - a.time;
+                            const time_diff = a.time - b.time;
                             if (time_diff != 0) return time_diff;
 
                             return a.customer.id.localeCompare(b.customer.id);
