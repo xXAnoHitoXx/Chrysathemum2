@@ -133,8 +133,10 @@ export function ClosingForm(props: {
             </div>
             <div className="p-2">
                 <Input
+                    isClearable
                     className="w-full"
                     label="details"
+                    defaultValue={props.appointment.details}
                     onValueChange={(det) => {
                         props.appointment.details = det;
                         props.on_change();

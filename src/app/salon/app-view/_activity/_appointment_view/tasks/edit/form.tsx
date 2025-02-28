@@ -98,6 +98,7 @@ export function AppEdit({
                                 <div className="w-full">Details</div>
                                 <Input
                                     size="sm"
+                                    isClearable
                                     defaultValue={
                                         appointments[0]
                                             ? appointments[0].details
