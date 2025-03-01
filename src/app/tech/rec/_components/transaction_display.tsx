@@ -51,102 +51,97 @@ export function TransactionDisplay(props: {
                 ]}
             />
 
-            <div className="flex w-fit flex-1 border-4 border-sky-900">
-                <div className="flex h-full w-fit flex-col-reverse">
-                    <Row
-                        color={props.technician.color}
-                        data={[
-                            { width: half, text: "" },
-                            { width: full, text: "Total:" },
-                            {
-                                width: full,
-                                text:
-                                    money(shop_entry.amount) +
-                                    " " +
-                                    "(" +
-                                    money(shop_entry.tip) +
-                                    ")",
-                            },
-                            { width: full, text: "" },
-                            {
-                                width: half,
-                                text: money(
-                                    Math.round(
-                                        shop_entry.amount *
-                                            getTaxRate(props.date),
-                                    ) +
-                                        shop_entry.tip -
-                                        shop_entry.cash -
-                                        shop_entry.gift -
-                                        shop_entry.discount,
-                                ),
-                            },
-                            { width: half, text: money(shop_entry.cash) },
-                            { width: half, text: money(shop_entry.gift) },
-                            {
-                                width: half,
-                                text: money(shop_entry.discount),
-                            },
-                        ]}
-                    />
-                    {props.transactions.map((transaction) => {
-                        return (
-                            <Row
-                                color={transaction.technician.color}
-                                data={[
-                                    {
-                                        width: half,
-                                        text: time_to_string(transaction.time),
-                                    },
-                                    {
-                                        width: full,
-                                        text: transaction.customer.name,
-                                    },
-                                    {
-                                        width: full,
-                                        text:
-                                            money(transaction.amount) +
-                                            " " +
-                                            "(" +
-                                            money(transaction.tip) +
-                                            ")",
-                                    },
-                                    {
-                                        width: full,
-                                        text: transaction.details,
-                                    },
-                                    {
-                                        width: half,
-                                        text: money(
-                                            Math.round(
-                                                transaction.amount *
-                                                    getTaxRate(
-                                                        transaction.date,
-                                                    ),
-                                            ) +
-                                                transaction.tip -
-                                                transaction.cash -
-                                                transaction.gift -
-                                                transaction.discount,
-                                        ),
-                                    },
-                                    {
-                                        width: half,
-                                        text: money(transaction.cash),
-                                    },
-                                    {
-                                        width: half,
-                                        text: money(transaction.gift),
-                                    },
-                                    {
-                                        width: half,
-                                        text: money(transaction.discount),
-                                    },
-                                ]}
-                            />
-                        );
-                    })}
-                </div>
+            <div className="flex w-fit flex-1 flex-col justify-start border-4 border-sky-900">
+                {props.transactions.map((transaction) => {
+                    return (
+                        <Row
+                            color={transaction.technician.color}
+                            data={[
+                                {
+                                    width: half,
+                                    text: time_to_string(transaction.time),
+                                },
+                                {
+                                    width: full,
+                                    text: transaction.customer.name,
+                                },
+                                {
+                                    width: full,
+                                    text:
+                                        money(transaction.amount) +
+                                        " " +
+                                        "(" +
+                                        money(transaction.tip) +
+                                        ")",
+                                },
+                                {
+                                    width: full,
+                                    text: transaction.details,
+                                },
+                                {
+                                    width: half,
+                                    text: money(
+                                        Math.round(
+                                            transaction.amount *
+                                                getTaxRate(transaction.date),
+                                        ) +
+                                            transaction.tip -
+                                            transaction.cash -
+                                            transaction.gift -
+                                            transaction.discount,
+                                    ),
+                                },
+                                {
+                                    width: half,
+                                    text: money(transaction.cash),
+                                },
+                                {
+                                    width: half,
+                                    text: money(transaction.gift),
+                                },
+                                {
+                                    width: half,
+                                    text: money(transaction.discount),
+                                },
+                            ]}
+                        />
+                    );
+                })}
+                <Row
+                    color={props.technician.color}
+                    data={[
+                        { width: half, text: "" },
+                        { width: full, text: "Total:" },
+                        {
+                            width: full,
+                            text:
+                                money(shop_entry.amount) +
+                                " " +
+                                "(" +
+                                money(shop_entry.tip) +
+                                ")",
+                        },
+                        { width: full, text: "" },
+                        {
+                            width: half,
+                            text: money(
+                                Math.round(
+                                    shop_entry.amount * getTaxRate(props.date),
+                                ) +
+                                    shop_entry.tip -
+                                    shop_entry.cash -
+                                    shop_entry.gift -
+                                    shop_entry.discount,
+                            ),
+                        },
+                        { width: half, text: money(shop_entry.cash) },
+                        { width: half, text: money(shop_entry.gift) },
+                        {
+                            width: half,
+                            text: money(shop_entry.discount),
+                        },
+                    ]}
+                />
             </div>
         </div>
     );

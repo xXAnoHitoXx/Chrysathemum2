@@ -95,9 +95,11 @@ export function TransactionUpdate(props: {
             </div>
             <div className="p-2">
                 <Input
+                    isClearable
                     isDisabled={is_loading}
                     className="w-full"
                     label="details"
+                    defaultValue={transaction_ref.current.details}
                     onValueChange={(det) => {
                         transaction_ref.current.details = det;
                     }}
