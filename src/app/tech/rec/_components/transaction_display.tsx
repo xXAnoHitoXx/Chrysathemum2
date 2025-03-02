@@ -1,4 +1,3 @@
-import { getTaxRate } from "~/constants";
 import { Technician } from "~/server/technician/type_def";
 import { Transaction } from "~/server/transaction/type_def";
 import { time_to_string } from "~/util/appointment_time";
@@ -15,24 +14,11 @@ export function TransactionDisplay(props: {
     const shop_entry = {
         amount: 0,
         tip: 0,
-        machine: 0,
-        cash: 0,
-        gift: 0,
-        discount: 0,
     };
 
     for (let transaction of props.transactions) {
         shop_entry.amount += transaction.amount;
         shop_entry.tip += transaction.tip;
-        shop_entry.machine +=
-            Math.round(transaction.amount * getTaxRate(transaction.date)) +
-            transaction.tip -
-            transaction.cash -
-            transaction.gift -
-            transaction.discount;
-        shop_entry.cash += transaction.cash;
-        shop_entry.gift += transaction.gift;
-        shop_entry.discount += transaction.discount;
     }
 
     return (
@@ -44,10 +30,6 @@ export function TransactionDisplay(props: {
                     { width: full, text: "Customer Name" },
                     { width: full, text: "Amount (tip)" },
                     { width: full, text: "Detail" },
-                    { width: half, text: "Machine" },
-                    { width: half, text: "Cash" },
-                    { width: half, text: "Gift" },
-                    { width: half, text: "Discount" },
                 ]}
             />
 
@@ -78,31 +60,6 @@ export function TransactionDisplay(props: {
                                     width: full,
                                     text: transaction.details,
                                 },
-                                {
-                                    width: half,
-                                    text: money(
-                                        Math.round(
-                                            transaction.amount *
-                                                getTaxRate(transaction.date),
-                                        ) +
-                                            transaction.tip -
-                                            transaction.cash -
-                                            transaction.gift -
-                                            transaction.discount,
-                                    ),
-                                },
-                                {
-                                    width: half,
-                                    text: money(transaction.cash),
-                                },
-                                {
-                                    width: half,
-                                    text: money(transaction.gift),
-                                },
-                                {
-                                    width: half,
-                                    text: money(transaction.discount),
-                                },
                             ]}
                         />
                     );
@@ -122,24 +79,6 @@ export function TransactionDisplay(props: {
                                 ")",
                         },
                         { width: full, text: "" },
-                        {
-                            width: half,
-                            text: money(
-                                Math.round(
-                                    shop_entry.amount * getTaxRate(props.date),
-                                ) +
-                                    shop_entry.tip -
-                                    shop_entry.cash -
-                                    shop_entry.gift -
-                                    shop_entry.discount,
-                            ),
-                        },
-                        { width: half, text: money(shop_entry.cash) },
-                        { width: half, text: money(shop_entry.gift) },
-                        {
-                            width: half,
-                            text: money(shop_entry.discount),
-                        },
                     ]}
                 />
             </div>
