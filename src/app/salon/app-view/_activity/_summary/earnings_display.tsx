@@ -4,6 +4,13 @@ import { money } from "~/util/money";
 import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
 
 export function AccountDisplay(props: { accounts: TechnicianEarnings[] }) {
+    bubble_sort(props.accounts, (a, b) => {
+        const comp = a.tech.id.localeCompare(b.tech.id);
+        if (comp != 0) return comp;
+
+        return a.date.localeCompare(b.date);
+    });
+
     const full = "w-56";
     const half = "w-28";
 

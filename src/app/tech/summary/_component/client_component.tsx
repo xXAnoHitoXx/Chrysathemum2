@@ -1,106 +1,88 @@
 "use client";
 
-import { CalendarDate, RangeValue } from "@heroui/react";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Button, CalendarDate, RangeValue } from "@heroui/react";
+import { useQueries } from "@tanstack/react-query";
+import { useState } from "react";
 import { Method } from "~/app/api/api_query";
 import { TechAccountDisplay } from "./tech_account_display";
 import { last_monday, last_sunday } from "~/util/date";
 import { TechnicianEarnings } from "~/server/earnings/type_def";
-import { bubble_sort } from "~/util/sorter/ano_bubble_sort";
-import { useRouter } from "next/navigation";
 import { BoardDateRangePicker } from "~/app/_components/ui_elements/date_range_picker";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 export function TechSummaryView(props: { salon: string }) {
-    const router = useRouter();
     const start = props.salon === "SCVL" ? last_monday() : last_sunday();
+    const router = useRouter();
 
     const [date_range, set_date_range] = useState<RangeValue<CalendarDate>>({
         start: start,
         end: start.add({ days: 6 }),
     });
 
-    const [date_to_load, load_date] = useState<CalendarDate | null>(null);
-    const [entries, set_entries] = useState<TechnicianEarnings[]>([]);
-
-    useEffect(() => {
-        load_date(date_range.start);
-    }, [date_range]);
+    const [entries, set_entries] = useState<Map<string, TechnicianEarnings[]>>(
+        new Map(),
+    );
 
     const summary_api = "/api/tech_view/summary/";
-    const query = useQuery({
-        queryFn: async () => {
-            if (date_to_load == null) {
-                return 0;
-            }
-
-            if (date_to_load.compare(date_range.start) == 0) {
-                set_entries((_) => []);
-            }
-
-            const response = await fetch(
-                summary_api + date_to_load.toString(),
-                {
-                    method: Method.GET,
-                    cache: "no-store",
-                },
-            );
-
-            let parse_failed = false;
-
-            if (response.status === 200) {
-                const tech_acc = TechnicianEarnings.safeParse(
-                    await response.json(),
-                );
-                if (tech_acc.success) {
-                    set_entries((prev) => {
-                        const next = [...prev, tech_acc.data];
-                        bubble_sort(next, (a, b) => {
-                            return a.date.localeCompare(b.date);
-                        });
-                        const next_day = date_to_load.add({ days: 1 });
-
-                        if (next_day.compare(date_range.end) <= 0) {
-                            load_date(next_day);
-                        }
-                        return next;
-                    });
-
-                    return 0;
+    useQueries({
+        queries: [date_range]
+            .flatMap((date_range) => {
+                const dates: string[] = [];
+                let date = date_range.start.copy();
+                while (date.compare(date_range.end) <= 0) {
+                    dates.push(date.toString());
+                    date = date.add({ days: 1 });
                 }
-                parse_failed = true;
-            }
+                return dates;
+            })
+            .map((date) => {
+                return {
+                    queryFn: async () => {
+                        const response = await fetch(summary_api + date, {
+                            method: Method.GET,
+                            cache: "no-store",
+                        });
+                        if (response.status === 200) {
+                            const accounts = z
+                                .array(TechnicianEarnings)
+                                .safeParse(await response.json());
 
-            if (response.status === 500 || parse_failed) {
-                set_entries((prev) => {
-                    const next = [...prev];
-                    const next_day = date_to_load.add({ days: 1 });
-                    if (next_day.compare(date_range.end) <= 0) {
-                        load_date(next_day);
-                    }
-                    return next;
-                });
-            } else {
-                router.replace("/");
-            }
-
-            return 0;
-        },
-        queryKey: ["summary", date_to_load],
+                            if (accounts.success) {
+                                set_entries((prev) => {
+                                    const next = new Map(prev);
+                                    next.set(date, accounts.data);
+                                    return next;
+                                });
+                            }
+                        }
+                        return 0;
+                    },
+                    queryKey: ["summary", date_range, date],
+                };
+            }),
     });
 
     return (
-        <div className="flex w-full h-full overflow-y-scroll flex-col">
+        <div className="flex h-full w-full flex-col overflow-y-scroll">
             <div className="flex h-fit w-full justify-between p-2">
                 <BoardDateRangePicker
                     dates={date_range}
                     set_date={set_date_range}
                 />
-                {query.isLoading
-                    ? `Loading: [${date_to_load}]...`
-                    : `Loaded up to: [${date_to_load}]`}
+                <Button
+                    color="danger"
+                    size="md"
+                    onPress={() => {
+                        router.push("/tech/nav");
+                    }}
+                >
+                    Return
+                </Button>
             </div>
-            <TechAccountDisplay accounts={entries} />
+            <TechAccountDisplay
+                accounts={Array.from(entries.values()).flat()}
+            />
         </div>
     );
 }
