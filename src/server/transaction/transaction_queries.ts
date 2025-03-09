@@ -149,23 +149,33 @@ export class TransactionQuery {
     });
 
     public static update_transaction: ServerQuery<Transaction, void> =
-        ServerQuery.create_query((transaction: Transaction) => {
-            const entry: TransactionEntry = {
-                id: transaction.id,
-                details: transaction.details,
-                date: transaction.date,
-                time: transaction.time,
-                customer_id: transaction.customer.id,
-                technician_id: transaction.technician.id,
-                salon: transaction.salon,
-                amount: transaction.amount,
-                tip: transaction.tip,
-                cash: transaction.cash,
-                gift: transaction.gift,
-                discount: transaction.discount,
-            };
-            return entry;
-        }).chain(update_transaction_date_entry);
+        ServerQuery.from_builder((transaction: Transaction) =>
+            ServerQuery.create_query((transaction: Transaction) => {
+                const entry: TransactionEntry = {
+                    id: transaction.id,
+                    details: transaction.details,
+                    date: transaction.date,
+                    time: transaction.time,
+                    customer_id: transaction.customer.id,
+                    technician_id: transaction.technician.id,
+                    salon: transaction.salon,
+                    amount: transaction.amount,
+                    tip: transaction.tip,
+                    cash: transaction.cash,
+                    gift: transaction.gift,
+                    discount: transaction.discount,
+                };
+                return entry;
+            })
+                .chain(update_transaction_date_entry)
+                .chain<EarningRecordID>(() => {
+                    return {
+                        salon: transaction.salon,
+                        date: transaction.date,
+                    };
+                })
+                .chain(invalidate_earnings_information_of_date),
+        );
 
     public static retrieve_transactions_on_date: ServerQuery<
         TransactionRecordID,
