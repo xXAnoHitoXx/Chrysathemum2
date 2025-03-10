@@ -8,7 +8,6 @@ import { TechAccountDisplay } from "./tech_account_display";
 import { last_monday, last_sunday } from "~/util/date";
 import { TechnicianEarnings } from "~/server/earnings/type_def";
 import { BoardDateRangePicker } from "~/app/_components/ui_elements/date_range_picker";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 
 export function TechSummaryView(props: { salon: string }) {
@@ -20,11 +19,12 @@ export function TechSummaryView(props: { salon: string }) {
         end: start.add({ days: 6 }),
     });
 
-    const [entries, set_entries] = useState<Map<string, TechnicianEarnings[]>>(
+    const [entries, set_entries] = useState<Map<string, TechnicianEarnings>>(
         new Map(),
     );
 
     const summary_api = "/api/tech_view/summary/";
+
     useQueries({
         queries: [date_range]
             .flatMap((date_range) => {
@@ -44,9 +44,9 @@ export function TechSummaryView(props: { salon: string }) {
                             cache: "no-store",
                         });
                         if (response.status === 200) {
-                            const accounts = z
-                                .array(TechnicianEarnings)
-                                .safeParse(await response.json());
+                            const accounts = TechnicianEarnings.safeParse(
+                                await response.json(),
+                            );
 
                             if (accounts.success) {
                                 set_entries((prev) => {
@@ -80,9 +80,7 @@ export function TechSummaryView(props: { salon: string }) {
                     Return
                 </Button>
             </div>
-            <TechAccountDisplay
-                accounts={Array.from(entries.values()).flat()}
-            />
+            <TechAccountDisplay accounts={Array.from(entries.values())} />
         </div>
     );
 }
